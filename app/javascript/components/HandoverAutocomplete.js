@@ -9,7 +9,7 @@ import createReactClass from 'create-react-class'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
-import Autocomplete from 'react-autocomplete'
+import Autocomplete from '@eins78/react-autocomplete'
 
 export const HandoverAutocomplete = createReactClass({
   propTypes: {

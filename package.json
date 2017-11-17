@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@eins78/react-autocomplete": "1.7.3-fork.1",
     "@rails/webpacker": "^3.0.2",
     "babel-preset-react": "^6.24.1",
     "classnames": "^2.2.5",
