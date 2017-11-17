@@ -18,4 +18,5 @@ import { ReactRailsUJS } from '../react-rails.js'
 export { React, ReactDOM }
 
 // react components bundle, when used *directly* from non-webpack code:
-export { componentRequireContext as requireComponent } from '../react-rails.js'
+const componentRequireContext = ReactRailsUJS
+export { componentRequireContext as requireComponent }

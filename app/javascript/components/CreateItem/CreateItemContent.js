@@ -1,4 +1,3 @@
-/* global _ */
 /* global _jed */
 import React from 'react'
 import PropTypes from 'prop-types'

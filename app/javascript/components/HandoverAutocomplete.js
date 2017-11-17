@@ -1,15 +1,12 @@
-// TODO: cleanup
-/* eslint-disable react/no-string-refs */
-
-/* global _jed */
 import React from 'react'
 import PropTypes from 'prop-types'
-import cx from 'classnames'
 import createReactClass from 'create-react-class'
 
 import Autocomplete from '@eins78/react-autocomplete'
 
-export const HandoverAutocomplete = createReactClass({
+// TODO: cleanup ref usage
+/* eslint-disable react/no-string-refs */
+const HandoverAutocomplete = createReactClass({
   propTypes: {
     placeholder: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
@@ -159,3 +156,5 @@ export const HandoverAutocomplete = createReactClass({
     )
   }
 })
+
+export default HandoverAutocomplete

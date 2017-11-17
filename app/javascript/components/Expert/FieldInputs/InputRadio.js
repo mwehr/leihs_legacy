@@ -1,5 +1,3 @@
-/* global _ */
-/* global _jed */
 import React from 'react'
 import createReactClass from 'create-react-class'
 
@@ -8,7 +6,6 @@ export const InputRadio = createReactClass({
   propTypes: {},
 
   _onChange(event, value) {
-    console.log('radio on change')
     this.props.selectedValue.value.selection = value
     this.props.onChange()
   },

@@ -1,3 +1,5 @@
+/* global _jed */
+
 export const FieldsDropdownData = {
   _onlyMainFields(allFields) {
     return allFields.filter(field => {

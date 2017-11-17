@@ -1,7 +1,3 @@
-/* global _ */
-/* global _jed */
-import React from 'react'
-
 export const LeftOrRightColumn = {
   _columnGroupFieldModels(fields, fieldModels, leftOrRight) {
     if (leftOrRight == 'left') {

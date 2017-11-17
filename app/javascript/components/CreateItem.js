@@ -1,5 +1,3 @@
-/* global _ */
-/* global _jed */
 import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
@@ -8,7 +6,7 @@ import createReactClass from 'create-react-class'
 import { CreateItemContent } from './CreateItem/CreateItemContent'
 
 /* eslint-disable react/prop-types */
-export const CreateItem = createReactClass({
+const CreateItem = createReactClass({
   propTypes: {},
 
   getInitialState() {
@@ -821,3 +819,5 @@ export const CreateItem = createReactClass({
     )
   }
 })
+
+export default CreateItem

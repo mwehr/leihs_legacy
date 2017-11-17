@@ -1,5 +1,3 @@
-/* global _ */
-/* global _jed */
 import React from 'react'
 
 import { InputText } from '../Expert/FieldInputs/InputText'

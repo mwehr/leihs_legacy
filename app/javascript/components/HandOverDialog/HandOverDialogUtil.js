@@ -1,3 +1,5 @@
+/* global _jed */
+
 export const HandOverDialogUtil = {
   _validateStartDate(reservations) {
     var hasErrors = _.any(reservations, l => {

@@ -1,7 +1,9 @@
+/* global i18n */
 import React from 'react'
 import createReactClass from 'create-react-class'
 
 import { DatePicker } from './DatePicker'
+import { CreateItemFieldSwitch } from '../../../CreateItem/CreateItemFieldSwitch'
 
 /* eslint-disable react/prop-types */
 export const DatePickerWithInput = createReactClass({

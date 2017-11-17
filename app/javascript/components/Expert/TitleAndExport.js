@@ -1,5 +1,6 @@
-import React from 'react'
+/* global _jed */
 import createReactClass from 'create-react-class'
+import React from 'react'
 
 /* eslint-disable react/prop-types */
 export const TitleAndExport = createReactClass({

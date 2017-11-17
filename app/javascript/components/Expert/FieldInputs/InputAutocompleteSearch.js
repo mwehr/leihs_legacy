@@ -1,6 +1,7 @@
-/* global _ */
-/* global _jed */
 import React from 'react'
+import createReactClass from 'create-react-class'
+
+import { FieldAutocomplete } from './util/FieldAutocomplete'
 
 /* eslint-disable react/prop-types */
 export const InputAutocompleteSearch = createReactClass({

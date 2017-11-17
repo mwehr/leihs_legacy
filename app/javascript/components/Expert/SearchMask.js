@@ -1,7 +1,10 @@
+/* global _jed */
 import React from 'react'
 import createReactClass from 'create-react-class'
+import _ from 'lodash'
 
 import { FieldSelection } from './FieldSelection'
+import { FieldSwitch } from './FieldSwitch'
 
 /* eslint-disable react/prop-types */
 export const SearchMask = createReactClass({

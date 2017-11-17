@@ -1,6 +1,5 @@
-/* global _ */
-/* global _jed */
 import React from 'react'
+import createReactClass from 'create-react-class'
 
 /* eslint-disable react/prop-types */
 export const InputCurrency = createReactClass({

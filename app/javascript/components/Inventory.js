@@ -1,14 +1,12 @@
 /* global _jed */
 import React from 'react'
-import PropTypes from 'prop-types'
-import cx from 'classnames'
 import createReactClass from 'create-react-class'
 
 import { InventoryFilterSelect } from './Inventory/InventoryFilterSelect'
 import { DatePickerWithInput } from './Expert/Components/DatePicker/DatePickerWithInput'
 
 /* eslint-disable react/prop-types */
-export const Inventory = createReactClass({
+const Inventory = createReactClass({
   propTypes: {},
 
   _surround(string) {
@@ -222,7 +220,9 @@ export const Inventory = createReactClass({
     if (inventoryFilterJson) {
       try {
         inventoryFilter = JSON.parse(inventoryFilterJson)
-      } catch (exception) {}
+      } catch (exception) {
+        /* ignore */
+      }
     }
 
     var filterReset = URI.parseQuery(window.location.search).filters == 'reset'
@@ -732,7 +732,7 @@ export const Inventory = createReactClass({
 
   _onCategoriesTerm(event) {
     event.preventDefault()
-    debugger
+
     this.setState(
       {
         categoriesTerm: event.target.value,
@@ -1632,3 +1632,5 @@ export const Inventory = createReactClass({
     )
   }
 })
+
+export default Inventory

@@ -1,3 +1,4 @@
+/* global _jed */
 import React from 'react'
 
 export const RenderFieldLabel = {

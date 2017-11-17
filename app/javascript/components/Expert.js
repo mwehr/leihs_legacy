@@ -1,8 +1,4 @@
-/* global _ */
-/* global _jed */
 import React from 'react'
-import PropTypes from 'prop-types'
-import cx from 'classnames'
 import createReactClass from 'create-react-class'
 
 // TODO
@@ -14,7 +10,7 @@ import { SearchMaskState } from './Expert/SearchMaskState'
 import { TitleAndExport } from './Expert/TitleAndExport'
 
 /* eslint-disable react/prop-types */
-export const Expert = createReactClass({
+const Expert = createReactClass({
   propTypes: {},
 
   getInitialState() {
@@ -249,3 +245,5 @@ export const Expert = createReactClass({
     )
   }
 })
+
+export default Expert
