@@ -1,26 +1,29 @@
 import React from 'react'
-import createReactClass from 'create-react-class'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
-const stringifyObj = obj => {
-  let res
+function stringifyObj(obj) {
+  obj = obj === null ? 'null' : obj === undefined ? 'undefined' : obj
   try {
-    res = JSON.stringify(props)
-  } catch (e) {}
-  return res || props.toString()
+    return JSON.stringify(obj)
+  } catch (err) {
+    return `Object: ${obj.toString()}; Error: ${err}`
+  }
 }
 
 const DebugProps = props => (
   <div
+    className={cx('react-compoent', { 'component-debug-props': true })}
     style={{
       border: '1px solid tomato',
       background: 'papayawhip',
       padding: '1.5rem',
       fontSize: '1.5rem'
     }}>
-    <pre>{JSON.stringify(props) || props.toString()}</pre>
+    <pre>{stringifyObj(props)}</pre>
   </div>
 )
+
+DebugProps.PropTypes = PropTypes.any
 
 export default DebugProps
