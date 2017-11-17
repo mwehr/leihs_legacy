@@ -1,8 +1,4 @@
-/* global _ */
-/* global _jed */
 import React from 'react'
-import PropTypes from 'prop-types'
-import cx from 'classnames'
 import createReactClass from 'create-react-class'
 
 /* eslint-disable react/prop-types */

@@ -1,7 +1,5 @@
-
-window.BackwardTestCompatibility = {
-
-  // Should be replaced by lodash.
+export const BackwardTestCompatibility = {
+  // TODO: Should be replaced by lodash.
   _setValue(obj, path, val) {
     var fields = path
     var result = obj
@@ -18,9 +16,7 @@ window.BackwardTestCompatibility = {
     }
   },
 
-
   _getFormName(selectedValue) {
-
     var field = selectedValue.field
     if (field.form_name) {
       return '[' + field.form_name + ']'
@@ -36,6 +32,5 @@ window.BackwardTestCompatibility = {
     } else {
       return '[' + field.attribute + ']'
     }
-  },
-
+  }
 }

@@ -1,15 +1,14 @@
-window.HandOverDialogUtil = {
-
+export const HandOverDialogUtil = {
   _validateStartDate(reservations) {
+    var hasErrors = _.any(reservations, l => {
+      return (
+        moment(l.start_date)
+          .endOf('day')
+          .diff(moment().startOf('day'), 'days') > 0
+      )
+    })
 
-    var hasErrors = _.any(
-      reservations,
-      (l) => {
-        return moment(l.start_date).endOf('day').diff(moment().startOf('day'), 'days') > 0
-      }
-    )
-
-    if(hasErrors) {
+    if (hasErrors) {
       App.Flash({
         type: 'error',
         message: _jed('you cannot hand out reservations which are starting in the future')
@@ -21,15 +20,15 @@ window.HandOverDialogUtil = {
   },
 
   _validateEndDate(reservations) {
+    var hasErrors = _.any(reservations, l => {
+      return (
+        moment(l.end_date)
+          .endOf('day')
+          .diff(moment().startOf('day'), 'days') < 0
+      )
+    })
 
-    var hasErrors = _.any(
-      reservations,
-      (l) => {
-        return moment(l.end_date).endOf('day').diff(moment().startOf('day'), 'days') < 0
-      }
-    )
-
-    if(hasErrors) {
+    if (hasErrors) {
       App.Flash({
         type: 'error',
         message: _jed('you cannot hand out reservations which are ending in the past')
@@ -41,15 +40,11 @@ window.HandOverDialogUtil = {
   },
 
   _validateAssignment(reservations) {
+    var hasErrors = _.any(reservations, l => {
+      return l.item_id == null && l.option_id == null
+    })
 
-    var hasErrors = _.any(
-      reservations,
-      (l) => {
-        return l.item_id == null && l.option_id == null
-      }
-    )
-
-    if(hasErrors) {
+    if (hasErrors) {
       App.Flash({
         type: 'error',
         message: _jed('you cannot hand out reservations with unassigned inventory codes')
@@ -58,48 +53,38 @@ window.HandOverDialogUtil = {
     } else {
       return true
     }
-
   },
 
   validateDialog(reservations) {
     return (
-      this._validateStartDate(reservations)
-      && this._validateEndDate(reservations)
-      && this._validateAssignment(reservations)
+      this._validateStartDate(reservations) &&
+      this._validateEndDate(reservations) &&
+      this._validateAssignment(reservations)
     )
   },
 
   loadHandOverDialogData(parameters, callback) {
-
     var user = parameters.user
     var reservations = parameters.reservations
 
-
-    App.Order.ajaxFetch({
-      data: $.param({
-        reservation_ids: _.map(reservations, (r) => r.id)
+    App.Order
+      .ajaxFetch({
+        data: $.param({
+          reservation_ids: _.map(reservations, r => r.id)
+        })
       })
-    })
-    .done((data) => {
+      .done(data => {
+        var orders = data.map(datum => {
+          return App.Order.find(datum.id)
+        })
 
-      var orders = data.map((datum) => {
-        return App.Order.find(datum.id)
+        var purpose = _.uniq(_.map(orders, o => o.purpose)).join('; ')
+
+        if (this.validateDialog(reservations)) {
+          callback(reservations, purpose)
+        } else {
+          return false
+        }
       })
-
-      var purpose = _.uniq(
-        _.map(orders, (o) => o.purpose)
-      ).join("; ")
-
-
-      if(this.validateDialog(reservations)) {
-
-        callback(reservations, purpose)
-
-      } else {
-        return false
-      }
-    })
-
   }
-
 }

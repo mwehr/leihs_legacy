@@ -1,12 +1,20 @@
-window.FieldSwitch = {
+import React from 'react'
 
+import { InputCurrency } from '../Expert/FieldInputs/InputCurrency'
+import { InputText } from '../Expert/FieldInputs/InputText'
+import { InputTextarea } from '../Expert/FieldInputs/InputTextarea'
+import { InputSelectWithIndex } from '../Expert/FieldInputs/InputSelectWithIndex'
+import { InputRadio } from '../Expert/FieldInputs/InputRadio'
+import { InputAutocomplete } from '../Expert/FieldInputs/InputAutocomplete'
+import { InputAutocompleteSearch } from '../Expert/FieldInputs/InputAutocompleteSearch'
+import { InputDateRange } from '../Expert/FieldInputs/InputDateRange'
 
-
+export const FieldSwitch = {
   _hasValue(selectedValue) {
-    switch(selectedValue.field.type) {
+    switch (selectedValue.field.type) {
       case 'text':
-        if(selectedValue.field.currency) {
-          return (selectedValue.value.from.trim().length > 0 && selectedValue.value.to.trim().length > 0)
+        if (selectedValue.field.currency) {
+          return selectedValue.value.from.trim().length > 0 && selectedValue.value.to.trim().length > 0
         } else {
           return selectedValue.value.text.trim().length > 0
         }
@@ -34,13 +42,13 @@ window.FieldSwitch = {
     }
   },
 
-  _createEmptyValue (field) {
-    switch(field.type) {
+  _createEmptyValue(field) {
+    switch (field.type) {
       case 'text':
-        if(field.currency) {
-          return {from: '', to: ''}
+        if (field.currency) {
+          return { from: '', to: '' }
         } else {
-          return {text: ''}
+          return { text: '' }
         }
         break
       case 'autocomplete-search':
@@ -56,18 +64,18 @@ window.FieldSwitch = {
         }
         break
       case 'textarea':
-        return {text: ''}
+        return { text: '' }
         break
       case 'attachment':
         break
       case 'select':
-        return {selection: field.default}
+        return { selection: field.default }
         break
       case 'radio':
-        return {selection: field.default}
+        return { selection: field.default }
         break
       case 'date':
-        return {from: '', to: ''}
+        return { from: '', to: '' }
         break
       default:
         throw 'Unexpected type: ' + field.type
@@ -75,9 +83,9 @@ window.FieldSwitch = {
   },
 
   _isDependencyValue(selectedValue, fieldDependencyValue) {
-    switch(selectedValue.field.type) {
+    switch (selectedValue.field.type) {
       case 'text':
-        if(selectedValue.field.currency) {
+        if (selectedValue.field.currency) {
           throw 'Not implemented yet.'
         } else {
           return selectedValue.value.text == fieldDependencyValue
@@ -106,10 +114,10 @@ window.FieldSwitch = {
     }
   },
 
-  _inputByType (selectedValue, onChangeSelectedValue, dependencyValue) {
-    switch(selectedValue.field.type) {
+  _inputByType(selectedValue, onChangeSelectedValue, dependencyValue) {
+    switch (selectedValue.field.type) {
       case 'text':
-        if(selectedValue.field.currency) {
+        if (selectedValue.field.currency) {
           return <InputCurrency selectedValue={selectedValue} onChange={onChangeSelectedValue} />
         } else {
           return <InputText selectedValue={selectedValue} onChange={onChangeSelectedValue} />
@@ -119,7 +127,13 @@ window.FieldSwitch = {
         return <InputAutocompleteSearch onChange={onChangeSelectedValue} selectedValue={selectedValue} />
         break
       case 'autocomplete':
-        return <InputAutocomplete selectedValue={selectedValue} dependencyValue={dependencyValue} onChange={onChangeSelectedValue} />
+        return (
+          <InputAutocomplete
+            selectedValue={selectedValue}
+            dependencyValue={dependencyValue}
+            onChange={onChangeSelectedValue}
+          />
+        )
         break
       case 'textarea':
         return <InputTextarea selectedValue={selectedValue} onChange={onChangeSelectedValue} />
@@ -137,9 +151,4 @@ window.FieldSwitch = {
         throw 'Unexpected type: ' + selectedValue.field.type
     }
   }
-
-
-
-
-
 }

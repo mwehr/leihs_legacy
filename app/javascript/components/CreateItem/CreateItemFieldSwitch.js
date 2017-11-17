@@ -1,12 +1,26 @@
-window.CreateItemFieldSwitch = {
+/* global _ */
+/* global _jed */
+import React from 'react'
 
+import { InputText } from '../Expert/FieldInputs/InputText'
+import { InputSelect } from '../Expert/FieldInputs/InputSelect'
+import { InputTextarea } from '../Expert/FieldInputs/InputTextarea'
+import { InputRadio } from '../Expert/FieldInputs/InputRadio'
+import { InputDate } from '../Expert/FieldInputs/InputDate'
+import { InputCheckbox } from '../Expert/FieldInputs/InputCheckbox'
+import { InputQuantityAllocations } from '../Expert/FieldInputs/InputQuantityAllocations'
+import { InputInventoryCode } from '../Expert/FieldInputs/InputInventoryCode'
+import { InputAttachment } from '../Expert/FieldInputs/InputAttachment'
+import { InputAutocomplete } from '../Expert/FieldInputs/InputAutocomplete'
+import { InputAutocompleteSearch } from '../Expert/FieldInputs/InputAutocompleteSearch'
+
+export const CreateItemFieldSwitch = {
   _hasValue(selectedValue) {
-
-    if(selectedValue.field.id == 'properties_quantity_allocations') {
+    if (selectedValue.field.id == 'properties_quantity_allocations') {
       return selectedValue.value.allocations.length > 0
     }
 
-    switch(selectedValue.field.type) {
+    switch (selectedValue.field.type) {
       case 'text':
         return selectedValue.value.text.trim().length > 0
         break
@@ -39,54 +53,46 @@ window.CreateItemFieldSwitch = {
     }
   },
 
-
   _dmyToString(dmy) {
-    if(dmy) {
+    if (dmy) {
       var dayString = '' + (dmy.day + 1)
       var monthString = '' + (dmy.month + 1)
       var yearString = '' + dmy.year
 
-      if(dayString.length == 1) {
+      if (dayString.length == 1) {
         dayString = '0' + dayString
       }
-      if(monthString.length == 1) {
+      if (monthString.length == 1) {
         monthString = '0' + monthString
       }
 
       return yearString + '-' + monthString + '-' + dayString
-
     } else {
       return null
     }
-
   },
 
   _parseSavedDate(string) {
-
     var mom = moment(string, 'YYYY-MM-DD', true)
-    if(!mom.isValid()) {
+    if (!mom.isValid()) {
       return string
-
     } else {
       return mom.format(i18n.date.L)
     }
   },
 
   _parseDayMonthYear(string) {
-
-    if(!string) {
+    if (!string) {
       return null
     }
 
     var mom = moment(string, i18n.date.L, true)
 
-    if(!mom.isValid()) {
+    if (!mom.isValid()) {
       return null
     }
 
-    return this._getDayMonthYear(mom);
-
-
+    return this._getDayMonthYear(mom)
   },
 
   _getDayMonthYear(mom) {
@@ -98,32 +104,25 @@ window.CreateItemFieldSwitch = {
   },
 
   _checkDateStringIsValid(d) {
-
     return moment(d, i18n.date.L, true).isValid()
   },
 
   _isValid(selectedValue) {
-
-    if(selectedValue.field.type == 'date') {
-
+    if (selectedValue.field.type == 'date') {
       var d = selectedValue.value.at
       return this._checkDateStringIsValid(d)
-
     } else {
       return true
     }
-
   },
 
-
   _itemValue(attribute, item) {
-
     var itemValue = null
     if (attribute instanceof Array) {
       itemValue = _.reduce(
         attribute,
         (result, current) => {
-          if(result) {
+          if (result) {
             return result[current]
           } else {
             return null
@@ -139,15 +138,14 @@ window.CreateItemFieldSwitch = {
   },
 
   _createEditValue(field, item, itemValue, attachments) {
-
-    if(field.id == 'retired') {
+    if (field.id == 'retired') {
       itemValue = !!itemValue
     }
 
-    if(field.id == 'properties_quantity_allocations') {
+    if (field.id == 'properties_quantity_allocations') {
       // debugger
       return {
-        allocations: itemValue.map((v)  => {
+        allocations: itemValue.map(v => {
           return {
             quantity: v.quantity,
             location: v.room,
@@ -157,14 +155,14 @@ window.CreateItemFieldSwitch = {
       }
     }
 
-    switch(field.type) {
+    switch (field.type) {
       case 'text':
-        if(field.currency) {
+        if (field.currency) {
           return {
-            text: accounting.formatMoney(itemValue, {format: '%v'})
+            text: accounting.formatMoney(itemValue, { format: '%v' })
           }
         } else {
-          return {text: itemValue}
+          return { text: itemValue }
         }
         break
       case 'autocomplete-search':
@@ -178,15 +176,15 @@ window.CreateItemFieldSwitch = {
         break
       case 'autocomplete':
         var text = null
-        if(field.id == 'room_id') {
+        if (field.id == 'room_id') {
           // debugger
           text = item.room.name
         } else {
-          if(itemValue) {
-            var value = _.find(field.values, (v) => {
+          if (itemValue) {
+            var value = _.find(field.values, v => {
               return v.value == itemValue
             })
-            if(value) text = value.label
+            if (value) text = value.label
           }
         }
         return {
@@ -195,11 +193,10 @@ window.CreateItemFieldSwitch = {
         }
         break
       case 'textarea':
-        return {text: itemValue}
+        return { text: itemValue }
         break
       case 'attachment':
-
-        var fileModels = attachments.map((a) => {
+        var fileModels = attachments.map(a => {
           return {
             type: 'edit',
             id: a.id,
@@ -208,40 +205,37 @@ window.CreateItemFieldSwitch = {
             delete: false
           }
         })
-        return {fileModels: fileModels}
+        return { fileModels: fileModels }
         break
       case 'select':
-
         // TODO read mapping to values from field definition
         // debugger
-        return {selection: itemValue}
+        return { selection: itemValue }
         break
       case 'radio':
-        return {selection: itemValue}
+        return { selection: itemValue }
         break
       case 'checkbox':
-        return {selections: itemValue}
+        return { selections: itemValue }
         break
       case 'date':
-        return {at: this._parseSavedDate(itemValue)}
+        return { at: this._parseSavedDate(itemValue) }
         break
       default:
         throw 'Unexpected type: ' + field.type
     }
-
   },
 
-  _createEmptyValue (field) {
-
-    if(field.id == 'properties_quantity_allocations') {
+  _createEmptyValue(field) {
+    if (field.id == 'properties_quantity_allocations') {
       return {
         allocations: []
       }
     }
 
-    switch(field.type) {
+    switch (field.type) {
       case 'text':
-        return {text: ''}
+        return { text: '' }
         break
       case 'autocomplete-search':
         return {
@@ -256,22 +250,22 @@ window.CreateItemFieldSwitch = {
         }
         break
       case 'textarea':
-        return {text: ''}
+        return { text: '' }
         break
       case 'attachment':
-        return {fileModels: []}
+        return { fileModels: [] }
         break
       case 'select':
-        return {selection: field.default}
+        return { selection: field.default }
         break
       case 'radio':
-        return {selection: field.default}
+        return { selection: field.default }
         break
       case 'date':
-        return {at: ''}
+        return { at: '' }
         break
       case 'checkbox':
-        return {selections: []}
+        return { selections: [] }
         break
       default:
         throw 'Unexpected type ' + field.type + ' for field ' + field.id
@@ -279,13 +273,11 @@ window.CreateItemFieldSwitch = {
   },
 
   _isDependencyValue(selectedValue, fieldDependencyValue) {
-
-    if(!fieldDependencyValue) {
+    if (!fieldDependencyValue) {
       return this._hasValue(selectedValue)
     }
 
-
-    switch(selectedValue.field.type) {
+    switch (selectedValue.field.type) {
       case 'text':
         return selectedValue.value.text == fieldDependencyValue
         break
@@ -315,13 +307,11 @@ window.CreateItemFieldSwitch = {
     }
   },
 
-
-  _outputByType (selectedValue) {
-
-    if(selectedValue.field.id == 'properties_quantity_allocations') {
+  _outputByType(selectedValue) {
+    if (selectedValue.field.id == 'properties_quantity_allocations') {
       return (
-        <div className='col1of2' data-type='value'>
-          <div className='padding-vertical-xs font-size-m' data-value='invoice'>
+        <div className="col1of2" data-type="value">
+          <div className="padding-vertical-xs font-size-m" data-value="invoice">
             <span>QUANTITY ALLOCATIONS</span>
           </div>
         </div>
@@ -330,92 +320,79 @@ window.CreateItemFieldSwitch = {
 
     var type = selectedValue.field.type
 
-    if(type == 'text' || type == 'textarea') {
+    if (type == 'text' || type == 'textarea') {
       return (
-        <div className='col1of2' data-type='value'>
-          <div className='padding-vertical-xs font-size-m' data-value='invoice'>
+        <div className="col1of2" data-type="value">
+          <div className="padding-vertical-xs font-size-m" data-value="invoice">
             <span>{selectedValue.value.text}</span>
           </div>
         </div>
       )
-    } else if(type == 'date') {
-
+    } else if (type == 'date') {
       return (
-        <div className='col1of2' data-type='value'>
-          <div className='padding-vertical-xs font-size-m' data-value='invoice'>
+        <div className="col1of2" data-type="value">
+          <div className="padding-vertical-xs font-size-m" data-value="invoice">
             <span>{selectedValue.value.text}</span>
           </div>
         </div>
       )
-
-
-    } else if(type == 'radio' || type == 'select') {
-
-      var label = _.find(selectedValue.field.values, (value) => {
+    } else if (type == 'radio' || type == 'select') {
+      var label = _.find(selectedValue.field.values, value => {
         return value.value == selectedValue.value.selection
       }).label
 
       return (
-        <div className='col1of2' data-type='value'>
-          <div className='padding-vertical-xs font-size-m' data-value='invoice'>
+        <div className="col1of2" data-type="value">
+          <div className="padding-vertical-xs font-size-m" data-value="invoice">
             <span>{label}</span>
           </div>
         </div>
       )
-
-    } else if(type == 'checkbox') {
-
-      var labels = selectedValue.value.selections.map((s) => {
-        var value = _.find(selectedValue.field.values, (value) => value.value == s)
-        if(value) {
-          return value.label
-        } else {
-          return s
-        }
-      }).join(', ')
-
+    } else if (type == 'checkbox') {
+      var labels = selectedValue.value.selections
+        .map(s => {
+          var value = _.find(selectedValue.field.values, value => value.value == s)
+          if (value) {
+            return value.label
+          } else {
+            return s
+          }
+        })
+        .join(', ')
 
       return (
-        <div className='col1of2' data-type='value'>
-          <div className='padding-vertical-xs font-size-m' data-value='invoice'>
+        <div className="col1of2" data-type="value">
+          <div className="padding-vertical-xs font-size-m" data-value="invoice">
             <span>{labels}</span>
           </div>
         </div>
       )
-
-
-
-    } else if(type == 'autocomplete') {
-
-      var value = _.find(selectedValue.field.values, (value) => {
+    } else if (type == 'autocomplete') {
+      var value = _.find(selectedValue.field.values, value => {
         return value.value == selectedValue.value.id
       })
 
       var label = ''
-      if(value) {
+      if (value) {
         label = value.label
       } else {
         // debugger
       }
 
       return (
-        <div className='col1of2' data-type='value'>
-          <div className='padding-vertical-xs font-size-m' data-value='invoice'>
+        <div className="col1of2" data-type="value">
+          <div className="padding-vertical-xs font-size-m" data-value="invoice">
             <span>{label}</span>
           </div>
         </div>
       )
-
     } else {
       throw 'Not implemented for: ' + type
     }
-
   },
 
-
-  _inputByType (selectedValue, onChangeSelectedValue, dependencyValue) {
-
-    switch(selectedValue.field.type) {
+  _inputByType(selectedValue, onChangeSelectedValue, dependencyValue) {
+    switch (selectedValue.field.type) {
       case 'text':
         return <InputText selectedValue={selectedValue} onChange={onChangeSelectedValue} />
         break
@@ -423,7 +400,13 @@ window.CreateItemFieldSwitch = {
         return <InputAutocompleteSearch onChange={onChangeSelectedValue} selectedValue={selectedValue} />
         break
       case 'autocomplete':
-        return <InputAutocomplete selectedValue={selectedValue} dependencyValue={dependencyValue} onChange={onChangeSelectedValue} />
+        return (
+          <InputAutocomplete
+            selectedValue={selectedValue}
+            dependencyValue={dependencyValue}
+            onChange={onChangeSelectedValue}
+          />
+        )
         break
       case 'textarea':
         return <InputTextarea selectedValue={selectedValue} onChange={onChangeSelectedValue} />
@@ -449,68 +432,67 @@ window.CreateItemFieldSwitch = {
   },
 
   _isFieldInvalid(fieldModel) {
-    if(fieldModel.field.required) {
-      return (!this._hasValue(fieldModel) || !this._isValid(fieldModel))
+    if (fieldModel.field.required) {
+      return !this._hasValue(fieldModel) || !this._isValid(fieldModel)
     } else {
       return this._hasValue(fieldModel) && !this._isValid(fieldModel)
     }
   },
 
   _isFieldEditable(field, item) {
-
-
-    if(!item) {
+    if (!item) {
       return true
     }
 
+    var editable
 
-    var editable;
+    editable = true
 
-    editable = true;
-
-    if ((field.permissions != null) && (typeof item !== 'undefined' && item !== null)) {
-      if ((field.permissions.role != null) && !App.AccessRight.atLeastRole(App.User.current.role, field.permissions.role)) {
-        editable = false;
+    if (field.permissions != null && (typeof item !== 'undefined' && item !== null)) {
+      if (
+        field.permissions.role != null &&
+        !App.AccessRight.atLeastRole(App.User.current.role, field.permissions.role)
+      ) {
+        editable = false
       }
-      if ((field.permissions.owner != null) && field.permissions.owner && (item.owner != null) && App.InventoryPool.current.id !== item.owner.id) {
-        editable = false;
+      if (
+        field.permissions.owner != null &&
+        field.permissions.owner &&
+        item.owner != null &&
+        App.InventoryPool.current.id !== item.owner.id
+      ) {
+        editable = false
       }
     }
 
-    return editable;
+    return editable
   },
 
   _renderFileRows(selectedValue) {
     return selectedValue.value.fileModels.map((fileModel, index) => {
-      return (
-        this._renderFileRow(fileModel, index)
-      )
+      return this._renderFileRow(fileModel, index)
     })
   },
 
   _renderFilename(fileModel) {
     return (
-      <a className='blue' href={fileModel.public_filename} target='_blank'>
+      <a className="blue" href={fileModel.public_filename} target="_blank">
         {fileModel.filename}
       </a>
     )
   },
 
   _renderFileRow(fileModel, index) {
-
     return (
-      <div key={'key_' + index} className='row line font-size-xs focus-hover-thin' data-type='inline-entry'>
-        <div className='line-col col7of10 text-align-left'>
-          {this._renderFilename(fileModel)}
-        </div>
-        <div className='line-col col3of10 text-align-right'></div>
+      <div key={'key_' + index} className="row line font-size-xs focus-hover-thin" data-type="inline-entry">
+        <div className="line-col col7of10 text-align-left">{this._renderFilename(fileModel)}</div>
+        <div className="line-col col3of10 text-align-right" />
       </div>
     )
-
   },
 
   _requiredString(selectedValue) {
-    if(selectedValue.field.required) {
+    if (selectedValue.field.required) {
       return 'true'
     } else {
       return 'false'
@@ -518,122 +500,134 @@ window.CreateItemFieldSwitch = {
   },
 
   _renderOutputField(selectedValue, dependencyValue, dataDependency, onChange, createItemProps, showInvalids, onClose) {
-
-    if(selectedValue.field.type == 'attachment') {
-
+    if (selectedValue.field.type == 'attachment') {
       var fieldClass = 'field row emboss padding-inset-xs margin-vertical-xxs margin-right-xs'
-      if(selectedValue.hidden) {
+      if (selectedValue.hidden) {
         fieldClass += ' hidden'
       }
 
       return (
-        <div className={fieldClass} data-editable='true' data-id='attachments' data-required={this._requiredString(selectedValue)} data-type='field'>
-          <div className='row'>
+        <div
+          className={fieldClass}
+          data-editable="true"
+          data-id="attachments"
+          data-required={this._requiredString(selectedValue)}
+          data-type="field">
+          <div className="row">
             {RenderFieldLabel._renderFieldLabel(selectedValue.field, onClose)}
-            <div className='col1of2' data-type='value'>
-              <div className='padding-vertical-xs font-size-m'></div>
+            <div className="col1of2" data-type="value">
+              <div className="padding-vertical-xs font-size-m" />
             </div>
           </div>
-          <div className='list-of-lines even padding-bottom-xxs'>
-            {this._renderFileRows(selectedValue)}
-          </div>
+          <div className="list-of-lines even padding-bottom-xxs">{this._renderFileRows(selectedValue)}</div>
         </div>
-
       )
-
     } else {
-
-
       var fieldClass = 'field row emboss padding-inset-xs margin-vertical-xxs margin-right-xs'
-      if(selectedValue.hidden) {
+      if (selectedValue.hidden) {
         fieldClass += ' hidden'
       }
 
       return (
-
-        <div className={fieldClass} data-editable='false' data-id={selectedValue.field.id} data-required={this._requiredString(selectedValue)} data-type='field'>
-          <div className='row'>
+        <div
+          className={fieldClass}
+          data-editable="false"
+          data-id={selectedValue.field.id}
+          data-required={this._requiredString(selectedValue)}
+          data-type="field">
+          <div className="row">
             {RenderFieldLabel._renderFieldLabel(selectedValue.field, onClose)}
             {this._outputByType(selectedValue)}
           </div>
         </div>
-
       )
-
     }
-
   },
 
-
   _renderInputField(selectedValue, dependencyValue, dataDependency, onChange, createItemProps, showInvalids, onClose) {
-
     var error = showInvalids && this._isFieldInvalid(selectedValue)
 
-    if(selectedValue.field.id == 'properties_quantity_allocations') {
-
+    if (selectedValue.field.id == 'properties_quantity_allocations') {
       return (
-        <InputQuantityAllocations onClose={onClose} selectedValue={selectedValue} dataDependency={dataDependency} onChange={onChange} createItemProps={createItemProps} error={error} />
+        <InputQuantityAllocations
+          onClose={onClose}
+          selectedValue={selectedValue}
+          dataDependency={dataDependency}
+          onChange={onChange}
+          createItemProps={createItemProps}
+          error={error}
+        />
       )
-
-
-    } else if(selectedValue.field.id == 'inventory_code') {
-
+    } else if (selectedValue.field.id == 'inventory_code') {
       return (
-        <InputInventoryCode onClose={onClose} selectedValue={selectedValue} onChange={onChange} createItemProps={createItemProps} error={error} />
+        <InputInventoryCode
+          onClose={onClose}
+          selectedValue={selectedValue}
+          onChange={onChange}
+          createItemProps={createItemProps}
+          error={error}
+        />
       )
-
-
-    } else if(selectedValue.field.type == 'attachment') {
-
+    } else if (selectedValue.field.type == 'attachment') {
       return (
-        <InputAttachment onClose={onClose} selectedValue={selectedValue} onChange={onChange} error={error} createItemProps={createItemProps} />
+        <InputAttachment
+          onClose={onClose}
+          selectedValue={selectedValue}
+          onChange={onChange}
+          error={error}
+          createItemProps={createItemProps}
+        />
       )
-
     } else {
-
       var fieldClass = 'field row emboss padding-inset-xs margin-vertical-xxs margin-right-xs'
-      if(error) {
+      if (error) {
         fieldClass += ' error'
       }
-      if(selectedValue.hidden) {
+      if (selectedValue.hidden) {
         fieldClass += ' hidden'
       }
 
       return (
-
-        <div className={fieldClass} data-editable='true' data-id={selectedValue.field.id} data-required={this._requiredString(selectedValue)} data-type='field'>
-          <div className='row'>
+        <div
+          className={fieldClass}
+          data-editable="true"
+          data-id={selectedValue.field.id}
+          data-required={this._requiredString(selectedValue)}
+          data-type="field">
+          <div className="row">
             {RenderFieldLabel._renderFieldLabel(selectedValue.field, onClose)}
             {this._inputByType(selectedValue, onChange, dependencyValue)}
           </div>
         </div>
-
       )
-
-
-
     }
-
   },
 
-  renderField (selectedValue, dependencyValue, dataDependency, onChange, createItemProps, showInvalids, onClose) {
+  renderField(selectedValue, dependencyValue, dataDependency, onChange, createItemProps, showInvalids, onClose) {
+    var isEditable =
+      !createItemProps.item ||
+      (createItemProps.item && this._isFieldEditable(selectedValue.field, createItemProps.item))
 
-    var isEditable = !createItemProps.item || createItemProps.item && this._isFieldEditable(selectedValue.field, createItemProps.item)
-
-
-    if(isEditable) {
-
-      return this._renderInputField(selectedValue, dependencyValue, dataDependency, onChange, createItemProps, showInvalids, onClose)
-
+    if (isEditable) {
+      return this._renderInputField(
+        selectedValue,
+        dependencyValue,
+        dataDependency,
+        onChange,
+        createItemProps,
+        showInvalids,
+        onClose
+      )
     } else {
-
-      return this._renderOutputField(selectedValue, dependencyValue, dataDependency, onChange, createItemProps, showInvalids, onClose)
+      return this._renderOutputField(
+        selectedValue,
+        dependencyValue,
+        dataDependency,
+        onChange,
+        createItemProps,
+        showInvalids,
+        onClose
+      )
     }
-
-
-
   }
-
-
-
 }

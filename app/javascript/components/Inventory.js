@@ -1,9 +1,11 @@
-/* global _ */
 /* global _jed */
 import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 import createReactClass from 'create-react-class'
+
+import { InventoryFilterSelect } from './Inventory/InventoryFilterSelect'
+import { DatePickerWithInput } from './Expert/Components/DatePicker/DatePickerWithInput'
 
 /* eslint-disable react/prop-types */
 export const Inventory = createReactClass({
@@ -125,20 +127,12 @@ export const Inventory = createReactClass({
           </div>
           <ul className="dropdown right">
             <li>
-              <a
-                className="dropdown-item"
-                href={this._csvExportUrlWithParams()}
-                id="csv-export"
-                target="_blank">
+              <a className="dropdown-item" href={this._csvExportUrlWithParams()} id="csv-export" target="_blank">
                 {this._surround(_jed('CSV'))}
               </a>
             </li>
             <li>
-              <a
-                className="dropdown-item"
-                href={this._excelExportUrlWithParams()}
-                id="excel-export"
-                target="_blank">
+              <a className="dropdown-item" href={this._excelExportUrlWithParams()} id="excel-export" target="_blank">
                 {this._surround(_jed('Excel'))}
               </a>
             </li>
@@ -170,10 +164,7 @@ export const Inventory = createReactClass({
 
   _renderSubTab(label, value) {
     var className = 'inline-tab-item'
-    if (
-      this.state.tabConfig.type == value.type &&
-      this.state.tabConfig.packages == value.packages
-    ) {
+    if (this.state.tabConfig.type == value.type && this.state.tabConfig.packages == value.packages) {
       className = 'active ' + className
     }
 
@@ -242,8 +233,7 @@ export const Inventory = createReactClass({
         retired: inventoryFilter.retired,
         used: inventoryFilter.used,
         is_borrowable: inventoryFilter.is_borrowable,
-        responsible_inventory_pool_id:
-          inventoryFilter.responsible_inventory_pool_id,
+        responsible_inventory_pool_id: inventoryFilter.responsible_inventory_pool_id,
         search_term: inventoryFilter.search_term,
         owned: inventoryFilter.owned,
         in_stock: inventoryFilter.in_stock,
@@ -322,9 +312,7 @@ export const Inventory = createReactClass({
       if (this._showSelectsOtherThanUsed()) {
         params.retired = this._selectionFromState('retired')
         params.is_borrowable = this._selectionFromState('is_borrowable')
-        params.responsible_inventory_pool_id = this._selectionFromState(
-          'responsible_inventory_pool_id'
-        )
+        params.responsible_inventory_pool_id = this._selectionFromState('responsible_inventory_pool_id')
       }
 
       if (!this._hideUsedSelect()) {
@@ -339,8 +327,7 @@ export const Inventory = createReactClass({
       }
 
       params.packages = this.state.tabConfig.packages
-      params.before_last_check =
-        this.state.before_last_check != '' ? this.state.before_last_check : null
+      params.before_last_check = this.state.before_last_check != '' ? this.state.before_last_check : null
     }
 
     var result = {}
@@ -374,27 +361,25 @@ export const Inventory = createReactClass({
   },
 
   _fetchInventory(page, callback) {
-    App.Inventory
-      .fetch(this._inventoryParams(page))
-      .done((data, status, xhr) => {
-        var pagination = JSON.parse(xhr.getResponseHeader('X-Pagination'))
+    App.Inventory.fetch(this._inventoryParams(page)).done((data, status, xhr) => {
+      var pagination = JSON.parse(xhr.getResponseHeader('X-Pagination'))
 
-        var inventoryPage = data.map(datum => {
-          return new App.Inventory.findOrCreate(datum)
-        })
-
-        // var inventory = this.state.inventory
-        // inventory[page - 1] = inventoryPage
-
-        callback(page, pagination, inventoryPage)
-
-        // this.setState({
-        //   pagination: pagination,
-        //   inventory: inventory
-        // }, () => {
-        //   callback(page, pagination)
-        // })
+      var inventoryPage = data.map(datum => {
+        return new App.Inventory.findOrCreate(datum)
       })
+
+      // var inventory = this.state.inventory
+      // inventory[page - 1] = inventoryPage
+
+      callback(page, pagination, inventoryPage)
+
+      // this.setState({
+      //   pagination: pagination,
+      //   inventory: inventory
+      // }, () => {
+      //   callback(page, pagination)
+      // })
+    })
   },
 
   componentDidMount() {
@@ -407,9 +392,7 @@ export const Inventory = createReactClass({
     // which are not in sync with the currently selected filter, but
     // the result of an earlier selected filter.
 
-    _.each([App.Item, App.License, App.Model, App.Software, App.Option], e =>
-      e.deleteAll()
-    )
+    _.each([App.Item, App.License, App.Model, App.Software, App.Option], e => e.deleteAll())
   },
 
   _reloadList() {
@@ -470,10 +453,7 @@ export const Inventory = createReactClass({
   },
 
   _fetchLicenses(page, inventoryPage, request, callback) {
-    var software = _.filter(
-      inventoryPage,
-      i => i.constructor.className == 'Software'
-    )
+    var software = _.filter(inventoryPage, i => i.constructor.className == 'Software')
     var ids = _.map(software, s => s.id)
     if (!ids.length > 0) {
       callback(page)
@@ -525,10 +505,7 @@ export const Inventory = createReactClass({
   },
 
   _fetchItems(page, inventoryPage, request, callback) {
-    var models = _.filter(
-      inventoryPage,
-      i => i.constructor.className == 'Model'
-    )
+    var models = _.filter(inventoryPage, i => i.constructor.className == 'Model')
     var ids = _.map(models, m => m.id)
     if (!ids.length > 0) {
       callback(page)
@@ -580,9 +557,7 @@ export const Inventory = createReactClass({
   },
 
   _fetchAvailability(page, inventoryPage, callback) {
-    var models = _.filter(inventoryPage, i =>
-      _.contains(['Model', 'Software'], i.constructor.className)
-    )
+    var models = _.filter(inventoryPage, i => _.contains(['Model', 'Software'], i.constructor.className))
     var ids = _.map(models, m => m.id)
     if (!ids.length > 0) {
       callback(page)
@@ -772,10 +747,7 @@ export const Inventory = createReactClass({
     event.preventDefault()
     this.setState(
       {
-        categoriesPath: _.first(
-          this.state.categoriesPath,
-          this.state.categoriesPath.length - 1
-        ),
+        categoriesPath: _.first(this.state.categoriesPath, this.state.categoriesPath.length - 1),
         searchMode: false
       },
       this._reloadList
@@ -832,9 +804,7 @@ export const Inventory = createReactClass({
   },
 
   _renderCurrentCategory() {
-    return (
-      <div id="category-current">{this._renderCurrentCategoryContent()}</div>
-    )
+    return <div id="category-current">{this._renderCurrentCategoryContent()}</div>
   },
 
   _renderCategories() {
@@ -866,8 +836,7 @@ export const Inventory = createReactClass({
   },
 
   _renderLinesTable() {
-    var classes =
-      'table-cell list-of-lines even separated-top padding-bottom-s min-height-l'
+    var classes = 'table-cell list-of-lines even separated-top padding-bottom-s min-height-l'
     if (this.state.showCategories) {
       classes += ' col4of5'
     }
@@ -920,8 +889,7 @@ export const Inventory = createReactClass({
             <InventoryFilterSelect
               hide={!this._showSelectsOtherThanUsed()}
               name={'retired'}
-              onChange={value =>
-                this.setState({ retired: value }, this._reloadList)}
+              onChange={value => this.setState({ retired: value }, this._reloadList)}
               value={this.state.retired}
               values={[
                 {
@@ -937,8 +905,7 @@ export const Inventory = createReactClass({
             <InventoryFilterSelect
               hide={this._hideUsedSelect()}
               name={'used'}
-              onChange={value =>
-                this.setState({ used: value }, this._reloadList)}
+              onChange={value => this.setState({ used: value }, this._reloadList)}
               value={this.state.used}
               values={[
                 { value: '', label: _jed('used') + ' & ' + _jed('not used') },
@@ -951,8 +918,7 @@ export const Inventory = createReactClass({
             <InventoryFilterSelect
               hide={!this._showSelectsOtherThanUsed()}
               name={'is_borrowable'}
-              onChange={value =>
-                this.setState({ is_borrowable: value }, this._reloadList)}
+              onChange={value => this.setState({ is_borrowable: value }, this._reloadList)}
               value={this.state.is_borrowable}
               values={[
                 {
@@ -968,15 +934,9 @@ export const Inventory = createReactClass({
             <InventoryFilterSelect
               hide={!this._showSelectsOtherThanUsed()}
               name={'responsible_inventory_pool_id'}
-              onChange={value =>
-                this.setState(
-                  { responsible_inventory_pool_id: value },
-                  this._reloadList
-                )}
+              onChange={value => this.setState({ responsible_inventory_pool_id: value }, this._reloadList)}
               value={this.state.responsible_inventory_pool_id}
-              values={[
-                { value: '', label: _jed('All inventory pools') }
-              ].concat(
+              values={[{ value: '', label: _jed('All inventory pools') }].concat(
                 _.map(this.props.responsibles, r => {
                   return { value: r.id, label: r.name }
                 })
@@ -985,16 +945,11 @@ export const Inventory = createReactClass({
           </div>
         </form>
         <div className="row">
-          <div className="col2of8 padding-right-xs">
-            {this._renderToggleAndSearch()}
-          </div>
+          <div className="col2of8 padding-right-xs">{this._renderToggleAndSearch()}</div>
           <form className={formClass2} data-filter="true">
             <div className="row">
               <div className="col1of5 padding-right-xs">
-                <label
-                  className="button inset white width-full height-xxs"
-                  htmlFor="owned"
-                  style={checkboxesStyle}>
+                <label className="button inset white width-full height-xxs" htmlFor="owned" style={checkboxesStyle}>
                   <input
                     checked={this.state.owned}
                     autoComplete="off"
@@ -1007,18 +962,14 @@ export const Inventory = createReactClass({
                 </label>
               </div>
               <div className="col1of5 padding-right-xs">
-                <label
-                  className="button inset white width-full height-xxs"
-                  htmlFor="in_stock"
-                  style={checkboxesStyle}>
+                <label className="button inset white width-full height-xxs" htmlFor="in_stock" style={checkboxesStyle}>
                   <input
                     checked={this.state.in_stock}
                     autoComplete="off"
                     id="in_stock"
                     name="in_stock"
                     type="checkbox"
-                    onChange={event =>
-                      this._onCheckboxChange(event, 'in_stock')}
+                    onChange={event => this._onCheckboxChange(event, 'in_stock')}
                   />
                   <span>{_jed('In Stock')}</span>
                 </label>
@@ -1034,17 +985,13 @@ export const Inventory = createReactClass({
                     id="incomplete"
                     name="incomplete"
                     type="checkbox"
-                    onChange={event =>
-                      this._onCheckboxChange(event, 'incomplete')}
+                    onChange={event => this._onCheckboxChange(event, 'incomplete')}
                   />
                   <span>{_jed('Incomplete')}</span>
                 </label>
               </div>
               <div className="col1of5 padding-right-xs">
-                <label
-                  className="button inset white width-full height-xxs"
-                  htmlFor="broken"
-                  style={checkboxesStyle}>
+                <label className="button inset white width-full height-xxs" htmlFor="broken" style={checkboxesStyle}>
                   <input
                     checked={this.state.broken}
                     autoComplete="off"
@@ -1097,8 +1044,7 @@ export const Inventory = createReactClass({
   },
 
   _renderLoadingOrNothing(child) {
-    var classes =
-      'table-cell list-of-lines even separated-top padding-bottom-s min-height-l'
+    var classes = 'table-cell list-of-lines even separated-top padding-bottom-s min-height-l'
     if (this.state.showCategories) {
       classes += ' col4of5'
     }
@@ -1123,9 +1069,7 @@ export const Inventory = createReactClass({
 
   _renderResultNothingFound() {
     return this._renderLoadingOrNothing(
-      <h3 className="headline-s light padding-inset-xl text-align-center">
-        No entries found
-      </h3>
+      <h3 className="headline-s light padding-inset-xl text-align-center">No entries found</h3>
     )
   },
 
@@ -1190,10 +1134,7 @@ export const Inventory = createReactClass({
   _renderModelDelete(model) {
     return (
       <li>
-        <a
-          className="dropdown-item red"
-          data-method="delete"
-          href={this._modelDeleteLink(model)}>
+        <a className="dropdown-item red" data-method="delete" href={this._modelDeleteLink(model)}>
           <i className="fa fa-trash" />
           {_jed('Delete')}
         </a>
@@ -1222,10 +1163,7 @@ export const Inventory = createReactClass({
             </div>
             <ul className="dropdown right">
               <li>
-                <a
-                  className="dropdown-item"
-                  data-model-id={model.id}
-                  data-open-time-line="">
+                <a className="dropdown-item" data-model-id={model.id} data-open-time-line="">
                   <i className="fa fa-align-left" />
                   {_jed('Timeline')}
                 </a>
@@ -1237,10 +1175,7 @@ export const Inventory = createReactClass({
       )
     } else {
       return (
-        <a
-          className="button white text-ellipsis"
-          data-model-id={model.id}
-          data-open-time-line>
+        <a className="button white text-ellipsis" data-model-id={model.id} data-open-time-line>
           <i className="fa fa-align-left" />
           {_jed('Timeline')}
         </a>
@@ -1273,10 +1208,7 @@ export const Inventory = createReactClass({
               <div className="table">
                 <div className="table-row">
                   <div className="table-cell vertical-align-middle">
-                    <img
-                      className="max-width-xxs max-height-xxs"
-                      src={this._modelImageUrl(model)}
-                    />
+                    <img className="max-width-xxs max-height-xxs" src={this._modelImageUrl(model)} />
                   </div>
                 </div>
               </div>
@@ -1285,20 +1217,14 @@ export const Inventory = createReactClass({
         </div>
         <div className="col2of5 line-col text-align-left">
           {this._renderModelPackage(model)}
-          <strong className="test-fix-timeline">
-            {this._renderModelName(model)}
-          </strong>
+          <strong className="test-fix-timeline">{this._renderModelName(model)}</strong>
         </div>
         <div className="col1of5 line-col text-align-center">
           <span title={_jed('in stock')}>{model.availability().in_stock}</span>
           /
-          <span title={_jed('rentable')}>
-            {model.availability().total_rentable}
-          </span>
+          <span title={_jed('rentable')}>{model.availability().total_rentable}</span>
         </div>
-        <div className="col1of5 line-col line-actions padding-right-xs">
-          {this._renderModelEdit(model)}
-        </div>
+        <div className="col1of5 line-col line-actions padding-right-xs">{this._renderModelEdit(model)}</div>
       </div>
     )
   },
@@ -1309,9 +1235,7 @@ export const Inventory = createReactClass({
     }
 
     return (
-      <a
-        className="button white text-ellipsis"
-        href={this._optionEditLink(model)}>
+      <a className="button white text-ellipsis" href={this._optionEditLink(model)}>
         {_jed('Edit Option')}
       </a>
     )
@@ -1319,23 +1243,13 @@ export const Inventory = createReactClass({
 
   _renderOptionLine(model) {
     return (
-      <div
-        key={'option_line_' + model.id}
-        className="line row focus-hover-thin"
-        data-id={model.id}
-        data-type="option">
-        <div className="col1of5 line-col text-align-center">
-          {model.inventory_code}
-        </div>
+      <div key={'option_line_' + model.id} className="line row focus-hover-thin" data-id={model.id} data-type="option">
+        <div className="col1of5 line-col text-align-center">{model.inventory_code}</div>
         <div className="col2of5 line-col text-align-left">
           <strong className="test-fix-timeline">{model.name()}</strong>
         </div>
-        <div className="col1of5 line-col text-align-center">
-          {accounting.formatMoney(model.price)}
-        </div>
-        <div className="col1of5 line-col line-actions padding-right-xs">
-          {this._renderOptionEdit(model)}
-        </div>
+        <div className="col1of5 line-col text-align-center">{accounting.formatMoney(model.price)}</div>
+        <div className="col1of5 line-col line-actions padding-right-xs">{this._renderOptionEdit(model)}</div>
       </div>
     )
 
@@ -1362,30 +1276,15 @@ export const Inventory = createReactClass({
   },
 
   _itemCopyLink(item) {
-    return (
-      App.Inventory.url().replace('/inventory', '') +
-      '/items/' +
-      item.id +
-      '/copy'
-    )
+    return App.Inventory.url().replace('/inventory', '') + '/items/' + item.id + '/copy'
   },
 
   _optionEditLink(option) {
-    return (
-      App.Inventory.url().replace('/inventory', '') +
-      '/options/' +
-      option.id +
-      '/edit'
-    )
+    return App.Inventory.url().replace('/inventory', '') + '/options/' + option.id + '/edit'
   },
 
   _modelEditLink(model) {
-    return (
-      App.Inventory.url().replace('/inventory', '') +
-      '/models/' +
-      model.id +
-      '/edit'
-    )
+    return App.Inventory.url().replace('/inventory', '') + '/models/' + model.id + '/edit'
   },
 
   _modelImageUrl(model) {
@@ -1421,10 +1320,7 @@ export const Inventory = createReactClass({
   },
 
   _hasEditRights() {
-    return this._appAccessRight().atLeastRole(
-      this._appCurrentUserRole(),
-      'lending_manager'
-    )
+    return this._appAccessRight().atLeastRole(this._appCurrentUserRole(), 'lending_manager')
   },
 
   _renderItemEditButtons(item) {
@@ -1505,8 +1401,7 @@ export const Inventory = createReactClass({
             onClick={event => this._onToggleItem(event, item)}
             className="button inset small width-full"
             data-type="inventory-expander">
-            {this._renderItemArrow(item)}{' '}
-            <span>{this._itemChildCount(item)}</span>
+            {this._renderItemArrow(item)} <span>{this._itemChildCount(item)}</span>
           </button>
         </div>
       </div>
@@ -1523,10 +1418,7 @@ export const Inventory = createReactClass({
         <strong key="model_name" className="grey-text">
           {this._itemModel(item).name()}
         </strong>,
-        <div
-          key="is_package"
-          className="row grey-text text-ellipsis width-full"
-          title={_jed('is part of a package')}>
+        <div key="is_package" className="row grey-text text-ellipsis width-full" title={_jed('is part of a package')}>
           {_jed('is part of a package')}
         </div>
       ]
@@ -1567,34 +1459,22 @@ export const Inventory = createReactClass({
 
   _renderLicenseLine(item) {
     return (
-      <div
-        key={'item_' + item.id}
-        className="line row focus-hover-thin"
-        data-id={item.id}
-        data-type="license">
+      <div key={'item_' + item.id} className="line row focus-hover-thin" data-id={item.id} data-type="license">
         <div className="col1of5 line-col" />
         <div className="col2of5 line-col text-align-left">
           <div className="row">{this._itemInventoryCode(item)}</div>
           {this._renderLicenseDetail(item)}
         </div>
         <div className="col1of5 line-col" />
-        <div className="col1of5 line-col line-actions padding-right-xs">
-          {this._renderItemEditButtons(item)}
-        </div>
+        <div className="col1of5 line-col line-actions padding-right-xs">{this._renderItemEditButtons(item)}</div>
       </div>
     )
   },
 
   _renderItemLine(item) {
     return (
-      <div
-        key={'item_' + item.id}
-        className="line row focus-hover-thin"
-        data-id={item.id}
-        data-type="item">
-        <div className="col1of5 line-col">
-          {this._renderItemPackageInfo(item)}
-        </div>
+      <div key={'item_' + item.id} className="line row focus-hover-thin" data-id={item.id} data-type="item">
+        <div className="col1of5 line-col">{this._renderItemPackageInfo(item)}</div>
         <div className="col2of5 line-col text-align-left">
           <div className="row">{this._itemInventoryCode(item)}</div>
           {this._renderItemDetail(item)}
@@ -1602,9 +1482,7 @@ export const Inventory = createReactClass({
         <div className="col1of5 line-col text-align-center">
           <strong className="darkred-text">{this._itemProblems(item)}</strong>
         </div>
-        <div className="col1of5 line-col line-actions padding-right-xs">
-          {this._renderItemEditButtons(item)}
-        </div>
+        <div className="col1of5 line-col line-actions padding-right-xs">{this._renderItemEditButtons(item)}</div>
       </div>
     )
   },
@@ -1638,10 +1516,7 @@ export const Inventory = createReactClass({
 
   _renderItem(item) {
     if (this._itemIsPackage(item) && this._isItemOpen(item)) {
-      return [
-        this._renderItemOrLicenseLine(item),
-        this._renderItemChildren(item)
-      ]
+      return [this._renderItemOrLicenseLine(item), this._renderItemChildren(item)]
     } else {
       return this._renderItemOrLicenseLine(item)
     }

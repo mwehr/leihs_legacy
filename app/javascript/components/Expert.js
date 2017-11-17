@@ -9,7 +9,9 @@ import createReactClass from 'create-react-class'
 // - Highlighting of current day and current selected date in picker.
 // - Make sure no SQL injections are possible.
 
-// import
+import { SearchResult } from './Expert/SearchResult'
+import { SearchMaskState } from './Expert/SearchMaskState'
+import { TitleAndExport } from './Expert/TitleAndExport'
 
 /* eslint-disable react/prop-types */
 export const Expert = createReactClass({
@@ -73,10 +75,7 @@ export const Expert = createReactClass({
       searchResult = [page]
     } else {
       var lastPage = searchResult[searchResult.length - 1]
-      if (
-        lastPage.inventory.start_index + lastPage.inventory.page_size ==
-        inventory.start_index
-      ) {
+      if (lastPage.inventory.start_index + lastPage.inventory.page_size == inventory.start_index) {
         searchResult = searchResult.concat(page)
       }
     }
@@ -103,22 +102,15 @@ export const Expert = createReactClass({
     var searchResult = this.state.searchResult
     if (!searchResult || _.last(searchResult).inventory.has_more) {
       var lastPage = _.last(searchResult)
-      this._fetchInventory(
-        lastPage.inventory.start_index + lastPage.inventory.page_size
-      )
+      this._fetchInventory(lastPage.inventory.start_index + lastPage.inventory.page_size)
     }
   },
 
   _fetchInventory(startIndex) {
     this.setState({ refresh: !this.state.refresh })
-    FetchInventory._fetchInventory(
-      this.xhrContext,
-      startIndex,
-      this.state.selectedValues,
-      (inventory, data) => {
-        this._updateSearchResult(inventory, data)
-      }
-    )
+    FetchInventory._fetchInventory(this.xhrContext, startIndex, this.state.selectedValues, (inventory, data) => {
+      this._updateSearchResult(inventory, data)
+    })
   },
 
   _refreshList() {
@@ -145,9 +137,7 @@ export const Expert = createReactClass({
     return (
       <div className="table" key="result">
         <div className="table-row">
-          <div
-            className="table-cell list-of-lines even separated-top padding-bottom-s min-height-l"
-            id="inventory">
+          <div className="table-cell list-of-lines even separated-top padding-bottom-s min-height-l" id="inventory">
             <div className="height-s" />
             {loading}
             <div className="height-s" />

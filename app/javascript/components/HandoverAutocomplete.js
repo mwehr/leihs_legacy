@@ -1,13 +1,11 @@
 // TODO: cleanup
 /* eslint-disable react/no-string-refs */
 
-/* global _ */
 /* global _jed */
 import React from 'react'
-import ReactDOM from 'react-dom'
-import createReactClass from 'create-react-class'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
+import createReactClass from 'create-react-class'
 
 import Autocomplete from '@eins78/react-autocomplete'
 
@@ -74,43 +72,26 @@ export const HandoverAutocomplete = createReactClass({
       )
     }
 
-    const models = _.sortBy(
-      _.filter(items, i => i.props.item.type === _jed('Model')),
-      i => i.props.item.name
-    )
+    const models = _.sortBy(_.filter(items, i => i.props.item.type === _jed('Model')), i => i.props.item.name)
 
-    const options = _.sortBy(
-      _.filter(items, i => i.props.item.type === _jed('Option')),
-      i => i.props.item.name
-    )
+    const options = _.sortBy(_.filter(items, i => i.props.item.type === _jed('Option')), i => i.props.item.name)
 
-    const templates = _.sortBy(
-      _.filter(items, i => i.props.item.type === _jed('Template')),
-      i => i.props.item.name
-    )
+    const templates = _.sortBy(_.filter(items, i => i.props.item.type === _jed('Template')), i => i.props.item.name)
 
     // searched but no results:
     if (props.searchResults && _.all([models, options, templates], _.isEmpty)) {
       return (
         <ul {...menuProps}>
-          <li className="padding-left-s margin-top-m margin-bottom-m">
-            {_jed('No results')}
-          </li>
+          <li className="padding-left-s margin-top-m margin-bottom-m">{_jed('No results')}</li>
         </ul>
       )
     }
 
     return (
       <ul {...menuProps}>
-        {_.isEmpty(models)
-          ? null
-          : this._renderMenuSubSection(_jed('Models'), models)}
-        {_.isEmpty(options)
-          ? null
-          : this._renderMenuSubSection(_jed('Options'), options)}
-        {_.isEmpty(templates)
-          ? null
-          : this._renderMenuSubSection(_jed('Templates'), templates)}
+        {_.isEmpty(models) ? null : this._renderMenuSubSection(_jed('Models'), models)}
+        {_.isEmpty(options) ? null : this._renderMenuSubSection(_jed('Options'), options)}
+        {_.isEmpty(templates) ? null : this._renderMenuSubSection(_jed('Templates'), templates)}
       </ul>
     )
   },
@@ -131,9 +112,7 @@ export const HandoverAutocomplete = createReactClass({
         item={item}
         id={item.abbr}
         className="separated-bottom exclude-last-child">
-        <a
-          className={'row' + (!item.available ? ' light-red' : '')}
-          title={item.name}>
+        <a className={'row' + (!item.available ? ' light-red' : '')} title={item.name}>
           <div className="row">
             <div className="col3of4" title={item.name}>
               <strong className="wrap">{item.name}</strong>
