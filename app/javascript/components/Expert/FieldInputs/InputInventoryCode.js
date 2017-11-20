@@ -2,6 +2,7 @@ import React from 'react'
 import createReactClass from 'create-react-class'
 
 import { InputText } from '../FieldInputs/InputText'
+import { RenderFieldLabel } from '../util/RenderFieldLabel'
 
 /* eslint-disable react/prop-types */
 export const InputInventoryCode = createReactClass({

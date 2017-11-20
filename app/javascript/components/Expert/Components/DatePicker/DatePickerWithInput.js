@@ -1,4 +1,6 @@
-/* global i18n */
+// FIXME: globals
+/* global moment i18n  */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 

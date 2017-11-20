@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global App $ */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 
@@ -27,8 +30,6 @@ export const FieldAutocompletePreload = createReactClass({
   },
 
   render() {
-    const props = this.props
-
     if (!this.state.data) {
       return <div />
     }

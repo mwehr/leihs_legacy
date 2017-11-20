@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global App _ moment i18n accounting */
+
 import React from 'react'
 
 import { InputText } from '../Expert/FieldInputs/InputText'
@@ -11,6 +14,7 @@ import { InputInventoryCode } from '../Expert/FieldInputs/InputInventoryCode'
 import { InputAttachment } from '../Expert/FieldInputs/InputAttachment'
 import { InputAutocomplete } from '../Expert/FieldInputs/InputAutocomplete'
 import { InputAutocompleteSearch } from '../Expert/FieldInputs/InputAutocompleteSearch'
+import { RenderFieldLabel } from '../Expert/util/RenderFieldLabel'
 
 export const CreateItemFieldSwitch = {
   _hasValue(selectedValue) {
@@ -21,31 +25,22 @@ export const CreateItemFieldSwitch = {
     switch (selectedValue.field.type) {
       case 'text':
         return selectedValue.value.text.trim().length > 0
-        break
       case 'autocomplete-search':
         return selectedValue.value.id != null
-        break
       case 'autocomplete':
         return selectedValue.value.id != null
-        break
       case 'textarea':
         return selectedValue.value.text.trim().length > 0
-        break
       case 'select':
         return selectedValue.value.selection != null
-        break
       case 'radio':
         return selectedValue.value.selection != null
-        break
       case 'date':
         return selectedValue.value.at.trim().length > 0
-        break
       case 'checkbox':
         return selectedValue.value.selections.length > 0
-        break
       case 'attachment':
         return selectedValue.value.fileModels.length > 0
-        break
       default:
         throw 'Unexpected type: ' + selectedValue.field.type
     }
@@ -152,7 +147,7 @@ export const CreateItemFieldSwitch = {
         })
       }
     }
-
+    let text
     switch (field.type) {
       case 'text':
         if (field.currency) {
@@ -162,18 +157,18 @@ export const CreateItemFieldSwitch = {
         } else {
           return { text: itemValue }
         }
-        break
+
       case 'autocomplete-search':
         var base = this._itemValue(field.item_value_label, item)
         var ext = this._itemValue(field.item_value_label_ext, item)
-        var text = base + (ext ? ' ' + ext : '')
+        text = base + (ext ? ' ' + ext : '')
         return {
           text: text,
           id: itemValue
         }
-        break
+
       case 'autocomplete':
-        var text = null
+        text = null
         if (field.id == 'room_id') {
           // debugger
           text = item.room.name
@@ -189,10 +184,10 @@ export const CreateItemFieldSwitch = {
           text: text,
           id: itemValue
         }
-        break
+
       case 'textarea':
         return { text: itemValue }
-        break
+
       case 'attachment':
         var fileModels = attachments.map(a => {
           return {
@@ -204,21 +199,21 @@ export const CreateItemFieldSwitch = {
           }
         })
         return { fileModels: fileModels }
-        break
+
       case 'select':
         // TODO read mapping to values from field definition
         // debugger
         return { selection: itemValue }
-        break
+
       case 'radio':
         return { selection: itemValue }
-        break
+
       case 'checkbox':
         return { selections: itemValue }
-        break
+
       case 'date':
         return { at: this._parseSavedDate(itemValue) }
-        break
+
       default:
         throw 'Unexpected type: ' + field.type
     }
@@ -234,37 +229,37 @@ export const CreateItemFieldSwitch = {
     switch (field.type) {
       case 'text':
         return { text: '' }
-        break
+
       case 'autocomplete-search':
         return {
           text: '',
           id: null
         }
-        break
+
       case 'autocomplete':
         return {
           text: '',
           id: null
         }
-        break
+
       case 'textarea':
         return { text: '' }
-        break
+
       case 'attachment':
         return { fileModels: [] }
-        break
+
       case 'select':
         return { selection: field.default }
-        break
+
       case 'radio':
         return { selection: field.default }
-        break
+
       case 'date':
         return { at: '' }
-        break
+
       case 'checkbox':
         return { selections: [] }
-        break
+
       default:
         throw 'Unexpected type ' + field.type + ' for field ' + field.id
     }
@@ -278,30 +273,30 @@ export const CreateItemFieldSwitch = {
     switch (selectedValue.field.type) {
       case 'text':
         return selectedValue.value.text == fieldDependencyValue
-        break
+
       case 'autocomplete-search':
         return selectedValue.value.text == fieldDependencyValue
-        break
+
       case 'autocomplete':
         return selectedValue.value.id == fieldDependencyValue
-        break
+
       case 'textarea':
         return selectedValue.value.text == fieldDependencyValue
-        break
+
       case 'select':
         return '' + selectedValue.value.selection == fieldDependencyValue
-        break
+
       case 'radio':
         return '' + selectedValue.value.selection == fieldDependencyValue
-        break
+
       // case 'checkbox':
       //   return true
       //   break
       case 'date':
         throw 'Not implemented yet for date.'
-        break
+
       default:
-        throw 'Unexpected type: ' + field.type
+        throw 'Unexpected type: ' + selectedValue.field.type
     }
   },
 
@@ -317,7 +312,7 @@ export const CreateItemFieldSwitch = {
     }
 
     var type = selectedValue.field.type
-
+    let label
     if (type == 'text' || type == 'textarea') {
       return (
         <div className="col1of2" data-type="value">
@@ -335,7 +330,7 @@ export const CreateItemFieldSwitch = {
         </div>
       )
     } else if (type == 'radio' || type == 'select') {
-      var label = _.find(selectedValue.field.values, value => {
+      label = _.find(selectedValue.field.values, value => {
         return value.value == selectedValue.value.selection
       }).label
 
@@ -370,7 +365,7 @@ export const CreateItemFieldSwitch = {
         return value.value == selectedValue.value.id
       })
 
-      var label = ''
+      label = ''
       if (value) {
         label = value.label
       } else {
@@ -393,10 +388,10 @@ export const CreateItemFieldSwitch = {
     switch (selectedValue.field.type) {
       case 'text':
         return <InputText selectedValue={selectedValue} onChange={onChangeSelectedValue} />
-        break
+
       case 'autocomplete-search':
         return <InputAutocompleteSearch onChange={onChangeSelectedValue} selectedValue={selectedValue} />
-        break
+
       case 'autocomplete':
         return (
           <InputAutocomplete
@@ -405,22 +400,22 @@ export const CreateItemFieldSwitch = {
             onChange={onChangeSelectedValue}
           />
         )
-        break
+
       case 'textarea':
         return <InputTextarea selectedValue={selectedValue} onChange={onChangeSelectedValue} />
-        break
+
       case 'select':
         return <InputSelect selectedValue={selectedValue} onChange={onChangeSelectedValue} />
-        break
+
       case 'radio':
         return <InputRadio selectedValue={selectedValue} onChange={onChangeSelectedValue} />
-        break
+
       case 'date':
         return <InputDate selectedValue={selectedValue} onChange={onChangeSelectedValue} />
-        break
+
       case 'checkbox':
         return <InputCheckbox selectedValue={selectedValue} onChange={onChangeSelectedValue} />
-        break
+
       // case 'attachment':
       //   return <InputAttachment selectedValue={selectedValue} onChange={onChangeSelectedValue} />
       //   break
@@ -498,8 +493,9 @@ export const CreateItemFieldSwitch = {
   },
 
   _renderOutputField(selectedValue, dependencyValue, dataDependency, onChange, createItemProps, showInvalids, onClose) {
+    let fieldClass
     if (selectedValue.field.type == 'attachment') {
-      var fieldClass = 'field row emboss padding-inset-xs margin-vertical-xxs margin-right-xs'
+      fieldClass = 'field row emboss padding-inset-xs margin-vertical-xxs margin-right-xs'
       if (selectedValue.hidden) {
         fieldClass += ' hidden'
       }
@@ -521,7 +517,7 @@ export const CreateItemFieldSwitch = {
         </div>
       )
     } else {
-      var fieldClass = 'field row emboss padding-inset-xs margin-vertical-xxs margin-right-xs'
+      fieldClass = 'field row emboss padding-inset-xs margin-vertical-xxs margin-right-xs'
       if (selectedValue.hidden) {
         fieldClass += ' hidden'
       }

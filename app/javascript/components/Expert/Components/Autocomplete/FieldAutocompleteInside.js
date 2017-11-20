@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global _jed  */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 
@@ -65,7 +68,7 @@ export const FieldAutocompleteInside = createReactClass({
     }
   },
 
-  _onFocus(event) {
+  _onFocus() {
     this.props._onFocus()
   },
 

@@ -2,6 +2,8 @@ import React from 'react'
 import createReactClass from 'create-react-class'
 
 import { SearchMask } from './SearchMask'
+import { FieldSwitch } from './FieldSwitch'
+import { EnsureDependents } from './util/EnsureDependents'
 
 /* eslint-disable react/prop-types */
 export const SearchMaskState = createReactClass({
@@ -27,8 +29,8 @@ export const SearchMaskState = createReactClass({
   },
 
   _determineLeftOrRight() {
-    leftCount = this.props.selectedValues.filter(selectedValue => selectedValue.col == 'left').length
-    rightCount = this.props.selectedValues.filter(selectedValue => selectedValue.col == 'right').length
+    const leftCount = this.props.selectedValues.filter(selectedValue => selectedValue.col == 'left').length
+    const rightCount = this.props.selectedValues.filter(selectedValue => selectedValue.col == 'right').length
 
     if (leftCount <= rightCount) {
       return 'left'

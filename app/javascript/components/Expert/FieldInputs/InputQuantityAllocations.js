@@ -1,6 +1,10 @@
-/* global _jed */
+// FIXME: globals
+/* global _ _jed */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
+
+import { RenderFieldLabel } from '../util/RenderFieldLabel'
 
 /* eslint-disable react/prop-types */
 export const InputQuantityAllocations = createReactClass({
@@ -19,7 +23,6 @@ export const InputQuantityAllocations = createReactClass({
 
     var allocation = this.props.selectedValue.value.allocations[index]
     if (allocation.type == 'new') {
-      var allocations = this.props.selectedValue.value.allocations
       this.props.selectedValue.value.allocations.splice(index, 1)
       this.props.onChange()
     } else {

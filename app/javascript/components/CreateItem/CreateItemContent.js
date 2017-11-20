@@ -1,8 +1,10 @@
-/* global _jed */
+// FIXME: globals
+/* global App _ _jed */
+
 import React from 'react'
-import PropTypes from 'prop-types'
-import cx from 'classnames'
 import createReactClass from 'create-react-class'
+
+import { RenderCreateItem } from './RenderCreateItem'
 
 /* eslint-disable react/prop-types */
 export const CreateItemContent = createReactClass({

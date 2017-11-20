@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global _ */
+
 export const XhrContext = () => {
   return {
     xhrRefs: {},
@@ -28,6 +31,6 @@ export const XhrContext = () => {
       return _.isEmpty(this.xhrRefs)
     },
 
-    callXhr(xhr) {}
+    callXhr() {}
   }
 }

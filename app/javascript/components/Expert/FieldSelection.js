@@ -1,7 +1,11 @@
+// FIXME: globals
+/* global _ */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 
 import { FieldAutocompleteWrapper } from './Components/Autocomplete/FieldAutocompleteWrapper'
+import { FieldsDropdownData } from './util/FieldsDropdownData'
 
 /* eslint-disable react/prop-types */
 export const FieldSelection = createReactClass({
@@ -22,8 +26,6 @@ export const FieldSelection = createReactClass({
   },
 
   render() {
-    const props = this.props
-
     return (
       <div className="col1of3">
         <label className="row margin-bottom-xxs">Feld auswählen</label>

@@ -8,7 +8,7 @@ export const Scrolling = {
   },
 
   _getDocHeight() {
-    D = document
+    const D = document
     return Math.max(
       D.body.scrollHeight,
       D.documentElement.scrollHeight,

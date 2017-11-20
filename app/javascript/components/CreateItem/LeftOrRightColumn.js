@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global _ */
+
 export const LeftOrRightColumn = {
   _columnGroupFieldModels(fields, fieldModels, leftOrRight) {
     if (leftOrRight == 'left') {

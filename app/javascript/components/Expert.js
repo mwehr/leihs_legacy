@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global App $ _  */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 
@@ -8,6 +11,9 @@ import createReactClass from 'create-react-class'
 import { SearchResult } from './Expert/SearchResult'
 import { SearchMaskState } from './Expert/SearchMaskState'
 import { TitleAndExport } from './Expert/TitleAndExport'
+import { XhrContext } from './Expert/XhrContext'
+import { Scrolling } from './Expert/util/Scrolling'
+import { FetchInventory } from './Expert/util/FetchInventory'
 
 /* eslint-disable react/prop-types */
 const Expert = createReactClass({
@@ -52,7 +58,7 @@ const Expert = createReactClass({
     // you most likely do not enter the XHR callback, which in this component means,
     // that the next page is not loaded. Thats why we explicitly cancel it.
     this.xhrContext.cancelXhrs()
-    Scrollling.unmount(this._onScroll)
+    Scrolling.unmount(this._onScroll)
   },
 
   _onScroll() {
@@ -95,7 +101,6 @@ const Expert = createReactClass({
       return
     }
 
-    var searchResult = this.state.searchResult
     if (!searchResult || _.last(searchResult).inventory.has_more) {
       var lastPage = _.last(searchResult)
       this._fetchInventory(lastPage.inventory.start_index + lastPage.inventory.page_size)

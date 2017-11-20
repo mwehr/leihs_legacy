@@ -1,4 +1,6 @@
-/* global _jed */
+// FIXME: globals
+/* global App $ _ _jed URI accounting */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 
@@ -347,8 +349,9 @@ const Inventory = createReactClass({
 
   _onCheckboxChange(event, attribute) {
     // NOTE: Never preveent default for checkboxes.
-    this.state[attribute] = event.target.checked
-    this.setState(this.state, this._reloadList)
+    const newState = { [attribute]: event.target.checked }
+    const callback = this._reloadList
+    this.setState(newState, callback)
   },
 
   _inventoryParams(page) {

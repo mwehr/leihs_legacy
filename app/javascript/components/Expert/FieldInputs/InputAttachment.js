@@ -1,6 +1,8 @@
 import React from 'react'
 import createReactClass from 'create-react-class'
 
+import RenderFieldLabel from '../util/RenderFieldLabel'
+
 /* eslint-disable react/prop-types */
 export const InputAttachment = createReactClass({
   propTypes: {},
@@ -51,7 +53,7 @@ export const InputAttachment = createReactClass({
     )
   },
 
-  _renderUploadIcon(fileModel) {
+  _renderUploadIcon() {
     return (
       <div className="line-col text-align-center" title="Datei wird beim speichern hochgeladen">
         <i className="fa fa-cloud-upload" />
@@ -74,17 +76,13 @@ export const InputAttachment = createReactClass({
   _renderDeleteButton(fileModel, index) {
     if (fileModel.delete) {
       return (
-        <button onClick={event => this._undoRemove(index)} className="button small inset" data-remove="" type="button">
+        <button onClick={() => this._undoRemove(index)} className="button small inset" data-remove="" type="button">
           Undo
         </button>
       )
     } else {
       return (
-        <button
-          onClick={event => this._removeNewFile(index)}
-          className="button small inset"
-          data-remove=""
-          type="button">
+        <button onClick={() => this._removeNewFile(index)} className="button small inset" data-remove="" type="button">
           Entfernen
         </button>
       )
@@ -103,7 +101,7 @@ export const InputAttachment = createReactClass({
           <div className="line-col col7of10 text-align-left">{fileModel.file.name}</div>
           <div className="line-col col3of10 text-align-right">
             <button
-              onClick={event => this._removeNewFile(index)}
+              onClick={() => this._removeNewFile(index)}
               className="button small inset"
               data-remove=""
               type="button">
@@ -154,7 +152,7 @@ export const InputAttachment = createReactClass({
 
           <div className="col1of2" data-type="value">
             <button
-              onClick={event => this.inputElement.click()}
+              onClick={() => this.inputElement.click()}
               type="button"
               className="button inset width-full"
               data-type="select">

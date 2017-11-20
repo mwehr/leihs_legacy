@@ -1,9 +1,13 @@
+// FIXME: globals
+/* global App $ _ moment _jed i18n */
+
 import React from 'react'
-import PropTypes from 'prop-types'
-import cx from 'classnames'
 import createReactClass from 'create-react-class'
 
 import { CreateItemContent } from './CreateItem/CreateItemContent'
+import { CreateItemFieldSwitch } from './CreateItem/CreateItemFieldSwitch'
+import { BackwardTestCompatibility } from './Expert/FieldInputs/BackwardTestCompatibility'
+import { EnsureDependents } from './Expert/util/EnsureDependents'
 
 /* eslint-disable react/prop-types */
 const CreateItem = createReactClass({
@@ -222,7 +226,7 @@ const CreateItem = createReactClass({
       data: {
         _method: 'delete'
       }
-    }).done(data => {
+    }).done(() => {
       _.each(this.state.fieldModels, fm => {
         fm.hidden = false
       })
@@ -236,7 +240,7 @@ const CreateItem = createReactClass({
     $.ajax({
       url: url,
       type: 'post'
-    }).done(data => {
+    }).done(() => {
       _.each(this.state.fieldModels, fm => {
         if (fm.field.id == fieldModel.field.id) {
           fieldModel.hidden = true
@@ -331,29 +335,21 @@ const CreateItem = createReactClass({
     switch (field.type) {
       case 'text':
         return value.text
-        break
       case 'autocomplete-search':
         return value.id
-        break
       case 'autocomplete':
         return value.id
-        break
       case 'textarea':
         return value.text
-        break
       case 'select':
         return value.selection
-        break
       case 'radio':
         return value.selection
-        break
       case 'checkbox':
         return value.selections
-        break
       case 'date':
         var dmy = CreateItemFieldSwitch._parseDayMonthYear(value.at)
         return CreateItemFieldSwitch._dmyToString(dmy)
-        break
       // case 'attachment':
       //   throw
       //   return ''
@@ -478,10 +474,10 @@ const CreateItem = createReactClass({
       method: 'POST',
       processData: false
     })
-      .done(data => {
+      .done(() => {
         callback({ result: 'success', fileModel: fileModel })
       })
-      .error(data => {
+      .error(() => {
         callback({ result: 'failure', fileModel: fileModel })
       })
   },

@@ -1,4 +1,6 @@
-/* global _jed */
+// FIXME: globals
+/* global App _ _jed */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 
@@ -38,7 +40,7 @@ export const SearchResult = createReactClass({
   _itemColumn1Toggle(isParent, item, childCount) {
     var toggle = <div className="col1of5 line-col" />
     if (isParent) {
-      var _onClick = event => {
+      var _onClick = () => {
         this.props._toggleOpenPackage(item.id)
       }
       var direction = this._isPackageOpen(item.id) ? 'down' : 'right'
@@ -207,7 +209,7 @@ export const SearchResult = createReactClass({
     return searchResult.availabilities.find(a => (a.model_id = data.id))
   },
 
-  _modelItemsCount(type, searchResult, modelId, is_package) {
+  _modelItemsCount(type, searchResult, modelId) {
     return searchResult.inventory.items.filter(item => {
       return item.model_id == modelId
     }).length
@@ -368,7 +370,7 @@ export const SearchResult = createReactClass({
 
     return this._appendIfNotNull(
       _.flatten(
-        searchResult.map((sr, index) => {
+        searchResult.map(sr => {
           return this._searchResultPage(sr)
         })
       ),
@@ -403,8 +405,6 @@ export const SearchResult = createReactClass({
   },
 
   render() {
-    const props = this.props
-
     return this._searchResult()
   }
 })

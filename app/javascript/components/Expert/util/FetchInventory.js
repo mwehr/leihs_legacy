@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global App $ _ */
+
 export const FetchInventory = {
   _fetchAvailability(xhrContext, inventory, callback) {
     var ids = inventory.data.filter(e => e.type == 'model').map(e => e.id)

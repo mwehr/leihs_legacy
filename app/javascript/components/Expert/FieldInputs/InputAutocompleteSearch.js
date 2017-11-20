@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global App $ _jed */
+
 import React from 'react'
 import createReactClass from 'create-react-class'
 

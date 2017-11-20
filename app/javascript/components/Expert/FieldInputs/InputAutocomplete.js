@@ -23,33 +23,31 @@ export const InputAutocomplete = createReactClass({
 
     var field = selectedValue.field
 
+    let url, doSearch
+    let initialText = null
+    if (selectedValue.value.id) {
+      initialText = selectedValue.value.text
+    }
+
+    const transformResult = result => {
+      return result.map(entry => {
+        return {
+          label: entry.label,
+          id: entry.value
+        }
+      })
+    }
+    const searchInData = (data, term) => {
+      return data.filter(field => {
+        return field.name.toLowerCase().indexOf(term.toLowerCase()) >= 0
+      })
+    }
+
     if (field.values_dependency_field_id) {
-      var url = field.values_url.replace('$$$parent_value$$$', props.dependencyValue.value.id)
+      url = field.values_url.replace('$$$parent_value$$$', props.dependencyValue.value.id)
 
-      var transformResult = result => {
-        return result.map(entry => {
-          return {
-            label: entry.name,
-            id: entry.id
-          }
-        })
-      }
-
-      var data = field.values
-
-      var searchInData = (data, term) => {
-        return data.filter(field => {
-          return field.name.toLowerCase().indexOf(term.toLowerCase()) >= 0
-        })
-      }
-
-      var doSearch = (data, term, callback) => {
+      doSearch = (data, term, callback) => {
         callback(transformResult(searchInData(data, term)))
-      }
-
-      var initialText = null
-      if (selectedValue.value.id) {
-        initialText = selectedValue.value.text
       }
 
       return (
@@ -62,33 +60,9 @@ export const InputAutocomplete = createReactClass({
           initialText={initialText}
         />
       )
-
-      console.log('url = ' + url)
     } else {
-      var transformResult = result => {
-        return result.map(entry => {
-          return {
-            label: entry.label,
-            id: entry.value
-          }
-        })
-      }
-
-      var data = field.values
-
-      var searchInData = term => {
-        return data.filter(field => {
-          return field.label.toLowerCase().indexOf(term.toLowerCase()) >= 0
-        })
-      }
-
-      var doSearch = (term, callback) => {
+      doSearch = (term, callback) => {
         callback(transformResult(searchInData(term)))
-      }
-
-      var initialText = null
-      if (selectedValue.value.id) {
-        initialText = selectedValue.value.text
       }
 
       return (

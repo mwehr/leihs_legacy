@@ -1,6 +1,9 @@
-/* global _jed */
+// FIXME: globals
+/* global App $ _jed */
 import createReactClass from 'create-react-class'
 import React from 'react'
+
+import { FetchInventory } from './util/FetchInventory'
 
 /* eslint-disable react/prop-types */
 export const TitleAndExport = createReactClass({

@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global  _  _jed */
+
 import React from 'react'
 import PropTypes from 'prop-types'
 import createReactClass from 'create-react-class'
@@ -92,7 +95,7 @@ const HandoverAutocomplete = createReactClass({
       </ul>
     )
   },
-  _renderMenuSubSection(heading, list, key) {
+  _renderMenuSubSection(heading, list) {
     return [
       <li className="submenu-header" key={heading + '-header'}>
         <b>{heading}</b>
@@ -102,7 +105,7 @@ const HandoverAutocomplete = createReactClass({
       </li>
     ]
   },
-  _renderMenuItem(item, isHighlighted) {
+  _renderMenuItem(item) {
     return (
       <li
         key={item.type + item.name + item.record.cid}

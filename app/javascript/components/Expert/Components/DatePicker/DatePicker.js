@@ -177,8 +177,6 @@ export const DatePicker = createReactClass({
   },
 
   render() {
-    const props = this.props
-
     return (
       <div
         ref={ref => (this.reference = ref)}

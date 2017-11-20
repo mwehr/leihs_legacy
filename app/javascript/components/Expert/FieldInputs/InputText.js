@@ -1,6 +1,8 @@
 import React from 'react'
 import createReactClass from 'create-react-class'
 
+import { BackwardTestCompatibility } from './BackwardTestCompatibility'
+
 /* eslint-disable react/prop-types */
 export const InputText = createReactClass({
   propTypes: {},

@@ -1,4 +1,10 @@
+// FIXME: globals
+/* global _ _jed */
+
 import React from 'react'
+
+import { CreateItemFieldSwitch } from './CreateItemFieldSwitch'
+import { LeftOrRightColumn } from './LeftOrRightColumn'
 
 /* eslint-disable react/prop-types */
 export const RenderCreateItem = {

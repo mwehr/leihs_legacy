@@ -1,4 +1,5 @@
-/* global _jed */
+// FIXME: globals
+/* global App $ _ moment _jed */
 
 export const HandOverDialogUtil = {
   _validateStartDate(reservations) {
@@ -66,7 +67,7 @@ export const HandOverDialogUtil = {
   },
 
   loadHandOverDialogData(parameters, callback) {
-    var user = parameters.user
+    // var user = parameters.user
     var reservations = parameters.reservations
 
     App.Order

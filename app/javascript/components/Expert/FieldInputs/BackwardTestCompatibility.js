@@ -1,3 +1,6 @@
+// FIXME: globals
+/* global _  */
+
 export const BackwardTestCompatibility = {
   // TODO: Should be replaced by lodash.
   _setValue(obj, path, val) {
@@ -28,7 +31,6 @@ export const BackwardTestCompatibility = {
         },
         ''
       )
-      this._setValue(result, field.attribute, value)
     } else {
       return '[' + field.attribute + ']'
     }
