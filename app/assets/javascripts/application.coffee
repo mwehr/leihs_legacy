@@ -34,12 +34,6 @@
 #= require spine/ajax
 #= require spine/relation
 #
-##### REACT
-#
-#= require react
-#= require react_ujs
-#= require components
-#
 ##### APP
 #
 #= require_tree ./initializers
@@ -57,3 +51,11 @@
 window.App ?= {}
 window.Tools ?= {}
 window.App.Modules ?= {}
+
+# use exports from webpack packs as globals for existing code:
+appPack = window.Packs.application
+window.React = appPack.React
+window.ReactDOM = appPack.ReactDOM
+# React components that used *directly* from non-webpack code
+# (meaning using `React.render` directly, not the `react_rails` helpers)
+['HandoverAutocomplete'].forEach((m) -> window[m] = appPack.requireComponent('./' + m)[m])
