@@ -6,7 +6,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 // `react-rails` setup
-import { ReactRailsUJS } from '../react-rails.js'
+import { ReactRailsUJS, componentRequireContext } from '../react-rails.js'
 
 //
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -18,5 +18,4 @@ import { ReactRailsUJS } from '../react-rails.js'
 export { React, ReactDOM }
 
 // react components bundle, when used *directly* from non-webpack code:
-const componentRequireContext = ReactRailsUJS
-export { componentRequireContext as requireComponent }
+export { ReactRailsUJS, componentRequireContext as requireComponent }
