@@ -58,4 +58,13 @@ window.React = appPack.React
 window.ReactDOM = appPack.ReactDOM
 # React components that used *directly* from non-webpack code
 # (meaning using `React.render` directly, not the `react_rails` helpers)
-['HandoverAutocomplete'].forEach((m) -> window[m] = appPack.requireComponent('./' + m)[m])
+['HandoverAutocomplete'].forEach((name) ->
+  m = appPack.requireComponent('./' + name)
+  # support default or named exports (if same name)
+  if typeof m == 'object' && typeof m.default == 'function'
+    m = m.default
+  if typeof m == 'object' && typeof m[name] == 'function'
+    m = m[name]
+  # attach as global var
+  window[name] = m
+)
