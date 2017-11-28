@@ -25,7 +25,11 @@
     "lint": "eslint app/javascript/"
   },
   "eslintConfig": {
-    "env": { "es6": true, "browser": true, "commonjs": true },
+    "env": {
+      "es6": true,
+      "browser": true,
+      "commonjs": true
+    },
     "parserOptions": {
       "ecmaVersion": 2016,
       "sourceType": "module",
@@ -35,7 +39,10 @@
         "experimentalObjectRestSpread": true
       }
     },
-    "plugins": ["prettier", "react"],
+    "plugins": [
+      "prettier",
+      "react"
+    ],
     "extends": [
       "eslint:recommended",
       "prettier",
@@ -47,7 +54,7 @@
       "prettier/prettier": [
         "error",
         {
-          "printWidth": 120,
+          "printWidth": 100,
           "singleQuote": true,
           "semi": false,
           "trailingComma": "none",

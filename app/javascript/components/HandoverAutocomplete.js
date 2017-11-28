@@ -4,10 +4,8 @@
 /* global _ */
 /* global _jed */
 import React from 'react'
-import ReactDOM from 'react-dom'
 import createReactClass from 'create-react-class'
 import PropTypes from 'prop-types'
-import cx from 'classnames'
 
 import Autocomplete from '@eins78/react-autocomplete'
 
@@ -93,28 +91,20 @@ export const HandoverAutocomplete = createReactClass({
     if (props.searchResults && _.all([models, options, templates], _.isEmpty)) {
       return (
         <ul {...menuProps}>
-          <li className="padding-left-s margin-top-m margin-bottom-m">
-            {_jed('No results')}
-          </li>
+          <li className="padding-left-s margin-top-m margin-bottom-m">{_jed('No results')}</li>
         </ul>
       )
     }
 
     return (
       <ul {...menuProps}>
-        {_.isEmpty(models)
-          ? null
-          : this._renderMenuSubSection(_jed('Models'), models)}
-        {_.isEmpty(options)
-          ? null
-          : this._renderMenuSubSection(_jed('Options'), options)}
-        {_.isEmpty(templates)
-          ? null
-          : this._renderMenuSubSection(_jed('Templates'), templates)}
+        {_.isEmpty(models) ? null : this._renderMenuSubSection(_jed('Models'), models)}
+        {_.isEmpty(options) ? null : this._renderMenuSubSection(_jed('Options'), options)}
+        {_.isEmpty(templates) ? null : this._renderMenuSubSection(_jed('Templates'), templates)}
       </ul>
     )
   },
-  _renderMenuSubSection(heading, list, key) {
+  _renderMenuSubSection(heading, list) {
     return [
       <li className="submenu-header" key={heading + '-header'}>
         <b>{heading}</b>
@@ -124,16 +114,14 @@ export const HandoverAutocomplete = createReactClass({
       </li>
     ]
   },
-  _renderMenuItem(item, isHighlighted) {
+  _renderMenuItem(item) {
     return (
       <li
         key={item.type + item.name + item.record.cid}
         item={item}
         id={item.abbr}
         className="separated-bottom exclude-last-child">
-        <a
-          className={'row' + (!item.available ? ' light-red' : '')}
-          title={item.name}>
+        <a className={'row' + (!item.available ? ' light-red' : '')} title={item.name}>
           <div className="row">
             <div className="col3of4" title={item.name}>
               <strong className="wrap">{item.name}</strong>
