@@ -43,6 +43,14 @@
 #= require_tree ./controllers
 #= require_tree ./views
 #
+##### REACT (old)
+#
+# FIXME: remove react + components from sprockets-bundle
+#= XXX require react
+#= XXX require react_ujs
+#= require_tree ./components
+#
+#
 ##### UJS (must be last so setup is done!)
 #= require ujs
 #
