@@ -59,8 +59,10 @@ export const HandoverAutocomplete = createReactClass({
     const menuProps = {
       className: 'ui-autocomplete ui-autocomplete-scrollable ui-front ui-menu',
       style: {
-        ...{ display: 'inline-block', position: 'fixed' },
-        ...givenStyles
+        display: 'inline-block',
+        position: 'absolute',
+        top: '31px',
+        width: '100%'
       }
     }
 
@@ -147,24 +149,24 @@ export const HandoverAutocomplete = createReactClass({
       placeholder: props.placeholder
     }
 
-    var wrapperProps = { style: {} }
+    var wrapperProps = {
+      style: {}
+    }
 
     return (
-      <div>
-        <Autocomplete
-          ref="autocomplete"
-          value={this.state.value}
-          items={props.searchResults || []}
-          wrapperProps={wrapperProps}
-          inputProps={inputProps}
-          renderMenu={this._renderMenu}
-          selectOnInputClick={false}
-          getItemValue={item => item.name}
-          onSelect={this._handleSelect}
-          onChange={this._handleChange}
-          renderItem={this._renderMenuItem}
-        />
-      </div>
+      <Autocomplete
+        ref="autocomplete"
+        value={this.state.value}
+        items={props.searchResults || []}
+        wrapperProps={wrapperProps}
+        inputProps={inputProps}
+        renderMenu={this._renderMenu}
+        selectOnInputClick={false}
+        getItemValue={item => item.name}
+        onSelect={this._handleSelect}
+        onChange={this._handleChange}
+        renderItem={this._renderMenuItem}
+      />
     )
   }
 })
