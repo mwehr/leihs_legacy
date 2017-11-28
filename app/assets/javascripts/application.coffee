@@ -64,6 +64,8 @@ window.App.Modules ?= {}
 appPack = window.Packs.application
 window.React = appPack.React
 window.ReactDOM = appPack.ReactDOM
+window.createReactClass = appPack.createReactClass
+
 # React components that used *directly* from non-webpack code
 # (meaning using `React.render` directly, not the `react_rails` helpers)
 ['HandoverAutocomplete'].forEach((name) ->
