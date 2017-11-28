@@ -36,9 +36,9 @@
 #
 ##### REACT
 #
-#= require react
-#= require react_ujs
-#= require components
+#= XXX require react
+#= XXX require react_ujs
+#= XXX require components
 #
 ##### APP
 #
