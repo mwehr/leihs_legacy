@@ -9,17 +9,12 @@ const i18n = window.i18n
 class VisitsIndex extends React.Component {
   constructor() {
     super()
-    const tabResetConfig = {
+
+    this.resetConfig = {
       offset: 0,
       visits: [],
       isLoadedAll: false,
       loadingFirstPage: true
-    }
-
-    this.resetStateBaseConfig = {
-      all: tabResetConfig,
-      hand_over: tabResetConfig,
-      take_back: tabResetConfig
     }
 
     this.state = f.merge(
@@ -30,12 +25,12 @@ class VisitsIndex extends React.Component {
         endDate: '',
         verification: 'irrelevant'
       },
-      this.resetStateBaseConfig
+      this.resetConfig
     )
 
     this.searchTermCallback = this.searchTermCallback.bind(this)
     this.debouncedFetch = f.debounce(this.fetch, 300)
-    this.currentRequest = null
+    this.currentXHRRequest = null
   }
 
   componentDidMount() {
@@ -52,11 +47,7 @@ class VisitsIndex extends React.Component {
   }
 
   tryLoadNext() {
-    if (
-      !this.state[this.state.tab].loadingAdditionalPage &&
-      !this.state[this.state.tab].isLoadedAll &&
-      Scrolling._isBottom()
-    ) {
+    if (!this.state.loadingAdditionalPage && !this.state.isLoadedAll && Scrolling._isBottom()) {
       this.loadNext()
     }
   }
@@ -64,9 +55,7 @@ class VisitsIndex extends React.Component {
   loadNext() {
     this.setState(
       {
-        [this.state.tab]: f.merge({}, this.state[this.state.tab], {
-          loadingAdditionalPage: true
-        })
+        loadingAdditionalPage: true
       },
       this.fetch
     )
@@ -79,7 +68,7 @@ class VisitsIndex extends React.Component {
         {
           search_term: value
         },
-        this.resetStateBaseConfig
+        this.resetConfig
       ),
       this.debouncedFetch
     )
@@ -106,13 +95,12 @@ class VisitsIndex extends React.Component {
   }
 
   fetch() {
-    if (this.currentRequest) {
-      console.log('abort')
-      this.currentRequest.abort()
-      this.currentRequest = null
+    if (this.currentXHRRequest) {
+      this.currentXHRRequest.abort()
+      this.currentXHRRequest = null
     }
 
-    this.currentRequest = $.ajax({
+    this.currentXHRRequest = $.ajax({
       url: `/manage/${this.props.inventory_pool_id}/visits`,
       method: 'GET',
       dataType: 'json',
@@ -123,17 +111,17 @@ class VisitsIndex extends React.Component {
           start_date: this.formatDateForFetch(this.state.startDate),
           end_date: this.formatDateForFetch(this.state.endDate)
         },
-        offset: this.state[this.state.tab].offset,
+        offset: this.state.offset,
         limit: 20,
         paginate: false,
-        verification: this.state[this.state.tab].verification
+        verification: this.state.verification
       }),
       success: data => {
-        this.currentRequest = null
-        return this.onFetchSuccessCallback(data)
+        this.currentXHRRequest = null
+        this.onFetchSuccessCallback(data)
       },
       error: () => {
-        this.currentRequest = null
+        this.currentXHRRequest = null
       }
     })
   }
@@ -143,13 +131,11 @@ class VisitsIndex extends React.Component {
 
     this.setState(prevState => {
       return {
-        [this.state.tab]: {
-          loadingFirstPage: false,
-          loadingAdditionalPage: false,
-          offset: prevState[this.state.tab].offset + 20,
-          visits: prevState[this.state.tab].visits.concat(data),
-          isLoadedAll: data.length == 0
-        }
+        loadingFirstPage: false,
+        loadingAdditionalPage: false,
+        offset: prevState.offset + 20,
+        visits: prevState.visits.concat(data),
+        isLoadedAll: data.length == 0
       }
     }, setStateCallback)
   }
@@ -160,7 +146,7 @@ class VisitsIndex extends React.Component {
         {
           endDate: dateString
         },
-        this.resetStateBaseConfig
+        this.resetConfig
       ),
       this.tryLoadNext
     )
@@ -172,7 +158,7 @@ class VisitsIndex extends React.Component {
         {
           startDate: dateString
         },
-        this.resetStateBaseConfig
+        this.resetConfig
       ),
       this.tryLoadNext
     )
@@ -185,9 +171,21 @@ class VisitsIndex extends React.Component {
         {
           verification: value
         },
-        this.resetStateBaseConfig
+        this.resetConfig
       ),
       this.debouncedFetch
+    )
+  }
+
+  onChangeTabCallback(tab) {
+    this.setState(
+      f.merge(
+        {
+          tab: tab
+        },
+        this.resetConfig
+      ),
+      this.tryLoadNext
     )
   }
 
@@ -236,7 +234,7 @@ class VisitsIndex extends React.Component {
   }
 
   renderPaginationLoading() {
-    if (this.state[this.state.tab].isLoadedAll) {
+    if (this.state.isLoadedAll) {
       return null
     } else {
       return (
@@ -272,19 +270,16 @@ class VisitsIndex extends React.Component {
   renderLinesTable() {
     return (
       <div>
-        {this.state[this.state.tab].visits.map(v => <VisitRow key={v.id} v={v} />)}
+        {this.state.visits.map(v => <VisitRow key={v.id} v={v} />)}
         {this.renderPaginationLoading()}
       </div>
     )
   }
 
   renderResult() {
-    if (
-      this.state[this.state.tab].loadingFirstPage &&
-      this.state[this.state.tab].visits.length == 0
-    ) {
+    if (this.state.loadingFirstPage && this.state.visits.length == 0) {
       return this.renderResultLoading()
-    } else if (this.state[this.state.tab].visits.length == 0) {
+    } else if (this.state.visits.length == 0) {
       return this.renderResultNothingFound()
     } else {
       return this.renderLinesTable()
@@ -302,21 +297,21 @@ class VisitsIndex extends React.Component {
         <div className="row margin-top-l">
           <div className="inline-tab-navigation" id="list-tabs">
             <a
-              onClick={() => this.setState({ tab: 'all' }, this.tryLoadNext)}
+              onClick={() => this.onChangeTabCallback('all')}
               className={cx('inline-tab-item', {
                 active: this.state.tab == 'all'
               })}>
               {_jed('All')}
             </a>
             <a
-              onClick={() => this.setState({ tab: 'hand_over' }, this.tryLoadNext)}
+              onClick={() => this.onChangeTabCallback('hand_over')}
               className={cx('inline-tab-item', {
                 active: this.state.tab == 'hand_over'
               })}>
               {_jed('Hand Over')}
             </a>
             <a
-              onClick={() => this.setState({ tab: 'take_back' }, this.tryLoadNext)}
+              onClick={() => this.onChangeTabCallback('take_back')}
               className={cx('inline-tab-item', {
                 active: this.state.tab == 'take_back'
               })}>
