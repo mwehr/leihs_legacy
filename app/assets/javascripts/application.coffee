@@ -57,7 +57,11 @@
 #####
 
 window.App ?= {}
-window.Tools ?= {}
+window.Tools ?=
+  inspect: (val) =>
+    console.log(val)
+    val
+
 window.App.Modules ?= {}
 
 # use exports from webpack packs as globals for existing code:
