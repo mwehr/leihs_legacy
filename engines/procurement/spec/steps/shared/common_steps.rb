@@ -198,7 +198,7 @@ module CommonSteps
 
   step 'page has been loaded' do
     # NOTE trick waiting page load
-    if has_selector? '#filter_target.transparency'
+    if has_selector?('#filter_target.transparency', wait: false)
       expect(page).to have_no_selector '#filter_target.transparency'
     end
 
