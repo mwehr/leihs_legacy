@@ -7,19 +7,8 @@ class DaysRemindersCell extends React.Component {
   constructor() {
     super()
     this.state = {
-      show: false,
       reminderSent: false
     }
-  }
-
-  showTooltip() {
-    if (this.props.v.type == 'take_back' && this.props.isOverdue) {
-      this.setState({ show: true })
-    }
-  }
-
-  hideTooltip() {
-    this.setState({ show: false })
   }
 
   getMaxRange() {
@@ -100,28 +89,10 @@ class DaysRemindersCell extends React.Component {
 
   render() {
     return (
-      <div
-        className="col1of5 line-col"
-        key={`reminder-${this.props.v.id}`}
-        ref={`reminder-${this.props.v.id}`}
-        onMouseEnter={this.showTooltip.bind(this)}
-        onMouseLeave={this.hideTooltip.bind(this)}>
+      <div className="col1of5 line-col" key={`reminder-${this.props.v.id}`}>
         {this.renderPopup() && (
           <Popup popupRef={this.popup}>
-            <div
-              style={{ opacity: '1' }}
-              className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial"
-              id="tooltipster-480797"
-              style={{
-                pointerEvents: 'auto',
-                zIndex: '9999999',
-                left: '376px',
-                top: '142px',
-                height: '108px',
-                width: '322px',
-                animationDuration: '350ms',
-                transitionDuration: '350ms'
-              }}>
+            <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
               <div className="tooltipster-box">
                 <div className="tooltipster-content">
                   <div className="min-width-l">{this.renderNotifications()}</div>

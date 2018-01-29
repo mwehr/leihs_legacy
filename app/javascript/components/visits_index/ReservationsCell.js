@@ -5,7 +5,6 @@ import { Popover, Overlay } from 'react-bootstrap'
 class ReservationsCell extends React.Component {
   constructor() {
     super()
-    this.state = { show: false }
   }
 
   diffDatesInDays(start, end) {
@@ -66,27 +65,9 @@ class ReservationsCell extends React.Component {
 
   render() {
     return (
-      <div
-        className="col1of5 line-col text-align-center"
-        key={`reservations-${this.props.visit_id}`}
-        ref={`reservations-${this.props.visit_id}`}
-        onMouseEnter={() => this.setState({ show: true })}
-        onMouseLeave={() => this.setState({ show: false })}>
+      <div className="col1of5 line-col text-align-center" key={`reservations-${this.props.visit_id}`}>
         <Popup popupRef={this.popup}>
-          <div
-            style={{ opacity: '1' }}
-            className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial"
-            id="tooltipster-480797"
-            style={{
-              pointerEvents: 'auto',
-              zIndex: '9999999',
-              left: '376px',
-              top: '142px',
-              height: '108px',
-              width: '322px',
-              animationDuration: '350ms',
-              transitionDuration: '350ms'
-            }}>
+          <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
             <div className="tooltipster-box">
               <div className="tooltipster-content">
                 <div className="min-width-l">{this.renderDateRanges()}</div>
