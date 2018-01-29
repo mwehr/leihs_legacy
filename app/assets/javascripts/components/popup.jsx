@@ -85,15 +85,13 @@
 
       var style = {
         position: 'relative',
-        backgroundColor: 'none',
-        left: '-50%'
+        left: '-50%',
+        height: '100%'
       }
 
       return (
-        <div style={style}>
-          <div onMouseEnter={this.contentMouseOver} onMouseLeave={this.contentMouseLeave}>
-            {this.props.children}
-          </div>
+        <div style={style} onMouseEnter={this.contentMouseOver} onMouseLeave={this.contentMouseLeave}>
+          {this.props.children}
         </div>
       )
     },
@@ -104,21 +102,21 @@
         return null
       }
 
+      var r = this.state.rectangle
+      var left = r.left + r.width * 0.5
+      var top = r.top
+
       var outer = {
-        position: 'relative',
-        top: '0px',
-        left: '0px',
-        width: '0px',
-        height: '0px'
+        position: 'fixed',
+        top: top + 'px',
+        left: left + 'px',
+        zIndex: '1000000'
       }
 
-      var left = this.state.rectangle.width * 0.5
 
       var inner = {
         position: 'absolute',
-        left: left + 'px',
-        bottom: '0px',
-        zIndex: '10000'
+        bottom: '0px'
       }
 
       return (

@@ -56,6 +56,15 @@ class UserCell extends React.Component {
 
   render() {
     return [
+      <div ref={ref => (this.popup = ref)} className="line-col col1of5" key={`user-${this.props.id}-${this.props.visit_id}`}>
+        <strong>
+          {this.props.firstname} {this.props.lastname}
+          <span className="darkred-text">
+            {this.props.is_suspended && ` ${_jed('Suspended')}!`}
+          </span>
+        </strong>
+      </div>
+      ,
       <Popup popupRef={this.popup} key={`user-popup-${this.props.id}-${this.props.visit_id}`}>
         <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
           <div className="tooltipster-box">
@@ -65,15 +74,6 @@ class UserCell extends React.Component {
           </div>
         </div>
       </Popup>
-      ,
-      <div ref={ref => (this.popup = ref)} className="line-col col1of5" key={`user-${this.props.id}-${this.props.visit_id}`}>
-        <strong>
-          {this.props.firstname} {this.props.lastname}
-          <span className="darkred-text">
-            {this.props.is_suspended && ` ${_jed('Suspended')}!`}
-          </span>
-        </strong>
-      </div>
     ]
   }
 }
