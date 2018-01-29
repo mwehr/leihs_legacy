@@ -97,6 +97,12 @@ class DaysRemindersCell extends React.Component {
                 {this.renderNotifications()}
               </div>
             </div>
+            <div className='tooltipster-arrow' style={{position: 'absolute', left: '0px', right: '0px', marginLeft: 'auto', marginRight: 'auto'}}>
+              <div className='tooltipster-arrow-uncropped'>
+                <div className='tooltipster-arrow-border'></div>
+                <div className='tooltipster-arrow-background'></div>
+              </div>
+            </div>
           </div>
         </Popup>
       ))

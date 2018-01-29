@@ -56,15 +56,15 @@
       if(nextProps.popupRef != this.popupRef) {
 
         if(this.popupRef) {
-          this.popupRef.removeEventListener("mouseenter", this.popupMouseOver);
-          this.popupRef.removeEventListener("mouseleave", this.popupMouseLeave);
+          this.popupRef.removeEventListener('mouseenter', this.popupMouseOver);
+          this.popupRef.removeEventListener('mouseleave', this.popupMouseLeave);
         }
 
         this.popupRef = nextProps.popupRef
 
         if(this.popupRef) {
-          this.popupRef.addEventListener("mouseenter", this.popupMouseOver);
-          this.popupRef.addEventListener("mouseleave", this.popupMouseLeave);
+          this.popupRef.addEventListener('mouseenter', this.popupMouseOver);
+          this.popupRef.addEventListener('mouseleave', this.popupMouseLeave);
         }
       }
     },
@@ -72,8 +72,8 @@
     componentWillUnmount() {
 
       if(this.popupRef) {
-        this.popupRef.removeEventListener("mouseenter", this.popupMouseOver);
-        this.popupRef.removeEventListener("mouseleave", this.popupMouseLeave);
+        this.popupRef.removeEventListener('mouseenter', this.popupMouseOver);
+        this.popupRef.removeEventListener('mouseleave', this.popupMouseLeave);
       }
     },
 
@@ -116,7 +116,7 @@
 
       var inner = {
         position: 'absolute',
-        bottom: '0px'
+        bottom: '-10px'
       }
 
       return (
