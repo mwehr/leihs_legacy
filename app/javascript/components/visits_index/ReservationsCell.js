@@ -42,7 +42,7 @@ class ReservationsCell extends React.Component {
       const diffDates = this.diffDatesInDays(startDate, endDate)
 
       return (
-        <div key={`${startDate}-${endDate}`}>
+        <div key={`${startDate}-${endDate}`} className="min-width-l">
           <div className="exclude-last-child padding-bottom-m margin-bottom-m no-last-child-margin">
             <div className="row margin-bottom-s">
               <div className="col1of2">
@@ -70,7 +70,7 @@ class ReservationsCell extends React.Component {
           <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
             <div className="tooltipster-box">
               <div className="tooltipster-content">
-                <div className="min-width-l">{this.renderDateRanges()}</div>
+                {this.renderDateRanges()}
               </div>
             </div>
           </div>

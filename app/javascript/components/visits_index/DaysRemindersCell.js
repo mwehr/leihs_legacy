@@ -95,7 +95,7 @@ class DaysRemindersCell extends React.Component {
             <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
               <div className="tooltipster-box">
                 <div className="tooltipster-content">
-                  <div className="min-width-l">{this.renderNotifications()}</div>
+                  {this.renderNotifications()}
                 </div>
               </div>
             </div>
