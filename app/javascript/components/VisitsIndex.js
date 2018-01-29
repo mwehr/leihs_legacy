@@ -10,32 +10,26 @@ class VisitsIndex extends React.Component {
   constructor() {
     super()
 
-    this.resetConfig = {
+    this.state = {
+      search_term: null,
+      tab: 'all',
+      startDate: '',
+      endDate: '',
+      verification: 'irrelevant',
       offset: 0,
       visits: [],
       isLoadedAll: false,
       loadingFirstPage: true
     }
 
-    this.state = f.merge(
-      {
-        search_term: null,
-        tab: 'all',
-        startDate: '',
-        endDate: '',
-        verification: 'irrelevant'
-      },
-      this.resetConfig
-    )
-
-    this.searchTermCallback = this.searchTermCallback.bind(this)
-    this.debouncedFetch = f.debounce(this.fetch, 300)
-    this.currentXHRRequest = null
+    // this.searchTermCallback = this.searchTermCallback.bind(this)
+    // this.debouncedFetch = f.debounce(this.fetch, 300)
+    this.currentRequest = null
   }
 
   componentDidMount() {
     Scrolling.mount(this.onScroll.bind(this))
-    this.fetch()
+    this.reloadList()
   }
 
   componentWillUnmount() {
@@ -46,31 +40,51 @@ class VisitsIndex extends React.Component {
     this.tryLoadNext()
   }
 
+
+
+  reloadList() {
+
+    if(this.currentRequest) {
+      this.currentRequest.abort()
+    }
+
+    this.setState({
+      visits: [],
+      offset: 0,
+      isLoadedAll: false,
+      loadingFirstPage: true
+    }, () => {
+      this.loadNext()
+    })
+
+  }
+
+  loadNext() {
+    this.loading = true
+    this.fetch()
+  }
+
+
   tryLoadNext() {
-    if (!this.state.loadingAdditionalPage && !this.state.isLoadedAll && Scrolling._isBottom()) {
+
+    if(this.loading) {
+      return
+    }
+
+    if (!this.state.isLoadedAll && Scrolling._isBottom()) {
       this.loadNext()
     }
   }
 
-  loadNext() {
-    this.setState(
-      {
-        loadingAdditionalPage: true
-      },
-      this.fetch
-    )
-  }
 
   searchTermCallback(event) {
     const value = event.target.value
     this.setState(
-      f.merge(
-        {
-          search_term: value
-        },
-        this.resetConfig
-      ),
-      this.debouncedFetch
+      { search_term: value },
+      () => {
+        var delayedReloadList = f.debounce(this.reloadList.bind(this), 300)
+        delayedReloadList();
+      }
     )
   }
 
@@ -95,12 +109,12 @@ class VisitsIndex extends React.Component {
   }
 
   fetch() {
-    if (this.currentXHRRequest) {
-      this.currentXHRRequest.abort()
-      this.currentXHRRequest = null
-    }
+    // if (this.currentXHRRequest) {
+    //   this.currentXHRRequest.abort()
+    //   this.currentXHRRequest = null
+    // }
 
-    this.currentXHRRequest = $.ajax({
+    this.currentRequest = $.ajax({
       url: `/manage/${this.props.inventory_pool_id}/visits`,
       method: 'GET',
       dataType: 'json',
@@ -117,75 +131,59 @@ class VisitsIndex extends React.Component {
         verification: this.state.verification
       }),
       success: data => {
-        this.currentXHRRequest = null
+        // this.currentXHRRequest = null
         this.onFetchSuccessCallback(data)
       },
       error: () => {
-        this.currentXHRRequest = null
+        // this.currentXHRRequest = null
       }
     })
   }
 
   onFetchSuccessCallback(data) {
-    const setStateCallback = data.length == 0 ? null : this.tryLoadNext
+    // const setStateCallback = data.length == 0 ? null : this.tryLoadNext
 
     this.setState(prevState => {
       return {
         loadingFirstPage: false,
-        loadingAdditionalPage: false,
         offset: prevState.offset + 20,
         visits: prevState.visits.concat(data),
         isLoadedAll: data.length == 0
       }
-    }, setStateCallback)
+    }, () => {
+
+      this.loading = false
+
+      this.tryLoadNext()
+    })
   }
 
   onSelectEndDateCallback(dateString) {
     this.setState(
-      f.merge(
-        {
-          endDate: dateString
-        },
-        this.resetConfig
-      ),
-      this.tryLoadNext
+      { endDate: dateString },
+      this.reloadList
     )
   }
 
   onSelectStartDateCallback(dateString) {
     this.setState(
-      f.merge(
-        {
-          startDate: dateString
-        },
-        this.resetConfig
-      ),
-      this.tryLoadNext
+      { startDate: dateString },
+      this.reloadList
     )
   }
 
   onSelectVerificationCallback(event) {
     const value = event.target.value
     this.setState(
-      f.merge(
-        {
-          verification: value
-        },
-        this.resetConfig
-      ),
-      this.debouncedFetch
+      { verification: value },
+      this.reloadList
     )
   }
 
   onChangeTabCallback(tab) {
     this.setState(
-      f.merge(
-        {
-          tab: tab
-        },
-        this.resetConfig
-      ),
-      this.tryLoadNext
+      { tab: tab },
+      this.reloadList
     )
   }
 
@@ -326,7 +324,7 @@ class VisitsIndex extends React.Component {
                 name="input"
                 placeholder="Search..."
                 type="text"
-                onChange={this.searchTermCallback}
+                onChange={this.searchTermCallback.bind(this)}
               />
             </div>
             <div className="col2of6 padding-right-s" id="list-range">
