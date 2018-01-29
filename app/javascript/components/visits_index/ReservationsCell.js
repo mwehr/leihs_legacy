@@ -36,10 +36,7 @@ class ReservationsCell extends React.Component {
   }
 
   renderDateRanges() {
-    const tmp = _.groupBy(this.props.reservations, r => [
-      r.start_date,
-      r.end_date,
-    ])
+    const tmp = _.groupBy(this.props.reservations, r => [r.start_date, r.end_date])
     return _.map(tmp, (reservations, dates) => {
       const startDate = reservations[0].start_date
       const endDate = reservations[0].end_date
@@ -68,34 +65,40 @@ class ReservationsCell extends React.Component {
   }
 
   render() {
-    return [
+    return (
       <div
         className="col1of5 line-col text-align-center"
         key={`reservations-${this.props.visit_id}`}
         ref={`reservations-${this.props.visit_id}`}
         onMouseEnter={() => this.setState({ show: true })}
-        onMouseLeave={() => this.setState({ show: false })}
-      >
-        {this.props.quantity} {_jed(this.props.quantity, 'Item')}
-      </div>,
-      <Overlay
-        show={this.state.show}
-        animation={false}
-        id={`reservations-overlay-${this.props.visit_id}`}
-        key={`reservations-overlay-${this.props.visit_id}`}
-        placement="top"
-        target={() =>
-          ReactDOM.findDOMNode(this.refs[`reservations-${this.props.visit_id}`])
-        }
-      >
-        <Popover
-          id={`reservations-popover-${this.props.visit_id}`}
-          key={`reservations-popover-${this.props.visit_id}`}
-        >
-          {this.renderDateRanges()}
-        </Popover>
-      </Overlay>,
-    ]
+        onMouseLeave={() => this.setState({ show: false })}>
+        <Popup popupRef={this.popup}>
+          <div
+            style={{ opacity: '1' }}
+            className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial"
+            id="tooltipster-480797"
+            style={{
+              pointerEvents: 'auto',
+              zIndex: '9999999',
+              left: '376px',
+              top: '142px',
+              height: '108px',
+              width: '322px',
+              animationDuration: '350ms',
+              transitionDuration: '350ms'
+            }}>
+            <div className="tooltipster-box">
+              <div className="tooltipster-content">
+                <div className="min-width-l">{this.renderDateRanges()}</div>
+              </div>
+            </div>
+          </div>
+        </Popup>
+        <div ref={ref => (this.popup = ref)}>
+          {this.props.quantity} {_jed(this.props.quantity, 'Item')}
+        </div>
+      </div>
+    )
   }
 }
 
