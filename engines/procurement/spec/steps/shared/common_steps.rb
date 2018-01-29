@@ -198,13 +198,8 @@ module CommonSteps
 
   step 'page has been loaded' do
     # NOTE trick waiting page load
-    if has_selector?('#filter_target.transparency', wait: false)
-      expect(page).to have_no_selector '#filter_target.transparency'
-    end
-
-    within '#filter_target' do
-      expect(page).to have_no_selector '.spinner'
-    end
+    expect(page).to have_no_selector '#filter_target.transparency'
+    expect(find('#filter_target')).to have_no_selector '.spinner'
   end
 
   step 'the changes are saved successfully to the database' do
