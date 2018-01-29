@@ -88,22 +88,23 @@ class DaysRemindersCell extends React.Component {
   }
 
   render() {
-    return (
-      <div className="col1of5 line-col" key={`reminder-${this.props.v.id}`}>
-        {this.renderPopup() && (
-          <Popup popupRef={this.popup}>
-            <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
-              <div className="tooltipster-box">
-                <div className="tooltipster-content">
-                  {this.renderNotifications()}
-                </div>
+    return [
+      (this.renderPopup() && (
+        <Popup popupRef={this.popup} key={`reminder-popup-${this.props.v.id}`}>
+          <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
+            <div className="tooltipster-box">
+              <div className="tooltipster-content">
+                {this.renderNotifications()}
               </div>
             </div>
-          </Popup>
-        )}
-        <div ref={ref => (this.popup = ref)}>{this.renderDaysCell()}</div>
+          </div>
+        </Popup>
+      ))
+      ,
+      <div ref={ref => (this.popup = ref)} className="col1of5 line-col" key={`reminder-${this.props.v.id}`}>
+        {this.renderDaysCell()}
       </div>
-    )
+    ]
   }
 }
 

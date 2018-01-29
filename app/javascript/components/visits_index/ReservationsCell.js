@@ -64,22 +64,21 @@ class ReservationsCell extends React.Component {
   }
 
   render() {
-    return (
-      <div className="col1of5 line-col text-align-center" key={`reservations-${this.props.visit_id}`}>
-        <Popup popupRef={this.popup}>
-          <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
-            <div className="tooltipster-box">
-              <div className="tooltipster-content">
-                {this.renderDateRanges()}
-              </div>
+    return [
+      <div ref={ref => (this.popup = ref)} className="col1of5 line-col text-align-center" key={`reservations-${this.props.visit_id}`}>
+        {this.props.quantity} {_jed(this.props.quantity, 'Item')}
+      </div>
+      ,
+      <Popup popupRef={this.popup} key={`reservations-popup-${this.props.visit_id}`}>
+        <div style={{ opacity: '1' }} className="tooltipster-sidetip tooltipster-default tooltipster-top tooltipster-initial">
+          <div className="tooltipster-box">
+            <div className="tooltipster-content">
+              {this.renderDateRanges()}
             </div>
           </div>
-        </Popup>
-        <div ref={ref => (this.popup = ref)}>
-          {this.props.quantity} {_jed(this.props.quantity, 'Item')}
         </div>
-      </div>
-    )
+      </Popup>
+    ]
   }
 }
 
