@@ -1,7 +1,11 @@
 import React from 'react'
 import VisitRow from './visits_index/VisitRow'
 import cx from 'classnames'
-import f from 'lodash'
+
+// NOTE: tmp. workaround for bundling bug
+// import f from 'lodash'
+const f = window.lodash
+
 const DatePickerWithInput = window.DatePickerWithInput
 const Scrolling = window.Scrolling
 const i18n = window.i18n
