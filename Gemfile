@@ -27,7 +27,7 @@ gem 'liquid', '~> 3.0'
 gem 'mini_magick', '~> 3.4'
 gem 'net-ldap', require: 'net/ldap'
 gem 'nilify_blanks', '~> 1.1'
-gem 'presentoir', git: 'https://github.com/leihs/presentoir', ref: '1f65b6a673be93f9babb17f26f3bacaf64a7fbc2'
+gem 'presentoir', git: 'https://github.com/leihs/presentoir', ref: '89c9122bdba63e43876d3b6307b5afff66b1c5e4'
 gem 'rails_autolink', '~> 1.0'
 gem 'rake' # So that cronjobs work -- otherwise they can't find rake
 gem 'rinku', '~> 2.0.4', require: false

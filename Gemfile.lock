@@ -35,8 +35,8 @@ GIT
 
 GIT
   remote: https://github.com/leihs/presentoir
-  revision: 1f65b6a673be93f9babb17f26f3bacaf64a7fbc2
-  ref: 1f65b6a673be93f9babb17f26f3bacaf64a7fbc2
+  revision: 89c9122bdba63e43876d3b6307b5afff66b1c5e4
+  ref: 89c9122bdba63e43876d3b6307b5afff66b1c5e4
   specs:
     presentoir (1.0.0)
 
