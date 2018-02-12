@@ -57,4 +57,12 @@ class Borrow::ApplicationController < ApplicationController
     @bread_crumbs = BreadCrumbs.new params.delete('_bc')
   end
 
+  def respond_with_presenter(presenter)
+    fail 'Not a Presenter' unless presenter.is_a?(ApplicationPresenter)
+    respond_to do |format|
+      format.html { render(locals: { get: presenter }) }
+      format.json { render(json: JSON.pretty_generate(presenter.dump)) }
+    end
+  end
+
 end

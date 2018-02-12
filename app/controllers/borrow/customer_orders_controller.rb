@@ -9,12 +9,11 @@ class Borrow::CustomerOrdersController < Borrow::ApplicationController
   end
 
   def index
-    respond_to do |format|
-      format.html do
-        @grouped_and_merged_lines = \
-          Contract.grouped_and_merged_lines current_user.reservations.submitted
-      end
-    end
+    # old:
+    @grouped_and_merged_lines = \
+      Contract.grouped_and_merged_lines current_user.reservations.submitted
+    # new:
+    respond_with_presenter(Borrow::CustomerOrders.new(user: current_user))
   end
 
   def current

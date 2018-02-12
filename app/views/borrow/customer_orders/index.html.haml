@@ -1,7 +1,7 @@
 - content_for :title, _("Open orders")
 
 .wrapper.margin-top-m
-  
+
   = render :partial => 'borrow/tabs', :locals => {:tabs => [[request.fullpath , _("Open orders")]]}
 
   .row.content-wrapper.straight-top-left
@@ -21,3 +21,5 @@
       .separated-top.padding-bottom-l
 
         = render :partial => "borrow/customer_orders/submitted/merged_lines", :collection => v, :as => :line
+
+    = react_component('CustomerOrders', get)
