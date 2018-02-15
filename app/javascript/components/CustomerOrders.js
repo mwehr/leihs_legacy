@@ -16,7 +16,7 @@ const CustomerOrders = ({ orders_by_year, models_by_id, inventory_pools_by_id })
       {f.map(years, year => (
         <div key={year}>
           <h3 className="headline-l margin-top-m padding-horizontal-l ">{year}</h3>
-          {f.map(orders_by_year[year].sort(), o => (
+          {f.map(orders_by_year[year], o => (
             <Order
               key={o.id}
               order={o}
@@ -32,21 +32,29 @@ const CustomerOrders = ({ orders_by_year, models_by_id, inventory_pools_by_id })
 
 const Order = ({ order, pool, models_by_id }) => {
   const approved = order.state === 'approved'
+  const start = moment(order.daterange.start, 'YYYY-MM-DD').format(i18n.date.L)
+  const end = moment(order.daterange.end, 'YYYY-MM-DD').format(i18n.date.L)
+
+  const cls = cx('paragraph-s separated-bottom padding-vertical-s padding-horizontal-l', {
+    'grey-text': !approved
+  })
 
   return (
-    <div
-      className={cx(
-        'row paragraph-s separated-bottom Xmargin-top-s padding-vertical-s padding-horizontal-l',
-        {
-          'grey-text': !approved
-        }
-      )}>
+    <div className={cls}>
       <div className="row">
-        <span className="col1of10">{moment(order.created_at).format(i18n.date.L)}</span>
-        <span className="col7of10">
-          <em>{order.purpose}</em>
+        <span className="col1of10">
+          {moment(order.created_at).format(i18n.date.L)}
+          <br />
+          bestellt.
         </span>
-        <span className="col2of10">{pool.name}</span>
+        <span className="col7of10 padding-bottom-xs">
+          Zweck: <em>{order.purpose}</em>
+          <br />
+          Vom {start} bis {end}
+        </span>
+        <span className="col2of10">
+          <b>{pool.shortname}</b> {pool.name}
+        </span>
       </div>
       <div className="row">
         <span className="col1of10">
@@ -54,7 +62,7 @@ const Order = ({ order, pool, models_by_id }) => {
         </span>
         <ul className="col9of10 text-ellipsis">
           {f.map(order.reservations, r => (
-            <li>{<ModelLine quantity={r.quantity} model={models_by_id[r.model_id]} />}</li>
+            <li>{<ReserationLine {...r} model={models_by_id[r.model_id]} />}</li>
           ))}
         </ul>
       </div>
@@ -62,15 +70,20 @@ const Order = ({ order, pool, models_by_id }) => {
   )
 }
 
-const ModelLine = ({ quantity, model }) => {
-  const name = f.isEmpty(model.manufacturer)
-    ? model.product
-    : `${model.product} (${model.manufacturer})`
+const ReserationLine = ({ quantity, model, ...r }) => {
+  const name = f.isEmpty(model)
+    ? '--unbekannt--'
+    : f.isEmpty(model.manufacturer) ? model.product : `${model.product} (${model.manufacturer})`
+
+  const active = f.get(model, 'active')
+  const start = moment(r.start_date, 'YYYY-MM-DD').format(i18n.date.L)
+  const end = moment(r.end_date, 'YYYY-MM-DD').format(i18n.date.L)
+
   return (
     <React.Fragment>
       {quantity}
       {' × '}
-      {model.active ? (
+      {active ? (
         <a className="black" href={model.url}>
           <b>{name}</b>
         </a>
@@ -79,6 +92,8 @@ const ModelLine = ({ quantity, model }) => {
           {name}
         </span>
       )}
+      {', vom '}
+      {start}—{end}
     </React.Fragment>
   )
 }
