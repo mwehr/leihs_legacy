@@ -12,12 +12,16 @@ module AuthenticatedSystem
   end
 
   # Accesses the current user from the session.
-  # Future calls avoid the database because nil is not equal to false.
   def current_user
-    @current_user ||=
-      unless @current_user == false
-        user_by_session
-      end
+    return @current_user unless @current_user.nil? # memoize
+    @current_user = dev_fake_user || user_by_session
+  end
+
+  def dev_fake_user
+    if Rails.env.development?
+      fake_user_id = params.permit(:fake_user).fetch(:fake_user, nil)
+      User.find_by(id: fake_user_id)
+    end
   end
 
   def current_user=(user)
