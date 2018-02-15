@@ -18,11 +18,11 @@ class ApplicationRecordPresenter < ApplicationPresenter
   end
 
   def created_at
-    record.try(:created_at)
+    record.try(:created_at).try(:as_json)
   end
 
   def updated_at
-    record.try(:updated_at)
+    record.try(:updated_at).try(:as_json)
   end
 
   # helpers to be used in ApplicationRecordPresenters
