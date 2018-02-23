@@ -47,7 +47,7 @@ class UserCell extends React.Component {
         </div>
         {this.props.image_url && (
           <div className="col1of4">
-            <img className="max-size-xxs margin-horziontal-auto" src={this.props.image_url} />
+            <img className="max-size-xxs margin-horziontal-auto" src={this.props.image_url} style='max-width: 100px; max-height: 100px' />
           </div>
         )}
       </div>
