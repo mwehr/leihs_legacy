@@ -1,7 +1,10 @@
 /* global moment, i18n, _jed */
-import React from 'react'
-import cx from 'classnames'
-import f from 'lodash'
+// import React from 'react'
+// import cx from 'classnames'
+// import f from 'lodash'
+const React = require('react')
+const cx = require('classnames')
+const f = require('lodash')
 
 // import DebugProps from './DebugProps'
 
@@ -31,9 +34,9 @@ const CustomerOrders = ({ orders_by_year, models_by_id, inventory_pools_by_id })
 }
 
 const Order = ({ order, pool, models_by_id }) => {
-  const approved = order.state === 'approved'
-  const start = moment(order.daterange.start, 'YYYY-MM-DD').format(i18n.date.L)
-  const end = moment(order.daterange.end, 'YYYY-MM-DD').format(i18n.date.L)
+  const approved = order.state !== 'rejected'
+  const start = moment(order.total_date_range.start, 'YYYY-MM-DD').format(i18n.date.L)
+  const end = moment(order.total_date_range.end, 'YYYY-MM-DD').format(i18n.date.L)
 
   const cls = cx('paragraph-s separated-bottom padding-vertical-s padding-horizontal-l', {
     'grey-text': !approved
@@ -47,10 +50,15 @@ const Order = ({ order, pool, models_by_id }) => {
           <br />
           bestellt.
         </span>
-        <span className="col7of10 padding-bottom-xs">
-          Zweck: <em>{order.purpose}</em>
-          <br />
-          Vom {start} bis {end}
+        <span className="col7of10 padding-bottom-xs padding-right-m">
+          <p>
+            Zweck: <em>{order.purpose}</em>
+          </p>
+          {f.every([start, end]) && (
+            <p>
+              Vom {start} bis {end}
+            </p>
+          )}
         </span>
         <span className="col2of10">
           <b>{pool.shortname}</b> {pool.name}
@@ -98,4 +106,5 @@ const ReserationLine = ({ quantity, model, ...r }) => {
   )
 }
 
-export default CustomerOrders
+// export default CustomerOrders
+module.exports = CustomerOrders

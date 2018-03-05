@@ -17,8 +17,10 @@ class window.App.ValuesDependencyFieldController extends Spine.Controller
   removeChildElement: => @el.find("##{@childField.id}").remove()
 
   renderChildElement: =>
+    console.log 'DO renderChildElement'
     @updateChildValues
       callback: =>
+        console.log 'DO renderChildElement CALLBACK'
         @parentElement.after \
           App.Render \
             "manage/views/items/field", {}, $.extend(@renderData, { field: @childField })
@@ -35,4 +37,6 @@ class window.App.ValuesDependencyFieldController extends Spine.Controller
           @callback?()
 
   transformResponseData: (data) =>
-    _.map data, (el) => { value: el.id, label: el[@childField.values_label_method] }
+    res = _.map data, (el) => { value: el.id, label: el[@childField.values_label_method] }
+    console.log 'done transformResponseData'
+    res

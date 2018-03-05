@@ -13,9 +13,16 @@ class window.App.Render
 
   @defaultPath: ""
 
-  constructor: (template, data, options)-> 
+  constructor: (template, data, options)->
     if typeof options == "string"
       options = JSON.parse options
+
+    # console.log 'jsRender', {template, data, options, type: options?.field?()?.type}
+    # debugger if template == "manage/views/items/field"
+
+    # if options?.field?.attribute == 'room_id'
+    #   options.field.type = 'autocomplete-search'
+
     return $.views.render["#{App.Render.defaultPath}#{template}"](data, options)
 
   @path: (template)=> "#{App.Render.defaultPath}#{template}"
