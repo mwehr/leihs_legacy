@@ -4578,9 +4578,9 @@ window.i18n.locale_data = {
          null,
          "Sie sind für dieses Gerätepark gesperrt"
       ],
-      "Does not have any borrowable items": [
+      "Does not have any reservable items": [
          null,
-         "Hat keine ausleihbaren Gegenstände"
+         "Hat keine reservierbaren Gegenstände"
       ]
    }
 }
