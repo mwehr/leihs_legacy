@@ -94,11 +94,6 @@ class User < ApplicationRecord
   has_many :option_lines, dependent: :restrict_with_exception
   has_many :visits
 
-  validates_presence_of :firstname
-  validates_presence_of :lastname, :email, unless: :delegation?
-  validates_uniqueness_of :email, unless: :delegation?
-  validates :email, format: /.+@.+\..+/, allow_blank: true
-
   # tmp#2#, :finder_sql => 'SELECT * FROM groups
   # INNER JOIN groups_users ON groups.id = groups_users.entitlement_group_id
   # OR entitlement_groups.inventory_pool_id IS
