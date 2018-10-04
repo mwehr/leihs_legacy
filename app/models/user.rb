@@ -208,7 +208,10 @@ class User < ApplicationRecord
     if delegation?
       name
     else
-      "#{firstname[0]}. #{lastname}"
+      "#{firstname.presence && firstname[0] + '.'} #{lastname}"
+        .strip.presence \
+        || self.login.to_s.strip.presence \
+        || self.email
     end
   end
 
