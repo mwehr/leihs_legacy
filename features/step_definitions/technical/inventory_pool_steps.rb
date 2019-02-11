@@ -55,11 +55,11 @@ Given /^inventory pool model test data setup$/ do
 
   User.delete_all
 
-  %W(le_mac eichen_berge birke venger siegfried).each do |login_name|
+  %W[le_mac eichen_berge birke venger siegfried].each do |login_name|
     LeihsFactory.create_user login: login_name
   end
 
-  @manager = LeihsFactory.create_user({login: 'hammer'}, {role: :lending_manager})
+  @manager = LeihsFactory.create_user({ login: 'hammer' }, { role: :lending_manager })
 end
 
 Given /^all contracts and contract reservations are deleted$/ do
@@ -68,15 +68,17 @@ Given /^all contracts and contract reservations are deleted$/ do
 end
 
 Given /^there are open contracts for all users$/ do
-  @open_reservations = User.all.flat_map do |user|
-    rand(3..6).times.map do
-      order = FactoryGirl.create(:order,
-                                 user: user,
-                                 inventory_pool: @current_inventory_pool,
-                                 state: :approved)
-      FactoryGirl.create :reservation, order: order, user: user, inventory_pool: @current_inventory_pool, status: :approved
+  @open_reservations =
+    User.all.flat_map do |user|
+      rand(3..6).times.map do
+        order =
+          FactoryGirl.create(
+            :order, user: user, inventory_pool: @current_inventory_pool, state: :approved
+          )
+        FactoryGirl.create :reservation,
+        order: order, user: user, inventory_pool: @current_inventory_pool, status: :approved
+      end
     end
-  end
 end
 
 Given /^every contract has a different start date$/ do
@@ -91,17 +93,23 @@ When /^all the contract reservations of all the events are combined$/ do
   @hand_over_visits.flat_map(&:reservations)
 end
 
-Then /^the result is a set of contract reservations that are associated with the users' contracts$/ do
+Then /
+       ^the result is a set of contract reservations that are associated with the users' contracts$
+     / do
   expect(@hand_over_visits.to_a.size).to eq @open_reservations.count # NOTE count returns a Hash because the group() in default scope
 end
 
 Given /^there is an open contract with reservations for a user$/ do
   user = User.first
-  order = FactoryGirl.create(:order,
-                             user: user,
-                             inventory_pool: @current_inventory_pool,
-                             state: :approved)
-  @open_reservations = rand(3..6).times.map { FactoryGirl.create :reservation, order: order, user: user, inventory_pool: @current_inventory_pool, status: :approved }
+  order =
+    FactoryGirl.create(
+      :order, user: user, inventory_pool: @current_inventory_pool, state: :approved
+    )
+  @open_reservations =
+    rand(3..6).times.map do
+      FactoryGirl.create :reservation,
+      order: order, user: user, inventory_pool: @current_inventory_pool, status: :approved
+    end
 end
 
 Given /^the first contract line starts on the same date as the second one$/ do
@@ -116,28 +124,42 @@ When /^the visits of the inventory pool are fetched$/ do
   @hand_over_visits = @current_inventory_pool.visits.hand_over
 end
 
-Then /^the first two contract reservations should now be grouped inside the first visit, which makes it two visits in total$/ do
+Then /
+       ^the first two contract reservations should now be grouped inside the first visit, which makes it two visits in total$
+     / do
   expect(@hand_over_visits.to_a.size).to eq 2 # NOTE count returns a Hash because the group() in default scope
 end
 
 Given /^there are 2 different contracts for 2 different users$/ do
-  @open_reservation0 = FactoryGirl.create :reservation, user: User.first, inventory_pool: @current_inventory_pool, status: :approved
-  @open_reservation1 = FactoryGirl.create :reservation, user: User.last, inventory_pool: @current_inventory_pool, status: :approved
+  @open_reservation0 =
+    FactoryGirl.create :reservation,
+    user: User.first, inventory_pool: @current_inventory_pool, status: :approved
+  @open_reservation1 =
+    FactoryGirl.create :reservation,
+    user: User.last, inventory_pool: @current_inventory_pool, status: :approved
 end
 
 Given /^there are 2 different contracts with reservations for 2 different users$/ do
   user2 = User.first
-  order2 = FactoryGirl.create(:order,
-                              user: user2,
-                              inventory_pool: @current_inventory_pool,
-                              state: :approved)
-  @open_reservations2 = rand(3..6).times.map { FactoryGirl.create :reservation, order: order2, user: user2, inventory_pool: @current_inventory_pool, status: :approved }
+  order2 =
+    FactoryGirl.create(
+      :order, user: user2, inventory_pool: @current_inventory_pool, state: :approved
+    )
+  @open_reservations2 =
+    rand(3..6).times.map do
+      FactoryGirl.create :reservation,
+      order: order2, user: user2, inventory_pool: @current_inventory_pool, status: :approved
+    end
   user3 = User.last
-  order3 = FactoryGirl.create(:order,
-                              user: user3,
-                              inventory_pool: @current_inventory_pool,
-                              state: :approved)
-  @open_reservations3 = rand(3..6).times.map { FactoryGirl.create :reservation, order: order3, user: user3, inventory_pool: @current_inventory_pool, status: :approved }
+  order3 =
+    FactoryGirl.create(
+      :order, user: user3, inventory_pool: @current_inventory_pool, state: :approved
+    )
+  @open_reservations3 =
+    rand(3..6).times.map do
+      FactoryGirl.create :reservation,
+      order: order3, user: user3, inventory_pool: @current_inventory_pool, status: :approved
+    end
 end
 
 Then /^there are 2 hand over visits for the given inventory pool$/ do
@@ -148,12 +170,16 @@ Then /^there are 2 take back visits for the given inventory pool$/ do
   expect(@current_inventory_pool.visits.take_back.reload.to_a.size).to eq 2 # NOTE count returns a Hash because the group() in default scope
 end
 
-Given /^1st contract line of 2nd contract has the same start date as the 1st contract line of the 1st contract$/ do
+Given /
+        ^1st contract line of 2nd contract has the same start date as the 1st contract line of the 1st contract$
+      / do
   @open_reservation1.start_date = @open_reservation0.start_date
   @open_reservation1.save
 end
 
-Given /^1st contract line of 2nd contract has the same end date as the 1st contract line of the 1st contract$/ do
+Given /
+        ^1st contract line of 2nd contract has the same end date as the 1st contract line of the 1st contract$
+      / do
   @open_reservations3[0].end_date = @open_reservations2[0].end_date
   @open_reservations3[0].save
 end
@@ -181,14 +207,18 @@ end
 
 Given /^the contract is signed$/ do
   # sign the contract
-  Contract.sign!(@manager, @current_inventory_pool, @open_reservations.first.user, @open_reservations,
-                 Faker::Lorem.sentence)
+  Contract.sign!(
+    @manager,
+    @current_inventory_pool,
+    @open_reservations.first.user,
+    @open_reservations,
+    Faker::Lorem.sentence
+  )
 end
 
 Given /^all contracts are signed$/ do
   @open_reservations.group_by(&:user).each_pair do |user, reservations|
-    Contract.sign!(@manager, @current_inventory_pool, user, reservations,
-                   Faker::Lorem.sentence)
+    Contract.sign!(@manager, @current_inventory_pool, user, reservations, Faker::Lorem.sentence)
   end
 end
 
@@ -204,7 +234,9 @@ When /^all the contract reservations of all the visits are combined$/ do
   @take_back_lines = @take_back_visits.flat_map(&:reservations)
 end
 
-Then /^one should get the set of contract reservations that are associated with the users' contracts$/ do
+Then /
+       ^one should get the set of contract reservations that are associated with the users' contracts$
+     / do
   expect(@take_back_lines.count).to eq @open_reservations.count
 end
 
@@ -216,7 +248,9 @@ Given /^3rd contract line ends on a different date than the other two$/ do
   end_third_reservation_on_different_date! @open_reservations
 end
 
-Then /^the first 2 contract reservations should be grouped inside the 1st visit, which makes it two visits in total$/ do
+Then /
+       ^the first 2 contract reservations should be grouped inside the 1st visit, which makes it two visits in total$
+     / do
   expect(@take_back_visits.to_a.size).to eq 2 # NOTE count returns a Hash because the group() in default scope
 end
 
@@ -229,21 +263,28 @@ end
 Given /^to each contract line of both contracts an item is assigned$/ do
   [@open_reservations2, @open_reservations3].each do |c|
     # assign contract reservations
-    c.each do |cl|
-      cl.update_attributes(item: cl.model.items.borrowable.in_stock.first)
-    end
+    c
+      .each { |cl| cl.update_attributes(item: cl.model.items.borrowable.in_stock.first) }
   end
 end
 
 Given /^both contracts are signed$/ do
   [@open_reservations2, @open_reservations3].each do |reservations|
     # sign the contract
-    Contract.sign!(@manager, @current_inventory_pool, reservations.first.user, reservations,
-                   Faker::Lorem.sentence)
+    Contract
+      .sign!(
+      @manager,
+      @current_inventory_pool,
+      reservations.first.user,
+      reservations,
+      Faker::Lorem.sentence
+    )
   end
 end
 
-Then /^the first 2 contract reservations should now be grouped inside the 1st visit, which makes it 2 visits in total$/ do
+Then /
+       ^the first 2 contract reservations should now be grouped inside the 1st visit, which makes it 2 visits in total$
+     / do
   expect(@take_back_visits.to_a.size).to eq 2 # NOTE count returns a Hash because the group() in default scope
 end
 
@@ -254,15 +295,16 @@ end
 
 Then(/^the amount of visits includes$/) do |table|
   date = @inventory_pool.visits.potential_hand_over.sample.date
-  total_visits = table.raw.flatten.sum do |k|
-    case k
+  total_visits =
+    table.raw.flatten.sum do |k|
+      case k
       when 'potential hand overs (not yet acknowledged orders)'
-        @inventory_pool.visits.potential_hand_over.select{|v| v.date == date}.size
+        @inventory_pool.visits.potential_hand_over.select { |v| v.date == date }.size
       when 'hand overs'
         @inventory_pool.visits.hand_over.where(date: date).to_a.size # NOTE count returns a Hash because the group() in default scope
       when 'take backs'
         @inventory_pool.visits.take_back.where(date: date).to_a.size # NOTE count returns a Hash because the group() in default scope
+      end
     end
-  end
   expect(@inventory_pool.workday.total_visits_by_date[date].size).to eq total_visits
 end

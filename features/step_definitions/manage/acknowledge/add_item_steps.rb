@@ -1,7 +1,7 @@
 When /^I add a model by typing in the inventory code of an item of that model to the quick add$/ do
-  @item ||= @current_inventory_pool.items.detect {|x| not x.inventory_code.blank? }
+  @item ||= @current_inventory_pool.items.detect { |x| not x.inventory_code.blank? }
   find('#add-input input').set @item.inventory_code
-  find("button[type='submit'][title='#{_("Add")}']").click
+  find("button[type='submit'][title='#{_('Add')}']").click
   find('.line', match: :prefer_exact, text: @item.model.name)
 end
 
@@ -31,15 +31,13 @@ end
 
 When /^I start to type the name of a model( which is not yet in the contract)?$/ do |arg1|
   items = @current_inventory_pool.items.borrowable
-  @item = if arg1
-            items.detect {|i| not @contract.models.include? i.model}
-          else
-            items.first
-          end
+  @item = arg1 ? items.detect { |i| not @contract.models.include? i.model } : items.first
   find('#add-input input').set @item.model.name[0..-2]
 end
 
-When /^I add a model to the acknowledge which is already existing in the selected date range by providing an inventory code$/ do
+When /
+       ^I add a model to the acknowledge which is already existing in the selected date range by providing an inventory code$
+     / do
   @line = @contract.reservations.first
   @old_lines_count = @contract.reservations.count
   @model = @line.model
@@ -54,7 +52,7 @@ When /^I add a model to the acknowledge which is already existing in the selecte
 end
 
 Then /^the existing line quantity is not increased$/ do
-  old_quantity = @line.quantity 
+  old_quantity = @line.quantity
   expect(@line.reload.quantity).to eq old_quantity
 end
 
@@ -68,7 +66,11 @@ Then /^the new line is getting visually merged with the existing line$/ do
     find('.line', match: :prefer_exact, text: @model.name)
     reservations = @contract.reload.reservations.where(model_id: @model)
     expect(all('.line').count).to eq @line_el_count
-    expect(all('.line', text: @model.name).sum{|l| l.find('div:nth-child(3) > span:nth-child(1)').text.to_i}).to eq reservations.count
+    expect(
+      all('.line', text: @model.name).sum do |l|
+        l.find('div:nth-child(3) > span:nth-child(1)').text.to_i
+      end
+    ).to eq reservations.count
     expect(reservations.count).to eq reservations.to_a.sum(&:quantity)
   end
 end
@@ -76,11 +78,12 @@ end
 Given /^I search for a model with default dates and note the current availability$/ do
   init_start_date = Date.parse find('#add-start-date').value
   av = nil
-  @model = @current_inventory_pool.models.detect do |model|
-    av = model.availability_in(@current_inventory_pool)
-    av.changes.keys.last > init_start_date
-  end
-  @new_start_date = av.changes.select{|k, v| k > init_start_date }.keys.first
+  @model =
+    @current_inventory_pool.models.detect do |model|
+      av = model.availability_in(@current_inventory_pool)
+      av.changes.keys.last > init_start_date
+    end
+  @new_start_date = av.changes.select { |k, v| k > init_start_date }.keys.first
   find('#add-input input').set @model.name
   el = find('.ui-autocomplete .row', match: :prefer_exact, text: @model.name)
   @init_aval = el.find('div.col1of4:nth-child(2) > div:nth-child(1)').text
@@ -107,7 +110,11 @@ end
 
 Then (/^the model's availability has changed$/) do
   wait_until(3) do
-    @changed_aval = find('.row a', match: :prefer_exact, text: @model.name).find('div.col1of4:nth-child(2) > div:nth-child(1)').text
+    @changed_aval =
+      find('.row a', match: :prefer_exact, text: @model.name).find(
+        'div.col1of4:nth-child(2) > div:nth-child(1)'
+      )
+        .text
     @changed_aval.slice(0) != @init_aval.slice(0)
   end
 end
@@ -118,13 +125,9 @@ When(/^I start searching some model for adding it$/) do
   find('#add-input input').click
 end
 
-When(/^I leave the autocomplete$/) do
-  find('body').click
-end
+When(/^I leave the autocomplete$/) { find('body').click }
 
-When(/^I reenter the autocomplete$/) do
-  find('#add-input input').click
-end
+When(/^I reenter the autocomplete$/) { find('#add-input input').click }
 
 Then(/^I should still see the model in the resultlist$/) do
   find('.ui-autocomplete a', text: @model.name[0..-2], match: :first)
@@ -139,17 +142,14 @@ Then(/^only models related to my current pool are suggested$/) do
         expect(@current_inventory_pool.models.include? Model.find_by_name(name)).to be true
       end
     end
-  else
+
     # when selector not present, then no matched results
+  else
+
   end
 end
 
 When(/^I enter a model name( which is not related to my current pool)?$/) do |arg1|
-  model = if arg1
-            Model.all - @current_inventory_pool.models
-          else
-            Model.all
-          end.first
+  model = arg1 ? Model.all - @current_inventory_pool.models : Model.all.first
   find('#assign-or-add-input input').set model.name[0..-2]
 end
-

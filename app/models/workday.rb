@@ -6,10 +6,10 @@ class Workday < ApplicationRecord
   serialize :max_visits, Hash
 
   # deprecated
-  DAYS = %w(monday tuesday wednesday thursday friday saturday sunday)
+  DAYS = %w[monday tuesday wednesday thursday friday saturday sunday]
 
   # better
-  WORKDAYS = %w(sunday monday tuesday wednesday thursday friday saturday)
+  WORKDAYS = %w[sunday monday tuesday wednesday thursday friday saturday]
 
   def open_on?(date)
     return false if date.nil?
@@ -28,9 +28,9 @@ class Workday < ApplicationRecord
     when 6
       return saturday
     when 0
-      return sunday
+      return sunday # Should not be reached
     else
-      return false # Should not be reached
+      return false
     end
   end
 
@@ -48,14 +48,9 @@ class Workday < ApplicationRecord
 
   def workdays=(wdays)
     wdays.each_pair do |k, v|
-      write_attribute(WORKDAYS[Integer(k.presence || 0)],
-                      Integer(v['open'].presence || 0))
-      max_visits[Integer(k.presence || 0)] = \
-        if v['max_visits'].blank?
-          nil
-        else
-          Integer(v['max_visits'].presence || 0)
-        end
+      write_attribute(WORKDAYS[Integer(k.presence || 0)], Integer(v['open'].presence || 0))
+      max_visits[Integer(k.presence || 0)] =
+        v['max_visits'].blank? ? nil : Integer(v['max_visits'].presence || 0)
     end
   end
 
@@ -70,9 +65,7 @@ class Workday < ApplicationRecord
   def reached_max_visits
     dates = []
     total_visits_by_date.each_pair do |date, visits|
-      next if date.past? \
-        or max_visits_on(date.wday).nil? \
-        or visits.size < max_visits_on(date.wday)
+      next if date.past? or max_visits_on(date.wday).nil? or visits.size < max_visits_on(date.wday)
       dates << date
     end
     dates.sort
@@ -81,5 +74,4 @@ class Workday < ApplicationRecord
   def label_for_audits
     "#{_('Workdays')} #{inventory_pool}"
   end
-
 end

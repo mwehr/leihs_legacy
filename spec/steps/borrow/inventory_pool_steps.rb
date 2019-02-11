@@ -16,38 +16,29 @@ module Borrow
       # end
 
       step 'there is a pool :letter with borrowable items ' \
-           'the user has access to' do |letter|
-        instance_variable_set("@pool_#{letter}",
-                              FactoryGirl.create(:inventory_pool))
+             'the user has access to' do |letter|
+        instance_variable_set("@pool_#{letter}", FactoryGirl.create(:inventory_pool))
         FactoryGirl.create(
           :access_right,
-          user: @user,
-          inventory_pool: instance_variable_get("@pool_#{letter}"),
-          role: :customer
+          user: @user, inventory_pool: instance_variable_get("@pool_#{letter}"), role: :customer
         )
         FactoryGirl.create(
-          :item,
-          inventory_pool: instance_variable_get("@pool_#{letter}"),
-          is_borrowable: true
+          :item, inventory_pool: instance_variable_get("@pool_#{letter}"), is_borrowable: true
         )
       end
 
       step 'there is a pool :letter without borrowable items ' \
-           'the user has access to' do |letter|
-        instance_variable_set("@pool_#{letter}",
-                              FactoryGirl.create(:inventory_pool))
+             'the user has access to' do |letter|
+        instance_variable_set("@pool_#{letter}", FactoryGirl.create(:inventory_pool))
         FactoryGirl.create(
           :access_right,
-          user: @user,
-          inventory_pool: instance_variable_get("@pool_#{letter}"),
-          role: :customer
+          user: @user, inventory_pool: instance_variable_get("@pool_#{letter}"), role: :customer
         )
       end
 
       step 'there is a pool :letter the user has access to but ' \
-           'the user is suspended for' do |letter|
-        instance_variable_set("@pool_#{letter}",
-                              FactoryGirl.create(:inventory_pool))
+             'the user is suspended for' do |letter|
+        instance_variable_set("@pool_#{letter}", FactoryGirl.create(:inventory_pool))
         FactoryGirl.create(
           :access_right,
           user: @user,
@@ -59,8 +50,7 @@ module Borrow
       end
 
       step 'there is a pool :letter the user had access to in the past' do |letter|
-        instance_variable_set("@pool_#{letter}",
-                              FactoryGirl.create(:inventory_pool))
+        instance_variable_set("@pool_#{letter}", FactoryGirl.create(:inventory_pool))
         FactoryGirl.create(
           :access_right,
           user: @user,
@@ -88,13 +78,10 @@ module Borrow
       step 'I see pool :letter with a label :label' do |letter, label|
         pool = instance_variable_get("@pool_#{letter}")
         within "[data-id='#{pool.id}']" do
-          expect(current_scope)
-            .to have_content instance_variable_get("@pool_#{letter}").name
-          expect(current_scope)
-            .to have_content _(label)
+          expect(current_scope).to have_content instance_variable_get("@pool_#{letter}").name
+          expect(current_scope).to have_content _(label)
         end
       end
-
     end
   end
 end

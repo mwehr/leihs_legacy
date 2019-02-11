@@ -13,11 +13,8 @@ class ImagesController < ApplicationController
 
   def send_data_or_render_not_found(image)
     if image and image.content
-      send_data \
-        Base64.decode64(image.content),
-        filename: image.filename,
-        type: image.content_type,
-        disposition: 'inline'
+      send_data Base64.decode64(image.content),
+                filename: image.filename, type: image.content_type, disposition: 'inline'
     else
       head :not_found and return
     end

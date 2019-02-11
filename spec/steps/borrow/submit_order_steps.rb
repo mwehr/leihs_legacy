@@ -11,8 +11,9 @@ module Borrow
 
       step 'I am suspended for a pool I am a customer of' do
         ar = AccessRight.find_by(inventory_pool: @inventory_pool, role: :customer)
-        ar.update_attributes(suspended_until: Date.tomorrow,
-                             suspended_reason: Faker::Lorem.sentence)
+        ar.update_attributes(
+          suspended_until: Date.tomorrow, suspended_reason: Faker::Lorem.sentence
+        )
       end
 
       step 'there is a borrowable item in this pool' do
@@ -20,12 +21,11 @@ module Borrow
       end
 
       step 'I have an unsubmitted order for this pool ' \
-           'and the model of this item' do
-        FactoryGirl.create(:reservation,
-                           user: @customer,
-                           inventory_pool: @inventory_pool,
-                           status: :unsubmitted,
-                           model: @item.model)
+             'and the model of this item' do
+        FactoryGirl.create(
+          :reservation,
+          user: @customer, inventory_pool: @inventory_pool, status: :unsubmitted, model: @item.model
+        )
       end
 
       step 'I open the page for this order' do

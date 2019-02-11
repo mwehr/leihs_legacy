@@ -10,17 +10,15 @@ module Borrow
       include ::Spec::PersonasDumpSteps
 
       step 'I have an approved order' do
-        FactoryGirl.create(:reservation,
-                           user: @current_user,
-                           status: :approved,
-                           inventory_pool: @inventory_pool)
+        FactoryGirl.create(
+          :reservation, user: @current_user, status: :approved, inventory_pool: @inventory_pool
+        )
       end
 
       step 'each reservation line displays start and end date' do
         @current_user.reservations.approved.each do |r|
           within ".line[data-ids*='#{r.id}']" do
-            expect(page).to have_content \
-              "#{I18n.l r.start_date} - #{I18n.l r.end_date}"
+            expect(page).to have_content "#{I18n.l r.start_date} - #{I18n.l r.end_date}"
           end
         end
       end

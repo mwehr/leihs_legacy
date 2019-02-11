@@ -1,21 +1,13 @@
 module LeihsAdmin
   class RoomsController < AdminController
-
     def index
-      @rooms = \
-        Room
-        .includes(:building)
-        .order('buildings.name ASC, lower(rooms.name) ASC')
-      if search_term_param
-        @rooms = @rooms.search(search_term_param)
-      end
+      @rooms = Room.includes(:building).order('buildings.name ASC, lower(rooms.name) ASC')
+      @rooms = @rooms.search(search_term_param) if search_term_param
       @rooms = @rooms.default_paginate(paginate_params)
 
       respond_to do |format|
         format.html
-        format.js do
-          render partial: 'leihs_admin/rooms/room', collection: @rooms
-        end
+        format.js { render partial: 'leihs_admin/rooms/room', collection: @rooms }
       end
     end
 
@@ -55,6 +47,7 @@ module LeihsAdmin
 
     def destroy
       @room = Room.find(room_id_param)
+
       begin
         @room.destroy
         flash[:success] = _('%s successfully deleted') % _('Room')
@@ -81,6 +74,5 @@ module LeihsAdmin
     def search_term_param
       params.fetch(:search_term, nil)
     end
-
   end
 end

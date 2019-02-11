@@ -4,30 +4,28 @@ When(/^I select all reservations$/) do
     cb = line.find('input[type=checkbox][data-select-line]')
     cb.click unless cb.checked?
   end
-  expect(all('.line input[type=checkbox][data-select-line]').all? {|x| x.checked? }).to be true
+  expect(all('.line input[type=checkbox][data-select-line]').all?(&:checked?)).to be true
 end
 
 When(/^I select an option line$/) do
   @option_line_el = find(".line[data-line-type='option_line']", match: :first)
   @option_line_el.find("input[type='checkbox'][data-select-line]").click
-  @option_line_el_id = @option_line_el["data-id"]
+  @option_line_el_id = @option_line_el['data-id']
   @selected_items = []
   @selected_items << Reservation.find(@option_line_el_id).option
   expect(@selected_items.size).to eq 1
 end
 
-When(/^I change the time range for all contract reservations, envolving option and item reservations$/) do
+When(
+  /^I change the time range for all contract reservations, envolving option and item reservations$/
+) do
   step 'I add an option to the hand over by providing an inventory code'
   step 'I select all reservations'
   step 'I edit the timerange of the selection'
   @line = @hand_over.reservations.first
   @old_start_date = @line.start_date
   @new_start_date =
-    if @line.start_date + 1.day < Time.zone.today
-      Time.zone.today
-    else
-      @line.start_date + 1.day
-    end
+    @line.start_date + 1.day < Time.zone.today ? Time.zone.today : @line.start_date + 1.day
   get_fullcalendar_day_element(@new_start_date).click
   find('#set-start-date', text: _('Start date')).click
   step 'I save the booking calendar'
@@ -35,14 +33,19 @@ When(/^I change the time range for all contract reservations, envolving option a
 end
 
 Then(/^the time range for all contract reservations is changed$/) do
-  @customer.visits.hand_over.where(inventory_pool_id: @current_inventory_pool).detect { |x| x.reservations.size > 1 }.reservations.each do |line|
-    expect(line.start_date).to eq @new_start_date
+  @customer.visits.hand_over.where(inventory_pool_id: @current_inventory_pool).detect do |x|
+    x.reservations.size > 1
   end
+    .reservations
+    .each { |line| expect(line.start_date).to eq @new_start_date }
 end
 
 When(/^I change the time range for that option$/) do
   rescue_displaced_flash do
-    find(".line[data-line-type='option_line'][data-id='#{@option_line.id}']", text: @option_line.option.name)
+    find(
+      ".line[data-line-type='option_line'][data-id='#{@option_line.id}']",
+      text: @option_line.option.name
+    )
       .find('.button', text: _('Change entry'))
       .click
   end
@@ -100,13 +103,15 @@ When(/^I change the quantity through the edit dialog$/) do
   @quantity = @option_line.quantity > 1 ? 1 : rand(2..9)
   find('#booking-calendar-quantity').set @quantity
   step 'I save the booking calendar'
-  expect(find(".line[data-id='#{@option_line.id}'] input[data-line-quantity]").value.to_i).to eq @quantity
+  expect(
+    find(".line[data-id='#{@option_line.id}'] input[data-line-quantity]").value.to_i
+  ).to eq @quantity
 end
 
 Then(/^I see the quantity for this option$/) do
   within('.modal') do
     within('.modal-body') do
-      find(".row", text: /#{@quantity}.*#{@selected_items.first.model.name}/)
+      find('.row', text: /#{@quantity}.*#{@selected_items.first.model.name}/)
     end
   end
 end

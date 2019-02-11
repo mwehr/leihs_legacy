@@ -1,9 +1,6 @@
 class Manage::ContractsController < Manage::ApplicationController
-
   before_action do
-    if params[:id]
-      @contract = Contract.find(params[:id])
-    end
+    @contract = Contract.find(params[:id]) if params[:id]
     @user = current_inventory_pool.users.find(params[:user_id]) if params[:user_id]
   end
 
@@ -27,20 +24,13 @@ class Manage::ContractsController < Manage::ApplicationController
     respond_to do |format|
       format.html
       format.json do
-        @contracts = Contract.filter2(params,
-                                      nil,
-                                      current_inventory_pool,
-                                      paginate: false)
+        @contracts = Contract.filter2(params, nil, current_inventory_pool, paginate: false)
         count = Contract.from(@contracts).count
         @contracts = @contracts.default_paginate(params).order('created_at DESC')
         set_pagination_header(
           @contracts,
-          disable_total_count: (
-            params[:disable_total_count] == 'true' ? true : false
-          ),
-          custom_count: (
-            params[:global_contracts_search] == 'true' ? count : nil
-          )
+          disable_total_count: (params[:disable_total_count] == 'true' ? true : false),
+          custom_count: (params[:global_contracts_search] == 'true' ? count : nil)
         )
       end
     end
@@ -66,22 +56,21 @@ class Manage::ContractsController < Manage::ApplicationController
   end
 
   def create
-    reservations = \
-      @user
-      .reservations
-      .approved
-      .where(inventory_pool: current_inventory_pool)
-      .find(line_ids_param)
+    reservations =
+      @user.reservations.approved.where(inventory_pool: current_inventory_pool).find(line_ids_param)
 
     ApplicationRecord.transaction do
       begin
-        @contract = Contract.sign!(current_user,
-                                   current_inventory_pool,
-                                   @user,
-                                   reservations,
-                                   params[:purpose],
-                                   params[:note],
-                                   params[:delegated_user_id])
+        @contract =
+          Contract.sign!(
+            current_user,
+            current_inventory_pool,
+            @user,
+            reservations,
+            params[:purpose],
+            params[:note],
+            params[:delegated_user_id]
+          )
 
         render json: @contract.to_json
       rescue => e
@@ -93,11 +82,8 @@ class Manage::ContractsController < Manage::ApplicationController
   def swap_user
     order = current_inventory_pool.orders.find params[:id]
     user = current_inventory_pool.users.find(params[:user_id]) if params[:user_id]
-    delegated_user = if params[:delegated_user_id]
-                       current_inventory_pool \
-                         .users
-                         .find(params[:delegated_user_id])
-                     end
+    delegated_user =
+      current_inventory_pool.users.find(params[:delegated_user_id]) if params[:delegated_user_id]
     reservations = order.reservations
     ApplicationRecord.transaction do
       reservations.each do |line|
@@ -105,12 +91,9 @@ class Manage::ContractsController < Manage::ApplicationController
       end
     end
     if reservations.all?(&:valid?)
-      render \
-        json: \
-          user \
-            .orders
-            .find_by(status: order.status,
-                     inventory_pool_id: current_inventory_pool).to_json
+      render json:
+               user.orders.find_by(status: order.status, inventory_pool_id: current_inventory_pool)
+                 .to_json
     else
       errors = reservations.flat_map { |line| line.errors.full_messages }
       render status: :bad_request, plain: errors.uniq.join(', ')

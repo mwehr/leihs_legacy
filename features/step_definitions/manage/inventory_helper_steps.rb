@@ -8,7 +8,7 @@ end
 Then /^I choose all fields through a list or by name$/ do
   i = find('#inventory-helper-view').find('#search-mask').find('#field-input')
   # i = find('#inventory-helper-view #field-input')
-  while(i.click and page.has_selector?('.ui-menu-item a', visible: true)) do
+  while (i.click and page.has_selector?('.ui-menu-item a', visible: true))
     find('.ui-menu-item a', match: :first, visible: true).click
   end
 end
@@ -20,63 +20,65 @@ Then /^I set all their initial values$/ do
     next if @parent_el.all(".field[data-id='#{field.id}']").empty?
     field_el = @parent_el.find(".field[data-id='#{field.id}']")
     case field.data['type']
-      when 'radio'
-        r = field_el.find('input[type=radio]', match: :first)
-        r.click
-        @data[field.id] = r.value
-      when 'textarea'
-        ta = field_el.find('textarea')
-        ta.set 'This is a text for a textarea'
-        @data[field.id] = ta.value
-      when 'select'
-        o = field_el.find('option', match: :first)
-        o.select_option
-        @data[field.id] = o.value
-      when 'text'
-        within field_el do
-          string = if all("input[name='item[inventory_code]']").empty?
-                     'This is a text for a input text'
-                   else
-                     '123456'
-                   end
-          i = find("input[type='text']")
-          i.set string
-          @data[field.id] = i.value
-        end
-      when 'date'
-        dp = find(".field[data-id='#{field.id}'][data-type='date']").find('input')
-        ori_value = dp.value
-        dp.set ''
-        dp.set ori_value
-        within '.ui-datepicker-calendar' do
-          find('td a', text: Date.today.day.to_s).click
-        end
-        @data[field.id] = dp.value
-      when 'autocomplete'
-        find(".field[data-id='#{field.id}']").find('input').click
-              find('.ui-menu-item a', match: :first).click
-        @data[field.id] = find(".field[data-id='#{field.id}'][data-type='autocomplete']")
-      when 'autocomplete-search'
-        model = if @item and @item.children.exists? # item is a package
-                  Model.all.find &:is_package?
-                else
-                  Model.all.find {|m| not m.is_package?}
-                end
-        string = model.name
-        within ".field[data-id='#{field.id}']" do
-          find('input').click
-          find('input').set string
-        end
-        find('.ui-menu-item a', match: :prefer_exact, text: string).click
-        @data[field.id] = Model.find_by_name(string).id
-      when 'checkbox'
-        # currently we only have "ausgemustert"
-        field_el.find("input[type='checkbox']").click
-        find("[name='item[retired_reason]']").set 'This is a text for a input text'
-        @data[field.id] = 'This is a text for a input text'
-      else
-        raise 'field type not found'
+    when 'radio'
+      r = field_el.find('input[type=radio]', match: :first)
+      r.click
+      @data[field.id] = r.value
+    when 'textarea'
+      ta = field_el.find('textarea')
+      ta.set 'This is a text for a textarea'
+      @data[field.id] = ta.value
+    when 'select'
+      o = field_el.find('option', match: :first)
+      o.select_option
+      @data[field.id] = o.value
+    when 'text'
+      within field_el do
+        string =
+          if all("input[name='item[inventory_code]']").empty?
+            'This is a text for a input text'
+          else
+            '123456'
+          end
+        i = find("input[type='text']")
+        i.set string
+        @data[field.id] = i.value
       end
+    when 'date'
+      dp = find(".field[data-id='#{field.id}'][data-type='date']").find('input')
+      ori_value = dp.value
+      dp.set ''
+      dp.set ori_value
+      within '.ui-datepicker-calendar' do
+        find('td a', text: Date.today.day.to_s).click
+      end
+      @data[field.id] = dp.value
+    when 'autocomplete'
+      find(".field[data-id='#{field.id}']").find('input').click
+      find('.ui-menu-item a', match: :first).click
+      @data[field.id] = find(".field[data-id='#{field.id}'][data-type='autocomplete']")
+    when 'autocomplete-search'
+      model =
+        if @item and @item.children.exists? # item is a package
+          Model.all.find &:is_package?
+        else
+          Model.all.find { |m| not m.is_package? }
+        end
+      string = model.name
+      within ".field[data-id='#{field.id}']" do
+        find('input').click
+        find('input').set string
+      end
+      find('.ui-menu-item a', match: :prefer_exact, text: string).click
+      @data[field.id] = Model.find_by_name(string).id
+    when 'checkbox'
+      # currently we only have "ausgemustert"
+      field_el.find("input[type='checkbox']").click
+      find("[name='item[retired_reason]']").set 'This is a text for a input text'
+      @data[field.id] = 'This is a text for a input text'
+    else
+      raise 'field type not found'
+    end
 
     # if present, remove flash which gets displaced on cider and covers other elements
     first('#flash .fa-times-circle').try(:click)
@@ -84,17 +86,18 @@ Then /^I set all their initial values$/ do
 end
 
 Then /^I set the field "(.*?)" to "(.*?)"$/ do |field_name, value|
-  field = Field.find(find(".field.row.emboss", match: :prefer_exact, text: field_name)['data-id'].to_sym)
+  field =
+    Field.find(find('.field.row.emboss', match: :prefer_exact, text: field_name)['data-id'].to_sym)
   within(".field[data-id='#{field.id}']") do
     case field.data['type']
-      when 'radio'
-        find('label', text: value).click
-      when 'select'
-        find('option', text: value).select_option
-      when 'checkbox'
-        find('label', text: value).click
-      else
-        raise 'unknown field'
+    when 'radio'
+      find('label', text: value).click
+    when 'select'
+      find('option', text: value).select_option
+    when 'checkbox'
+      find('label', text: value).click
+    else
+      raise 'unknown field'
     end
   end
 end
@@ -107,20 +110,26 @@ Then /^I scan or enter the inventory code of an item that is in stock and not in
   end
 end
 
-
-Then /^I scan or enter the inventory code( of an item belonging to the current inventory pool)?$/ do |arg1|
-  @item ||= if arg1
-              @current_inventory_pool.items.where(owner_id: @current_inventory_pool)
-            else
-              @current_inventory_pool.items
-            end.in_stock.first
+Then /
+       ^I scan or enter the inventory code( of an item belonging to the current inventory pool)?$
+     / do |arg1|
+  @item ||=
+    if arg1
+      @current_inventory_pool.items.where(owner_id: @current_inventory_pool)
+    else
+      @current_inventory_pool.items
+    end
+      .in_stock
+      .first
   within('#item-selection') do
     find('[data-barcode-scanner-target]').set @item.inventory_code
     find('button[type=submit]', visible: false).click
   end
 end
 
-Then /^I see all the values of the item in an overview with model name and the modified values are already saved$/ do
+Then /
+       ^I see all the values of the item in an overview with model name and the modified values are already saved$
+     / do
   FastGettext.locale = @current_user.language.locale_name.gsub(/-/, '_')
   Field.all.each do |field|
     next if all(".field[data-id='#{field.id}']").empty?
@@ -136,17 +145,15 @@ Then /^I see all the values of the item in an overview with model name and the m
           field_el.has_content? value.day
         end
       elsif field.data['attribute'] == 'retired'
-        unless value.blank?
-          field_el.has_content? _(field.values.first['label'])
-        end
+        field_el.has_content? _(field.values.first['label']) unless value.blank?
       elsif field_type == 'radio'
         if value
-          value = field.values.detect{|v| v['value'] == value}['label']
+          value = field.values.detect { |v| v['value'] == value }['label']
           field_el.has_content? _(value)
         end
       elsif field_type == 'select'
         if value
-          value = field.values.detect{|v| v['value'] == value}['label']
+          value = field.values.detect { |v| v['value'] == value }['label']
           field_el.has_content? _(value)
         end
       elsif field_type == 'autocomplete'
@@ -168,18 +175,29 @@ Then /^I see all the values of the item in an overview with model name and the m
     end
   end
 
-  find("#flexible-fields .field[data-id='#{Field.all.detect{|f| f.data['label'] == "Model" }.id}']", text: @item.reload.model.name)
+  find(
+    "#flexible-fields .field[data-id='#{Field.all.detect { |f| f.data['label'] == 'Model' }.id}']",
+    text: @item.reload.model.name
+  )
 end
 
 Then /^the changed values are highlighted$/ do
   all('#field-selection .field', minimum: 1).each do |selected_field|
-    c = all("#item-section .field[data-id='#{selected_field['data-id']}'].success").count + all("#item-section .field[data-id='#{selected_field['data-id']}'].error").count
+    c =
+      all("#item-section .field[data-id='#{selected_field['data-id']}'].success").count +
+        all("#item-section .field[data-id='#{selected_field['data-id']}'].error").count
     expect(c).to eq 1
   end
 end
 
 Then /^I choose the fields from a list or by name$/ do
-  field = Field.all.select{|f| f.data['readonly'] == nil and f.data['type'] != 'autocomplete-search' and f.data['target_type'] != 'license' and not f.data['visibility_dependency_field_id']}.last
+  field =
+    Field.all.select do |f|
+      f.data['readonly'] == nil and f.data['type'] != 'autocomplete-search' and
+        f.data['target_type'] != 'license' and
+        not f.data['visibility_dependency_field_id']
+    end
+      .last
   within '#search-mask' do
     find('#field-input').click
     find('#field-input').set _(field.data['label'])
@@ -194,9 +212,7 @@ Then /^I set their initial values$/ do
   within '#field-selection' do
     fields = all('.field input, #field-selection .field textarea', visible: true)
     expect(fields.count).to be > 0
-    fields.each do |input|
-      input.set 'Test123'
-    end
+    fields.each { |input| input.set 'Test123' }
   end
 end
 
@@ -209,10 +225,9 @@ Then /^I scan or enter the inventory code of an item that can't be found$/ do
 end
 
 Then /^I start entering an item's inventory code$/ do
-  @item= @current_inventory_pool.items.first
+  @item = @current_inventory_pool.items.first
   find('#item-search-input').set @item.inventory_code[0..1]
 end
-
 
 Then /^I choose the item from the list of results$/ do
   expect(has_selector?('.ui-menu-item')).to be true
@@ -239,7 +254,7 @@ Then /^I can edit all of this item's values right then and there$/ do
 end
 
 Then /^my changes are saved$/ do
-  step %Q{I see all the values of the item in an overview with model name and the modified values are already saved}
+  step 'I see all the values of the item in an overview with model name and the modified values are already saved'
 end
 
 When /^I cancel$/ do
@@ -266,8 +281,12 @@ Then(/^I set some value for the field "(.*?)"$/) do |field|
 end
 
 Given(/^there is an item that shares its location with another$/) do
-  location = Location.find {|l| l.items.where(inventory_pool_id: @current_inventory_pool, parent_id: nil).count >= 2}
-  @item, @item_2 = location.items.where(inventory_pool_id: @current_inventory_pool, parent_id: nil).limit(2)
+  location =
+    Location.find do |l|
+      l.items.where(inventory_pool_id: @current_inventory_pool, parent_id: nil).count >= 2
+    end
+  @item, @item_2 =
+    location.items.where(inventory_pool_id: @current_inventory_pool, parent_id: nil).limit(2)
   @item_2_location = @item_2.location
 end
 
@@ -279,7 +298,9 @@ Then(/^the location of the other item has remained the same$/) do
   expect(@item_2.reload.location).to eq @item_2_location
 end
 
-When(/^"(.*?)" is selected and set to "(.*?)", then "(.*?)" must also be filled in$/) do |field, value, dependent_field|
+When(
+  /^"(.*?)" is selected and set to "(.*?)", then "(.*?)" must also be filled in$/
+) do |field, value, dependent_field|
   within '#search-mask' do
     find('#field-input').click
     find('#field-input').set field
@@ -290,54 +311,86 @@ When(/^"(.*?)" is selected and set to "(.*?)", then "(.*?)" must also be filled 
 end
 
 When(/^a required field is blank, the inventory helper cannot be used$/) do
-  step %Q{I scan or enter the inventory code}
+  step 'I scan or enter the inventory code'
 end
 
 Given(/^I edit the field "(.*?)" of an item that is not in stock$/) do |name|
-  step %Q{I select the field "#{name}"}
+  step "I select the field \"#{name}\""
   @item = @current_inventory_pool.items.not_in_stock.first
   @item_before = @item.to_json
-  step %Q{I scan or enter the inventory code}
+  step 'I scan or enter the inventory code'
 end
 
-Then(/^I see an error message that I can't change the responsible inventory pool for items that are not in stock$/) do
-  expect(page.has_content?(
-      _("The responsible inventory pool cannot be changed because it's not returned yet or has already been assigned to a contract line."))
+Then(
+  /
+    ^I see an error message that I can't change the responsible inventory pool for items that are not in stock$
+  /
+) do
+  expect(
+    page.has_content?(
+      _(
+        "The responsible inventory pool cannot be changed because it's not returned yet or has already been assigned to a contract line."
+      )
+    )
   ).to be true
   expect(@item_before).to eq @item.reload.to_json
 end
 
-Then(/^I see an error message that I can't retire the item because it's already handed over or assigned to a contract$/) do
-  expect(has_content?(_("The item cannot be retired because it's not returned yet or has already been assigned to a contract line."))).to be true
+Then(
+  /
+    ^I see an error message that I can't retire the item because it's already handed over or assigned to a contract$
+  /
+) do
+  expect(
+    has_content?(
+      _(
+        "The item cannot be retired because it's not returned yet or has already been assigned to a contract line."
+      )
+    )
+  ).to be true
   expect(@item_before).to eq @item.reload.to_json
 end
 
-Then(/^I see an error message that I can't change the model because the item is already handed over or assigned to a contract$/) do
-  expect(has_content?(_('The model cannot be changed because the item is used in contracts already.'))).to be true
+Then(
+  /
+    ^I see an error message that I can't change the model because the item is already handed over or assigned to a contract$
+  /
+) do
+  expect(
+    has_content?(_('The model cannot be changed because the item is used in contracts already.'))
+  ).to be true
   expect(@item_before).to eq @item.reload.to_json
 end
 
 Given(/^I edit the field "(.*?)" of an item that is part of a contract$/) do |name|
-  step %Q{I select the field "#{name}"}
+  step "I select the field \"#{name}\""
   @item = @current_inventory_pool.items.not_in_stock.first
   @item_before = @item.to_json
-  fill_in_autocomplete_field name, @current_inventory_pool.models.detect {|m| m != @item.model}.name
-  step %Q{I scan or enter the inventory code}
+  fill_in_autocomplete_field name,
+                             @current_inventory_pool.models.detect { |m| m != @item.model }.name
+  step 'I scan or enter the inventory code'
 end
 
 Given(/^I retire an item that is not in stock$/) do
-  step %Q{I select the field "Retiremen"}
+  step 'I select the field "Retiremen"'
   find('.row.emboss', match: :prefer_exact, text: _('Retirement')).find('select').select _('Yes')
-  find('.row.emboss', match: :prefer_exact, text: _('Reason for Retirement')).find('input, textarea').set 'Retirement reason'
+  find('.row.emboss', match: :prefer_exact, text: _('Reason for Retirement')).find(
+    'input, textarea'
+  ).set 'Retirement reason'
   @item = @current_inventory_pool.items.where(owner: @current_inventory_pool).not_in_stock.first
   @item_before = @item.to_json
-  step %Q{I scan or enter the inventory code}
+  step 'I scan or enter the inventory code'
 end
 
-Given(/^I edit the field "Responsible department" of an item that isn't in stock and belongs to the current inventory pool$/) do
-  step %Q{I select the field "Responsible department"}
+Given(
+  /
+    ^I edit the field "Responsible department" of an item that isn't in stock and belongs to the current inventory pool$
+  /
+) do
+  step 'I select the field "Responsible department"'
   @item = @current_inventory_pool.items.where(owner: @current_inventory_pool).not_in_stock.first
   @item_before = @item.to_json
-  fill_in_autocomplete_field 'Responsible department', InventoryPool.where.not(id: @current_inventory_pool).first.name
-  step %Q{I scan or enter the inventory code}
+  fill_in_autocomplete_field 'Responsible department',
+                             InventoryPool.where.not(id: @current_inventory_pool).first.name
+  step 'I scan or enter the inventory code'
 end

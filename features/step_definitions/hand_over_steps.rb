@@ -1,4 +1,4 @@
-When '$who approves the order' do | who |
+When '$who approves the order' do |who|
   post login_path(login: @last_manager_login_name)
   post manage_approve_order_path(@inventory_pool, @order, comment: 'test comment')
   @order = assigns(:order)
@@ -26,24 +26,22 @@ end
 #   expect(@contract.reservations.size).to eq 1
 # end
 
-
-Then /he sees ([0-9]+) line(s?) with a total quantity of ([0-9]+)$/ do |total, s, quantity |
-   expect(@visits.size).to eq total.to_i
-   s = @visits.sum(:quantity)
-   expect(s).to eq quantity.to_i
+Then /he sees ([0-9]+) line(s?) with a total quantity of ([0-9]+)$/ do |total, s, quantity|
+  expect(@visits.size).to eq total.to_i
+  s = @visits.sum(:quantity)
+  expect(s).to eq quantity.to_i
 end
 
 ###############################################
 
-Then "line $line has a quantity of $quantity for customer '$who'" do | line, quantity, who |
+Then "line $line has a quantity of $quantity for customer '$who'" do |line, quantity, who|
   expect(@visits[line.to_i - 1].quantity).to eq quantity.to_i
   expect(@visits[line.to_i - 1].user.login).to eq who
 end
 
 ###############################################
 
-
-When '$who chooses one line' do | who |
+When '$who chooses one line' do |who|
   visit = @visits.first
   get manage_hand_over_path(@inventory_pool, visit.user)
   response.should render_template('backend/hand_over/show')
@@ -51,7 +49,7 @@ When '$who chooses one line' do | who |
 end
 
 # copied from 'When "$who chooses $name's order"'
-When "$who chooses $name's visit" do | who, name |
+When "$who chooses $name's visit" do |who, name|
   @visit = @visits.detect { |c| c.user.login == name }
   get manage_hand_over_path(@inventory_pool, @visit.user)
   response.should render_template('backend/hand_over/show')
@@ -59,15 +57,15 @@ When "$who chooses $name's visit" do | who, name |
   @response = response
 end
 
-When "$who assigns '$item' to the first line" do | who, item |
+When "$who assigns '$item' to the first line" do |who, item|
   step "#{who} assigns '#{item}' to line 0"
 end
 
-When "$who tries to assign '$item' to the first line" do | who,item |
+When "$who tries to assign '$item' to the first line" do |who, item|
   step "#{who} tries to assign '#{item}' to line 0"
 end
 
-When "$who assigns '$item' to line $number" do | who, item, number |
+When "$who assigns '$item' to line $number" do |who, item, number|
   step "#{who} tries to assign '#{item}' to line #{number}"
   step "#{who} should not see a flash error"
 end
@@ -88,12 +86,12 @@ Then 'a new contract is generated' do
   expect(@contract.nil?).to be false
 end
 
-Then /^he sees ([0-9]+) contract line(s?) for all approved order lines$/ do | size, s |
+Then /^he sees ([0-9]+) contract line(s?) for all approved order lines$/ do |size, s|
   expect(@contract.reservations.size).to eq size.to_i
 end
 
 Then 'the total number of contracts is $n_contracts' do |n_contracts|
-	expect(Contract.count).to eq n_contracts.to_i
+  expect(Contract.count).to eq n_contracts.to_i
 end
 
 Then /^he should (.*)see a flash error$/ do |shouldNot|
@@ -129,7 +127,7 @@ Then /^I choose "([^"]*)" for the order by "([^"]*)"$/ do |button, person|
   within '#list_table' do
     all('tr').each do |row|
       if row.text =~ /#{person.to_s}/
-        row.find('td.buttons', match: :first).find('a', text: /.*#{button}.*/i).click
+        row.find('td.buttons', match: :first).find('a', text: /.*#{button}.*/).click
       end
     end
   end

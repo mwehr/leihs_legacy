@@ -11,15 +11,13 @@ module LeihsAdmin
 
       step 'I save the settings' do
         # NOTE: fixed navbar scrolling hack:
-        page.execute_script %[ $(".navbar").remove() ]
+        page.execute_script ' $(".navbar").remove() '
         find("button.btn.btn-success[type='submit']").click
       end
 
       step 'the settings are persisted' do
         check_flash_message(:notice, _('Successfully set.'))
-        @new_settings.each_pair do |k, v|
-          expect(Setting.first.send(k).presence).to eq v.presence
-        end
+        @new_settings.each_pair { |k, v| expect(Setting.first.send(k).presence).to eq v.presence }
       end
 
       step 'I go to the settings page' do
@@ -34,8 +32,7 @@ module LeihsAdmin
         fill_in form_field, with: text
       end
 
-      step 'the logo in the footer (in :text) :boolish link:optional_text' \
-          do |section, has_link, optional_text|
+      step 'the logo in the footer (in :text) :boolish link:optional_text' do |section, has_link, optional_text|
         href = optional_text.strip.delete('"')
         case section.to_sym
         when :admin
@@ -78,17 +75,16 @@ module LeihsAdmin
           table.raw.flatten.each do |k|
             begin
               case k
-              when \
-                'email_signature',
-                'external_base_url',
-                'ldap_config',
-                'mail_delivery_method',
-                'smtp_address',
-                'smtp_domain',
-                'smtp_openssl_verify_mode',
-                'smtp_password',
-                'smtp_username',
-                'user_image_url'
+              when 'email_signature',
+              'external_base_url',
+              'ldap_config',
+              'mail_delivery_method',
+              'smtp_address',
+              'smtp_domain',
+              'smtp_openssl_verify_mode',
+              'smtp_password',
+              'smtp_username',
+              'user_image_url'
                 field = find("input[name='setting[#{k}]']")
                 expect(Setting.first.send(k).to_s).to eq field.value
                 @new_settings[k] = new_value = Faker::Lorem.word
@@ -102,16 +98,12 @@ module LeihsAdmin
                 expect(Setting.first.send(k).to_s).to eq field.value
                 @new_settings[k] = new_value = Faker::Internet.email
                 field.set new_value
-              when \
-                'contract_lending_party_string',
-                'contract_terms',
-                'custom_head_tag'
+              when 'contract_lending_party_string', 'contract_terms', 'custom_head_tag'
                 field = find("textarea[name='setting[#{k}]']")
                 expect(Setting.first.send(k).to_s).to eq field.value
                 @new_settings[k] = new_value = Faker::Lorem.paragraph
                 field.set new_value
-              when 'deliver_received_order_notifications', \
-                   'smtp_enable_starttls_auto'
+              when 'deliver_received_order_notifications', 'smtp_enable_starttls_auto'
                 field = find("input[name='setting[#{k}]']")
                 expect(Setting.first.send(k)).to eq field.checked?
                 # TODO: @new_settings[k]
@@ -130,7 +122,7 @@ module LeihsAdmin
                 raise format('%s not found', k)
               end
             rescue Selenium::WebDriver::Error::UnknownError
-              page.execute_script %[ $(".navbar").remove() ]
+              page.execute_script ' $(".navbar").remove() '
               retry
             end
           end
@@ -143,11 +135,7 @@ module LeihsAdmin
       step 'the following settings are disabled:' do |table|
         within("form#edit_setting[action='/admin/settings']") do
           table.raw.flatten.each do |k|
-            f = find(
-              %w[input textarea select]
-              .map { |s| "#{s}[name='setting[#{k}]']" }
-              .join(',')
-            )
+            f = find(%w[input textarea select].map { |s| "#{s}[name='setting[#{k}]']" }.join(','))
             expect(f).to be_disabled
           end
         end

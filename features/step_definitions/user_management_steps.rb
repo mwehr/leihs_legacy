@@ -4,22 +4,23 @@ Given /^the admin$/ do
   @user = User.where(is_admin: true).first
 end
 
-Given /^a customer "([^"]*)"( exists)?$/ do |name,foo|
-  @user = LeihsFactory.create_user({login: name },
-                                   {role: :customer,
-                                   inventory_pool: @inventory_pool})
+Given /^a customer "([^"]*)"( exists)?$/ do |name, foo|
+  @user =
+    LeihsFactory.create_user({ login: name }, { role: :customer, inventory_pool: @inventory_pool })
   r = @user.access_rights.active.first
   r.save
 end
 
-Given /a (\w+) '([^']*)' for inventory pool '([^']*)'$/ do |role,who,ip_name|
+Given /a (\w+) '([^']*)' for inventory pool '([^']*)'$/ do |role, who, ip_name|
   step "inventory pool '#{ip_name}'"
   role = role.to_sym
   expect(role).not_to be_nil
-  @user = LeihsFactory.create_user({login: who},
-                                   {role: role,
-                                    inventory_pool: InventoryPool.find_by_name(ip_name),
-                                    password: 'pass' })
+  @user =
+    LeihsFactory.create_user(
+      { login: who }, {
+        role: role, inventory_pool: InventoryPool.find_by_name(ip_name), password: 'pass'
+      }
+    )
   @user.save!
 end
 
@@ -28,18 +29,15 @@ Given /^he is a (\w+)$/ do |role|
 end
 
 Given "customer '$who' has access to inventory pool $ip_s" do |who, ip_s|
-  inventory_pools = ip_s.split(' and ').collect { | ip_name |
-    InventoryPool.find_by_name ip_name
-  }
+  inventory_pools = ip_s.split(' and ').collect { |ip_name| InventoryPool.find_by_name ip_name }
   user = User.find_by_login(who) || FactoryGirl.create(:user, login: who)
-  inventory_pools.each { |ip|
+  inventory_pools.each do |ip|
     LeihsFactory.define_role(user, ip, :customer)
     expect(user.inventory_pools.include?(ip)).to be true
-  }
+  end
 end
 
-When /^I create a new user '([^']*)' at '([^']*)'( in ')?([^']*)'?$/ \
-do |name,email,filler,ip|
+When /^I create a new user '([^']*)' at '([^']*)'( in ')?([^']*)'?$/ do |name, email, filler, ip|
   step "I create a new inventory pool '#{ip}'" unless ip.blank?
 
   # TODO: for some reason, cucumber sometimes won't properly clean up
@@ -54,6 +52,6 @@ do |name,email,filler,ip|
   click_button 'Submit'
 end
 
-Given "'$name' has password '$pass'" do |name,pass|
+Given "'$name' has password '$pass'" do |name, pass|
   LeihsFactory.create_db_auth(login: name, password: pass)
 end

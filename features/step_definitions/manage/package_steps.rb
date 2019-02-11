@@ -2,7 +2,8 @@
 
 When /^I fill in at least the required fields$/ do
   @model_name = 'Test Model Package'
-  find('.row.emboss', match: :prefer_exact, text: _('Product')).fill_in 'model[product]', with: @model_name
+  find('.row.emboss', match: :prefer_exact, text: _('Product')).fill_in 'model[product]',
+  with: @model_name
 end
 
 When /^I add one or more packages$/ do
@@ -24,13 +25,16 @@ end
 
 Then /^the model is created and the packages and their assigned items are saved$/ do
   expect(has_selector?('.success')).to be true
-  @model = Model.find {|m| [m.name, m.product].include? @model_name}
+  @model = Model.find { |m| [m.name, m.product].include? @model_name }
   expect(@model.nil?).to be false
   expect(@model.is_package?).to be true
   @packages = @model.items
   expect(@packages.count).to eq 1
-  expect(@packages.first.children.map(&:inventory_code))
-    .to match_array ['beam123', 'beam345', 'bose123']
+  expect(@packages.first.children.map(&:inventory_code)).to match_array [
+                'beam123',
+                'beam345',
+                'bose123'
+              ]
 end
 
 Then /^the packages have their own inventory codes$/ do
@@ -39,12 +43,13 @@ end
 
 Given /^a (never|once) handed over item package is currently in stock$/ do |arg1|
   item_packages = @current_inventory_pool.items.packages.in_stock
-  @package = case arg1
-               when 'never'
-                 item_packages.detect {|p| p.item_lines.empty? }
-               when 'once'
-                 item_packages.detect {|p| p.item_lines.exists? }
-             end
+  @package =
+    case arg1
+    when 'never'
+      item_packages.detect { |p| p.item_lines.empty? }
+    when 'once'
+      item_packages.detect { |p| p.item_lines.exists? }
+    end
 end
 
 When(/^edit the related model package$/) do
@@ -61,20 +66,18 @@ end
 
 Then(/^the item package has been (deleted|retired)$/) do |arg1|
   case arg1
-    when 'deleted'
-      expect(Item.find_by_id(@package.id).nil?).to be true
-      expect { @package.reload }.to raise_error(ActiveRecord::RecordNotFound)
-    when 'retired'
-      expect(Item.find_by_id(@package.id).nil?).to be false
-      expect(@package.reload.retired).to eq Date.today
+  when 'deleted'
+    expect(Item.find_by_id(@package.id).nil?).to be true
+    expect { @package.reload }.to raise_error(ActiveRecord::RecordNotFound)
+  when 'retired'
+    expect(Item.find_by_id(@package.id).nil?).to be false
+    expect(@package.reload.retired).to eq Date.today
   end
 end
 
 Then /^the packaged items are not part of that item package anymore$/ do
   expect(@package_item_ids.size).to be > 0
-  @package_item_ids.each do |id|
-    expect(Item.find(id).parent_id).to eq nil
-  end
+  @package_item_ids.each { |id| expect(Item.find(id).parent_id).to eq nil }
 end
 
 Then(/^that item package is not listed$/) do
@@ -87,32 +90,41 @@ When /^the package is currently not in stock$/ do
 end
 
 Then /^I can't delete the package$/ do
-  expect(has_no_selector?("[data-type='inline-entry'][data-id='#{@package_not_in_stock.id}'] [data-remove]")).to be true
+  expect(
+    has_no_selector?(
+      "[data-type='inline-entry'][data-id='#{@package_not_in_stock.id}'] [data-remove]"
+    )
+  ).to be true
 end
 
 When /^I edit a model that already has packages( in mine and other inventory pools)?$/ do |arg1|
   step 'I open the inventory'
-  @model = @current_inventory_pool.models.detect do |m|
-    b = (not m.items.empty? and m.is_package?)
-    if arg1
-      b = (b and m.items.map(&:inventory_pool_id).uniq.size > 1)
+  @model =
+    @current_inventory_pool.models.detect do |m|
+      b = (not m.items.empty? and m.is_package?)
+      b = (b and m.items.map(&:inventory_pool_id).uniq.size > 1) if arg1
+      b
     end
-    b
-  end
   expect(@model).not_to be_nil
   @model_name = @model.name
   step 'I search for "%s"' % @model.name
   expect(has_selector?('.line', text: @model.name)).to be true
-  find('.line', match: :prefer_exact, text: @model.name).find('.button', match: :first, text: _('Edit Model')).click
+  find('.line', match: :prefer_exact, text: @model.name).find(
+    '.button', match: :first, text: _('Edit Model')
+  )
+    .click
 end
 
 When /^I edit a model that already has items$/ do
   step 'I open the inventory'
-  @model = @current_inventory_pool.models.detect {|m| not (m.items.empty? and m.is_package?)}
+  @model = @current_inventory_pool.models.detect { |m| not (m.items.empty? and m.is_package?) }
   @model_name = @model.name
   step 'I search for "%s"' % @model.name
   expect(has_selector?('.line', text: @model.name)).to be true
-  find('.line', match: :prefer_exact, text: @model.name).find('.button', match: :first, text: _('Edit Model')).click
+  find('.line', match: :prefer_exact, text: @model.name).find(
+    '.button', match: :first, text: _('Edit Model')
+  )
+    .click
 end
 
 Then /^I cannot assign packages to that model$/ do
@@ -128,13 +140,13 @@ end
 Then /^I can only save this package if I also assign items$/ do
   find('#save-package').click
   expect(has_content?(_('You can not create a package without any item'))).to be true
-  find("h3", text: _('Package'))
+  find('h3', text: _('Package'))
   find('.modal-close').click
   expect(has_no_selector?("[data-type='field-inline-entry']")).to be true
 end
 
 When /^I edit a package$/ do
-  @model = Model.find {|m| [m.name, m.product].include? 'Kamera Set' }
+  @model = Model.find { |m| [m.name, m.product].include? 'Kamera Set' }
   visit manage_edit_model_path(@current_inventory_pool, @model)
   @package_to_edit = @model.items.detect &:in_stock?
   find(".line[data-id='#{@package_to_edit.id}']").find('button[data-edit-package]').click
@@ -159,7 +171,7 @@ Then /^those items are no longer assigned to the package$/ do
   expect(page).to have_selector('#inventory .row')
   @package_to_edit.reload
   expect(@package_to_edit.children.count).to eq (@number_of_items_before - 1)
-  expect(@package_to_edit.children.detect {|i| i.inventory_code == @item_to_remove}).to eq nil
+  expect(@package_to_edit.children.detect { |i| i.inventory_code == @item_to_remove }).to eq nil
 end
 
 When /^I save the package$/ do
@@ -172,7 +184,7 @@ When /^I save both package and model$/ do
 end
 
 Then /^the package has all the entered information$/ do
-  model = Model.find {|m| [m.name, m.product].include? @model_name}
+  model = Model.find { |m| [m.name, m.product].include? @model_name }
   visit manage_edit_model_path(@current_inventory_pool, model)
   model.items.where(inventory_pool: @current_inventory_pool).each do |item|
     expect(has_selector?(".line[data-id='#{item.id}']", visible: false)).to be true
@@ -193,7 +205,7 @@ When(/^I add a package$/) do
 end
 
 When(/^I enter the package properties$/) do
-  steps %Q{And I enter the following item information
+  steps 'And I enter the following item information
     | field                  | type         | value           |
     | Working order          | radio        | OK              |
     | Completeness           | radio        | OK              |
@@ -208,16 +220,12 @@ When(/^I enter the package properties$/) do
     | Building               | autocomplete | general building |
     | Room                   | autocomplete | general room  |
     | Shelf                  |              | Test Gestell    |
-    | Initial Price          |              | 50.00           | }
+    | Initial Price          |              | 50.00           | '
 end
 
-When(/^I save this package$/) do
-  find('#save-package').click
-end
+When(/^I save this package$/) { find('#save-package').click }
 
-Then(/^I see the notice "(.*?)"$/) do |text|
-  find('#flash', match: :prefer_exact, text: text)
-end
+Then(/^I see the notice "(.*?)"$/) { |text| find('#flash', match: :prefer_exact, text: text) }
 
 Then /^the package has all the previously entered values$/ do
   expect(has_selector?('.modal .row.emboss')).to be true
@@ -225,19 +233,23 @@ Then /^the package has all the previously entered values$/ do
     field_name = hash_row['field']
     field_value = hash_row['value']
     field_type = hash_row['type']
-    field = Field.all.detect{|f| _(f.data['label']) == field_name}
+    field = Field.all.detect { |f| _(f.data['label']) == field_name }
     within '.modal' do
       matched_field = all("[data-type='field'][data-id='#{field.id}']", minimum: 1).last
       expect(matched_field).not_to be_blank
       case field_type
-        when 'autocomplete'
-          expect(matched_field.find('input,textarea').value).to eq (field_value != 'None' ? field_value : '')
-        when 'select'
-          expect(matched_field.all('option').detect(&:selected?).text).to eq field_value
-        when 'radio must'
-          expect(matched_field.find("input[checked][type='radio']").value).to eq field_value
-        when ''
-          expect(matched_field.find('input,textarea').value).to eq field_value
+      when 'autocomplete'
+        expect(matched_field.find('input,textarea').value).to eq (if field_value != 'None'
+             field_value
+           else
+             ''
+           end)
+      when 'select'
+        expect(matched_field.all('option').detect(&:selected?).text).to eq field_value
+      when 'radio must'
+        expect(matched_field.find("input[checked][type='radio']").value).to eq field_value
+      when ''
+        expect(matched_field.find('input,textarea').value).to eq field_value
       end
     end
   end
@@ -245,8 +257,9 @@ end
 
 Then(/^all the packaged items receive these same values store to this package$/) do |table|
   table.hashes.each do |t|
-    b = @package.children.all? {|c|
-      case t[:field]
+    b =
+      @package.children.all? do |c|
+        case t[:field]
         when 'Responsible department'
           c.inventory_pool_id == @package.inventory_pool_id
         when 'Responsible person'
@@ -261,15 +274,15 @@ Then(/^all the packaged items receive these same values store to this package$/)
           c.last_check == @package.last_check
         else
           'not found'
+        end
       end
-    }
     expect(b).to be true
   end
 end
 
 Then(/^I only see packages which I am responsible for$/) do
   within '#packages' do
-    dom_package_items = Item.find(all('.list-of-lines > .line').map{|x| x['data-id'] })
+    dom_package_items = Item.find(all('.list-of-lines > .line').map { |x| x['data-id'] })
     db_items = @model.items.where(inventory_pool_id: @current_inventory_pool)
     expect(dom_package_items).to eq db_items
   end

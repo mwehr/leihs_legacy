@@ -15,7 +15,7 @@ Rails.application.configure do
   config.eager_load = true
 
   # Full error reports are disabled and caching is turned on.
-  config.consider_all_requests_local       = false
+  config.consider_all_requests_local = false
   config.action_controller.perform_caching = true
 
   # Enable Rack::Cache to put a simple HTTP cache in front of your application
@@ -26,8 +26,8 @@ Rails.application.configure do
 
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
-  config.public_file_server.enabled = \
-    (YAML.load(ENV['RAILS_SERVE_STATIC_FILES'].presence || "no") == true)
+  config.public_file_server.enabled =
+    (YAML.load(ENV['RAILS_SERVE_STATIC_FILES'].presence || 'no') == true)
 
   # Compress JavaScripts and CSS.
   # NOTE: 'mangle: true' option makes the build non-reproducible!
@@ -85,6 +85,6 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  config.action_mailer.perform_deliveries = \
-    (YAML.load(ENV['LEIHS_SEND_MAILS'].presence || "no") == true)
+  config.action_mailer.perform_deliveries =
+    (YAML.load(ENV['LEIHS_SEND_MAILS'].presence || 'no') == true)
 end

@@ -4,13 +4,13 @@ Given(/^I open the picking list$/) do
   step 'I close the flash message'
 
   within '#lines' do
-    @selected_lines = @current_inventory_pool.reservations.find all(".line input[type='checkbox']:checked").map { |x| x.find(:xpath, './../../../../..')['data-id'] }
+    @selected_lines =
+      @current_inventory_pool.reservations.find all(".line input[type='checkbox']:checked")
+        .map { |x| x.find(:xpath, './../../../../..')['data-id'] }
   end
   step 'I can open the picking list'
 
-  document_window = window_opened_by do
-    click_button _('Picking List')
-  end
+  document_window = window_opened_by { click_button _('Picking List') }
   page.driver.browser.switch_to.window(document_window.handle)
 
   @list_element = find('.picking_list')
@@ -45,30 +45,33 @@ Given(/^I open a picking list$/) do
   end
 
   within '#lines' do
-    @selected_lines = @current_inventory_pool.reservations.find all(".line input[type='checkbox']:checked").map { |x| x.find(:xpath, './../../../../..')['data-id'] }
+    @selected_lines =
+      @current_inventory_pool.reservations.find all(".line input[type='checkbox']:checked")
+        .map { |x| x.find(:xpath, './../../../../..')['data-id'] }
   end
 
   step 'I can open the picking list'
 
-  document_window = window_opened_by do
-    click_button _('Picking List')
-  end
+  document_window = window_opened_by { click_button _('Picking List') }
   page.driver.browser.switch_to.window(document_window.handle)
 
   @list_element = find('.picking_list')
 end
 
-Then(/^I can open the (contract|picking list|value list) of any (order|contract) line$/) do |arg1, arg2|
-  s1 = case arg1
-         when 'contract'
-           _('Contract')
-         when 'picking list'
-           _('Picking List')
-         when 'value list'
-           _('Value List')
-         else
-           raise
-       end
+Then(
+  /^I can open the (contract|picking list|value list) of any (order|contract) line$/
+) do |arg1, arg2|
+  s1 =
+    case arg1
+    when 'contract'
+      _('Contract')
+    when 'picking list'
+      _('Picking List')
+    when 'value list'
+      _('Value List')
+    else
+      raise
+    end
 
   current_role = @current_user.access_right_for(@current_inventory_pool).role
 
@@ -92,16 +95,20 @@ Then(/^I can open the (contract|picking list|value list) of any (order|contract)
 end
 
 Then(/^the lists are sorted by (hand over|take back) date$/) do |arg1|
-  @s1, @s2 = case arg1
-               when 'hand over'
-                 ['start_date', _('Start date')]
-               when 'take back'
-                 ['end_date', _('End date')]
-               else
-                 raise
-             end
+  @s1, @s2 =
+    case arg1
+    when 'hand over'
+      ['start_date', _('Start date')]
+    when 'take back'
+      ['end_date', _('End date')]
+    else
+      raise
+    end
   find("section.list table thead tr th.#{@s1}", match: :first)
-  dates = all("section.list table thead tr th.#{@s1}").map { |el| Date.parse el.text.gsub("#{@s2}: ", '') }
+  dates =
+    all("section.list table thead tr th.#{@s1}").map do |el|
+      Date.parse el.text.gsub("#{@s2}: ", '')
+    end
   expect(dates).to eq dates.sort
 end
 
@@ -115,7 +122,11 @@ Then(/^each list contains the following columns$/) do |table|
   end
 end
 
-Then(/^each list will sorted after (models, then sorted after )?room and shelf( of the most available locations)?$/) do |arg1, arg2|
+Then(
+  /
+    ^each list will sorted after (models, then sorted after )?room and shelf( of the most available locations)?$
+  /
+) do |arg1, arg2|
   lines = @selected_lines || @contract.reservations
   expect(lines).not_to be_blank
   lines.group_by { |x| x.send @s1 }.each_key do |date|
@@ -134,35 +145,60 @@ Then(/^each list will sorted after (models, then sorted after )?room and shelf( 
 end
 
 Then(/^in the list, the assigned items will displayed with inventory code, room and shelf$/) do
-  @selected_lines.select { |line| line.item_id }.each do |line|
-    find('section.list .inventory_code', text: line.item.inventory_code).find(:xpath, './..').find('.location', text: '%s / %s' % [line.item.location.try(:room), line.item.location.try(:shelf)])
+  @selected_lines.select(&:item_id).each do |line|
+    find('section.list .inventory_code', text: line.item.inventory_code).find(:xpath, './..').find(
+      '.location', text: '%s / %s' % [line.item.location.try(:room), line.item.location.try(:shelf)]
+    )
   end
 end
 
 Then(/^in the list, the not assigned items will displayed without inventory code$/) do
   @selected_lines.select { |line| not line.item_id and line.is_a? ItemLine }.each do |line|
-    expect(find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(:xpath, './..').find('.inventory_code').text).to eq ''
+    expect(
+      find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(
+        :xpath, './..'
+      )
+        .find('.inventory_code')
+        .text
+    ).to eq ''
   end
 end
-
 
 Then(/^I can open the picking list$/) do
   find('[data-selection-enabled]').find(:xpath, './following-sibling::*').click
   find('button', text: _('Picking List'))
 end
 
-Then(/^the items without location, are displayed with (the available quantity for this customer and )?"(.*?)"$/) do |arg1, arg2|
+Then(
+  /
+    ^the items without location, are displayed with (the available quantity for this customer and )?"(.*?)"$
+  /
+) do |arg1, arg2|
   lines = @selected_lines || @contract.reservations
   expect(lines).not_to be_blank
   lines.select { |line| line.is_a? ItemLine }.each do |line|
     if line.item_id
-      find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(:xpath, './..').find('.location', text: arg2)
+      find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(
+        :xpath, './..'
+      )
+        .find('.location', text: arg2)
     else
-      locations = line.model.items.in_stock.where(inventory_pool_id: @current_inventory_pool).select('COUNT(items.location_id) AS count, locations.room AS room, locations.shelf AS shelf').joins(:location).group('items.location_id', 'locations.room', 'locations.shelf').order('count DESC, room ASC, shelf ASC')
+      locations =
+        line.model.items.in_stock.where(inventory_pool_id: @current_inventory_pool).select(
+          'COUNT(items.location_id) AS count, locations.room AS room, locations.shelf AS shelf'
+        )
+          .joins(:location)
+          .group('items.location_id', 'locations.room', 'locations.shelf')
+          .order('count DESC, room ASC, shelf ASC')
       locations.to_a.delete_if { |location| location.room.blank? and location.shelf.blank? }
-      not_defined_count = line.model.items.in_stock.where(inventory_pool_id: @current_inventory_pool).count - locations.to_a.sum(&:count)
+      not_defined_count =
+        line.model.items.in_stock.where(inventory_pool_id: @current_inventory_pool).count -
+          locations.to_a.sum(&:count)
       if not_defined_count > 0
-        find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(:xpath, './..').find('.location', text: arg2)
+        find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(
+          :xpath, './..'
+        )
+          .find('.location', text: arg2)
       end
     end
   end
@@ -172,7 +208,10 @@ Then(/^the missing location information for options, are displayed with "(.*?)"$
   lines = @selected_lines || @contract.reservations
   expect(lines).not_to be_blank
   lines.select { |line| line.is_a? OptionLine }.each do |line|
-    find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(:xpath, './..').find('.location', text: _(arg1))
+    find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(
+      :xpath, './..'
+    )
+      .find('.location', text: _(arg1))
   end
 end
 
@@ -180,6 +219,9 @@ Then(/^the unavailable items are displayed with "(.*?)"$/) do |arg1|
   lines = @selected_lines || @contract.reservations
   expect(lines).not_to be_blank
   lines.select { |line| not line.available? }.each do |line|
-    find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(:xpath, './..').find('.location', text: arg1)
+    find('section.list .model_name', match: :prefer_exact, text: line.model.name).find(
+      :xpath, './..'
+    )
+      .find('.location', text: arg1)
   end
 end

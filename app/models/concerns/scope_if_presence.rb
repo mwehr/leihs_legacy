@@ -45,8 +45,10 @@ module Concerns
       def scope_if_presence(arg, &block)
         if arg.presence
           case block.arity
-          when -1, 1 then block.call(all)
-          when 2 then block.call(all, arg)
+          when -1, 1
+            block.call(all)
+          when 2
+            block.call(all, arg)
           else
             raise 'unallowed block arity'
           end

@@ -7,8 +7,7 @@ class Manage::ModelsController < Manage::ApplicationController
   # NOTE overriding super controller
   def required_manager_role
     open_actions = [:timeline, :old_timeline]
-    if not open_actions.include?(action_name.to_sym) \
-      and (request.post? or not request.format.json?)
+    if not open_actions.include?(action_name.to_sym) and (request.post? or not request.format.json?)
       super
     else
       require_role :group_manager, current_inventory_pool
@@ -28,28 +27,26 @@ class Manage::ModelsController < Manage::ApplicationController
 
   def new_old
     not_authorized! unless privileged_user?
-    @model = if params[:type] == 'package'
-               Model.new
-             else
-               (params[:type].try(:humanize) || 'Model').constantize.new
-             end
+    @model =
+      if params[:type] == 'package'
+        Model.new
+      else
+        (params[:type].try(:humanize) || 'Model').constantize.new
+      end
   end
 
   def new
     not_authorized! unless privileged_user?
 
-    manufacturers = \
-      if params[:type] == 'software'
-        Software.manufacturers
-      else
-        Model.manufacturers
-      end
+    manufacturers = params[:type] == 'software' ? Software.manufacturers : Model.manufacturers
 
     @props = {
       inventory_pool_id: current_inventory_pool.id,
       create_model_path: manage_create_model_path,
-      # TODO: #{Kernel.const_get(@model.type || 'Model').manufacturers.to_json}
-      manufacturers: manufacturers.map(&:to_s),
+      manufacturers:
+        # TODO: #{Kernel.const_get(@model.type || 'Model').manufacturers.to_json}
+        manufacturers
+          .map(&:to_s),
       store_attachment_path: manage_model_store_attachment_react_path,
       store_image_path: manage_model_store_image_react_path,
       inventory_path: manage_inventory_path,
@@ -57,30 +54,17 @@ class Manage::ModelsController < Manage::ApplicationController
     }
   end
 
-  Mime::Type.register(
-    'application/octet-stream',
-    :plist_binary,
-    [],
-    ['binary.plist']
-  )
+  Mime::Type.register('application/octet-stream', :plist_binary, [], ['binary.plist'])
   def store_attachment_react
     respond_to do |format|
-      format.plist_binary do
-        store_attachment!(
-          params[:data],
-          model_id: params[:model_id]
-        )
-      end
+      format.plist_binary { store_attachment!(params[:data], model_id: params[:model_id]) }
     end
   end
 
   def store_image_react
     respond_to do |format|
       format.plist_binary do
-        store_image_with_thumbnail!(
-          params[:data],
-          Model.find(params[:model_id])
-        )
+        store_image_with_thumbnail!(params[:data], Model.find(params[:model_id]))
       end
     end
   end
@@ -89,17 +73,16 @@ class Manage::ModelsController < Manage::ApplicationController
     not_authorized! unless privileged_user?
     created = false
     ApplicationRecord.transaction do
-      @model = case params[:model][:type]
-               when 'software'
-                   Software
-               else
-                   Model
-               end.create(product: params[:model][:product],
-                          version: params[:model][:version])
+      @model =
+        case params[:model][:type]
+        when 'software'
+          Software
+        else
+          Model
+        end
+          .create(product: params[:model][:product], version: params[:model][:version])
 
-      if params[:model][:is_package]
-        @model.is_package = true
-      end
+      @model.is_package = true if params[:model][:is_package]
       save_model(@model)
       if !@model.persisted? or @model.errors.any?
         raise ActiveRecord::Rollback
@@ -109,8 +92,7 @@ class Manage::ModelsController < Manage::ApplicationController
     end
 
     unless created
-      render status: :bad_request,
-             plain: @model.errors.full_messages.uniq.join(', ')
+      render status: :bad_request, plain: @model.errors.full_messages.uniq.join(', ')
     else
       render status: :ok, json: { id: @model.id }
     end
@@ -124,26 +106,21 @@ class Manage::ModelsController < Manage::ApplicationController
   def edit
     model = fetch_model
 
-    manufacturers = \
-      if model.type == 'Software'
-        Software.manufacturers
-      else
-        Model.manufacturers
-      end
+    manufacturers = model.type == 'Software' ? Software.manufacturers : Model.manufacturers
 
     max_borrowable_quantity = nil
     if model.persisted?
-      max_borrowable_quantity = \
-        model.borrowable_items.where(
-          inventory_pool_id: current_inventory_pool
-        ).count
+      max_borrowable_quantity =
+        model.borrowable_items.where(inventory_pool_id: current_inventory_pool).count
     end
 
     @props = {
       inventory_pool_id: current_inventory_pool.id,
       create_model_path: manage_create_model_path,
-      # TODO: #{Kernel.const_get(@model.type || 'Model').manufacturers.to_json}
-      manufacturers: manufacturers.map(&:to_s),
+      manufacturers:
+        # TODO: #{Kernel.const_get(@model.type || 'Model').manufacturers.to_json}
+        manufacturers
+          .map(&:to_s),
       store_attachment_path: manage_model_store_attachment_react_path,
       store_image_path: manage_model_store_image_react_path,
       inventory_path: manage_inventory_path,
@@ -151,52 +128,27 @@ class Manage::ModelsController < Manage::ApplicationController
       edit_data: {
         model: model,
         max_borrowable_quantity: max_borrowable_quantity,
-        allocations: model.entitlements.map do |e|
-          {
-            id: e.id,
-            group_id: e.entitlement_group_id,
-            quantity: e.quantity,
-            label: e.entitlement_group.name
-          }
-        end,
-        categories: model.categories.map do |c|
-          {
-            id: c.id,
-            label: c.name
-          }
-        end,
-        accessories: model.accessories.map do |a|
-          {
-            id: a.id,
-            name: a.name,
-            inventory_pool_ids: a.inventory_pool_ids
-          }
-        end,
-        compatibles: model.compatibles.map do |c|
-          {
-            id: c.id,
-            label: c.product + (c.version ? ' ' + c.version : '')
-          }
-        end,
-        properties: model.properties.map do |p|
-          {
-            id: p.id,
-            key: p.key,
-            value: p.value
-          }
-        end,
-        images: model.images.map do |i|
-          {
-            id: i.id,
-            filename: i.filename
-          }
-        end,
-        attachments: model.attachments.map do |i|
-          {
-            id: i.id,
-            filename: i.filename
-          }
-        end
+        allocations:
+          model.entitlements.map do |e|
+            {
+              id: e.id,
+              group_id: e.entitlement_group_id,
+              quantity: e.quantity,
+              label: e.entitlement_group.name
+            }
+          end,
+        categories: model.categories.map { |c| { id: c.id, label: c.name } },
+        accessories:
+          model.accessories.map do |a|
+            { id: a.id, name: a.name, inventory_pool_ids: a.inventory_pool_ids }
+          end,
+        compatibles:
+          model.compatibles.map do |c|
+            { id: c.id, label: c.product + (c.version ? ' ' + c.version : '') }
+          end,
+        properties: model.properties.map { |p| { id: p.id, key: p.key, value: p.value } },
+        images: model.images.map { |i| { id: i.id, filename: i.filename } },
+        attachments: model.attachments.map { |i| { id: i.id, filename: i.filename } }
       }
     }
   end
@@ -209,8 +161,7 @@ class Manage::ModelsController < Manage::ApplicationController
       if save_model @model
         render status: :ok, json: { id: @model.id }
       else
-        render status: :bad_request,
-               plain: @model.errors.full_messages.uniq.join(', ')
+        render status: :bad_request, plain: @model.errors.full_messages.uniq.join(', ')
       end
     end
   end
@@ -229,30 +180,30 @@ class Manage::ModelsController < Manage::ApplicationController
 
   def destroy
     @model = fetch_model
+
     begin
       @model.destroy
       respond_to do |format|
         format.json { render json: true, status: :ok }
         format.html do
-          redirect_to \
-            manage_inventory_path(current_inventory_pool),
-            flash: { success: _('%s successfully deleted') % _('Model') }
+          redirect_to manage_inventory_path(current_inventory_pool),
+                      flash: { success: _('%s successfully deleted') % _('Model') }
         end
       end
     rescue => e
-      @model.errors.add(:base,
-                        if e.class == ActiveRecord::DeleteRestrictionError
-                          :restrict_with_exception_dependent_delete
-                        else
-                          e
-                        end)
+      @model.errors.add(
+        :base,
+        if e.class == ActiveRecord::DeleteRestrictionError
+          :restrict_with_exception_dependent_delete
+        else
+          e
+        end
+      )
       text = @model.errors.full_messages.uniq.join(', ')
       respond_to do |format|
         format.json { render plain: text, status: :forbidden }
         format.html do
-          redirect_to \
-            manage_inventory_path(current_inventory_pool),
-            flash: { error: text }
+          redirect_to manage_inventory_path(current_inventory_pool), flash: { error: text }
         end
       end
     end
@@ -260,21 +211,16 @@ class Manage::ModelsController < Manage::ApplicationController
 
   def old_timeline
     @model = fetch_model
-    respond_to do |format|
-      format.html { render layout: false }
-    end
+    respond_to { |format| format.html { render layout: false } }
   end
 
   include TimelineAvailability
   def timeline
     @props = {
-      timeline_availability: timeline_availability(
-        fetch_model.id, current_inventory_pool.id, lending_manager?
-      )
+      timeline_availability:
+        timeline_availability(fetch_model.id, current_inventory_pool.id, lending_manager?)
     }
-    respond_to do |format|
-      format.html { render layout: false }
-    end
+    respond_to { |format| format.html { render layout: false } }
   end
 
   private
@@ -290,10 +236,8 @@ class Manage::ModelsController < Manage::ApplicationController
       if package['id'].blank?
         ApplicationRecord.transaction do
           item = Item.new
-          data = package.merge owner_id: current_inventory_pool.id,
-                               model: @model
-          data[:inventory_code] ||= \
-            "P-#{Item.proposed_inventory_code(current_inventory_pool)}"
+          data = package.merge owner_id: current_inventory_pool.id, model: @model
+          data[:inventory_code] ||= "P-#{Item.proposed_inventory_code(current_inventory_pool)}"
           item.update_attributes data
           children['id'].each do |child_id|
             child = Item.find(child_id)
@@ -335,8 +279,7 @@ class Manage::ModelsController < Manage::ApplicationController
   private
 
   def inherit_attributes_from_package!(package, item)
-    item.update_attributes!(room_id: package.room_id,
-                            shelf: package.shelf)
+    item.update_attributes!(room_id: package.room_id, shelf: package.shelf)
   end
 
   def save_model(model)
@@ -356,25 +299,40 @@ class Manage::ModelsController < Manage::ApplicationController
     # TODO: # Rails bug: https://github.com/rails/rails/issues/25198
     deal_with_destroy_nested_attributes!(params[:model])
     ###############################################################################
-    p = ActionController::Parameters.new(params[:model].map do |k, v|
-      case k
-      when 'partitions_attributes'
-        [:entitlements_attributes, ActionController::Parameters.new(v.map do |k, v|
-          [k, ActionController::Parameters.new(v.map do |k, v|
-            case k
-            when 'group_id'
-              [:entitlement_group_id, v]
-            else
-              [k, v]
-            end
-          end.to_h)]
-        end.to_h)]
-      else
-        [k, v]
-      end
-    end.to_h)
+    p =
+      ActionController::Parameters.new(
+        params[:model].map do |k, v|
+          case k
+          when 'partitions_attributes'
+            [
+              :entitlements_attributes,
+              ActionController::Parameters.new(
+                v.map do |k, v|
+                  [
+                    k,
+                    ActionController::Parameters.new(
+                      v.map do |k, v|
+                        case k
+                        when 'group_id'
+                          [:entitlement_group_id, v]
+                        else
+                          [k, v]
+                        end
+                      end
+                        .to_h
+                    )
+                  ]
+                end
+                  .to_h
+              )
+            ]
+          else
+            [k, v]
+          end
+        end
+          .to_h
+      )
     p.permit!
     model.update_attributes(p) and model.save
   end
-
 end

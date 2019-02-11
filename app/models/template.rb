@@ -6,17 +6,12 @@ class Template < ModelGroup
   # TODO 12** validates all models are present to current inventory_pool
   # TODO 12** has_many :models through
 
-  after_save do
-    raise _('Template must have at least one model') if model_links.blank?
-  end
+  after_save { raise _('Template must have at least one model') if model_links.blank? }
 
   def self.filter(params, inventory_pool)
     templates = inventory_pool.templates
-    unless params[:search_term].blank?
-      templates = templates.search(params[:search_term])
-    end
-    templates = \
-      templates.order("#{params[:sort] || 'name'} #{params[:order] || 'ASC'}")
+    templates = templates.search(params[:search_term]) unless params[:search_term].blank?
+    templates = templates.order("#{params[:sort] || 'name'} #{params[:order] || 'ASC'}")
     templates = templates.default_paginate params
     templates
   end
@@ -24,19 +19,9 @@ class Template < ModelGroup
   ################################################################################
 
   # returns an array of reservations
-  def add_to_contract(contract,
-                      user,
-                      _quantity = nil,
-                      start_date = nil,
-                      end_date = nil,
-                      delegated_user_id = nil)
+  def add_to_contract(contract, user, _quantity = nil, start_date = nil, end_date = nil, delegated_user_id = nil)
     model_links.flat_map do |ml|
-      ml.model.add_to_contract(contract,
-                               user,
-                               ml.quantity,
-                               start_date,
-                               end_date,
-                               delegated_user_id)
+      ml.model.add_to_contract(contract, user, ml.quantity, start_date, end_date, delegated_user_id)
     end
   end
 

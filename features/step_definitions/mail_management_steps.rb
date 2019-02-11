@@ -7,7 +7,7 @@ end
 
 Then '$email receives an email' do |email|
   expect(ActionMailer::Base.deliveries.size).to eq 1
-  @mail = ActionMailer::Base.deliveries[0]  
+  @mail = ActionMailer::Base.deliveries[0]
   # ActiveMailer upcases the first letter?!
   expect(@mail.to[0].downcase).to eq email.downcase
   ActionMailer::Base.deliveries.clear

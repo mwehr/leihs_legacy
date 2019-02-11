@@ -63,6 +63,5 @@ module Manage
 end
 
 RSpec.configure do |config|
-  config.include Manage::Spec::CategoryCrudSteps,
-                 manage_category_crud: true
+  config.include Manage::Spec::CategoryCrudSteps, manage_category_crud: true
 end

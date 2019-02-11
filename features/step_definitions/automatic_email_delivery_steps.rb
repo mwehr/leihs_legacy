@@ -37,7 +37,9 @@ Then(/^the day before the take back I receive a deadline soon email$/) do
   expect(ActionMailer::Base.deliveries.empty?).to be false
   expect(@current_user.notifications.reload.empty?).to be false
 
-  expect(ActionMailer::Base.deliveries.detect {|x| x.to.include? @current_user.email}.nil?).to be false
+  expect(
+    ActionMailer::Base.deliveries.detect { |x| x.to.include? @current_user.email }.nil?
+  ).to be false
 end
 
 Then(/^the day after the take back I receive a remember email$/) do
@@ -49,7 +51,7 @@ Then(/^the day after the take back I receive a remember email$/) do
   expect(ActionMailer::Base.deliveries.empty?).to be false
   expect(@current_user.notifications.reload.empty?).to be false
 
-  expect(ActionMailer::Base.deliveries.detect {|x| x.to == @current_user.emails }.nil?).to be false
+  expect(ActionMailer::Base.deliveries.detect { |x| x.to == @current_user.emails }.nil?).to be false
 end
 
 Then(/^for each further day I receive an additional remember email$/) do
@@ -64,6 +66,5 @@ Then(/^for each further day I receive an additional remember email$/) do
   expect(ActionMailer::Base.deliveries.empty?).to be false
   expect(@current_user.notifications.reload.empty?).to be false
 
-  expect(ActionMailer::Base.deliveries.detect {|x| x.to == @current_user.emails }.nil?).to be false
+  expect(ActionMailer::Base.deliveries.detect { |x| x.to == @current_user.emails }.nil?).to be false
 end
-

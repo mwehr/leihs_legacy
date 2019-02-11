@@ -23,9 +23,9 @@
 #   @contract = assigns(:contract)
 # end
 
-When "$manager chooses to take back $customer's entry" do | manager, customer |
-  @user = User.find_by_login( customer )
-  get manage_take_back_path( @inventory_pool, @user )
+When "$manager chooses to take back $customer's entry" do |manager, customer|
+  @user = User.find_by_login(customer)
+  get manage_take_back_path(@inventory_pool, @user)
   @reservations = assigns(:reservations)
 end
 
@@ -38,7 +38,7 @@ end
 # end
 
 Then "$who's contract should be closed" do |who|
-  user = User.find_by_login( who )
+  user = User.find_by_login(who)
   contract = Contract.find_by_user_id user.id
   expect(contract.status).to eq :closed
 end

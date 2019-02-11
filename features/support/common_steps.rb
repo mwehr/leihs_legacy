@@ -7,11 +7,11 @@ Given 'pending - reported by $who on $date' do |who, date|
 end
 
 Given 'resolved by $who on $date' do |who, date|
-  # do nothing
+
 end
 
 Given /^reported by (.*) on (.*)/ do |who, date|
-  # do nothing
+
 end
 
 Given /pending - (?!reported by)(.*)/ do |explanation|
@@ -26,13 +26,13 @@ end
 # It needs to be eventually migrated from culerity to capybara all the same
 When /I fill in (\w+) of "([^\"]*)" with "([^\"]*)"/ do |order, field, value|
   text_fields = $browser.text_fields
-  matching = text_fields.find_all { |t| t.id.match( field ) }
+  matching = text_fields.find_all { |t| t.id.match(field) }
   matching[order.to_i].set(value)
 end
 
 # Date changing hackery
 When 'I beam into the future to $date' do |date|
-  Dataset.back_to_date( LeihsFactory.parsedate( date ) )
+  Dataset.back_to_date(LeihsFactory.parsedate(date))
 end
 
 When 'I beam back into the present' do
@@ -40,9 +40,7 @@ When 'I beam back into the present' do
 end
 
 Given(/^today corresponds to the start date of the order$/) do
-  if @contract
-    Dataset.back_to_date @contract.min_date
-  end
+  Dataset.back_to_date @contract.min_date if @contract
   visit current_path # reload the page in order to travel in time also in browser
 end
 
@@ -53,10 +51,8 @@ Then 'I close the flash message' do
 end
 
 Then 'I close the flash message if visible' do
-  flash = first("#flash")
-  if flash
-    flash.find(".fa-times-circle").click
-  end
+  flash = first('#flash')
+  flash.find('.fa-times-circle').click if flash
 end
 
 When 'I scroll loading all pages' do
@@ -68,11 +64,11 @@ When 'I scroll loading all pages' do
 end
 
 Then 'I scroll to the end of the list' do
-  page.execute_script "window.scrollBy(0,10000)"
+  page.execute_script 'window.scrollBy(0,10000)'
 end
 
 Then 'I scroll to the end of the order list twice' do
   find('.list-of-lines .line', match: :first)
-  page.execute_script "window.scrollBy(0,10000)"
-  page.execute_script "window.scrollBy(0,10000)"
+  page.execute_script 'window.scrollBy(0,10000)'
+  page.execute_script 'window.scrollBy(0,10000)'
 end

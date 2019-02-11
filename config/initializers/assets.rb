@@ -8,18 +8,20 @@ Rails.application.config.assets.version = '1.0'
 
 # Precompile additional assets.
 # application.js, application.css, and all non-JS/CSS in app/assets folder are already added.
-Rails.application.config.assets.precompile += %w( application.js
-                                                  borrow.js
-                                                  manage.js
-                                                  borrow.css
-                                                  manage.css
-                                                  print.css
-                                                  i18n/locale/*
-                                                  simile_timeline/*
-                                                  timeline.css
-                                                  upload.js
-                                                  timecop/timecop-0.1.1.js
-                                                )
+Rails.application.config.assets.precompile +=
+  %w[
+    application.js
+    borrow.js
+    manage.js
+    borrow.css
+    manage.css
+    print.css
+    i18n/locale/*
+    simile_timeline/*
+    timeline.css
+    upload.js
+    timecop/timecop-0.1.1.js
+  ]
 
 # DOES NOT WORK: NoMethodError: undefined method `call' for JsrenderRails::Jsrender:Class
 # Sprockets.register_mime_type 'text/jsr', extensions: ['.jsr']

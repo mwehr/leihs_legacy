@@ -7,12 +7,12 @@ When /^I see the calendar$/ do
 end
 
 Then /^I see the availability of models on weekdays as well as holidays and weekends$/ do
-  while all('.fc-widget-content.holiday').empty? do
-    find('.fc-button-next', match: :first).click
-  end
+  find('.fc-button-next', match: :first).click while all('.fc-widget-content.holiday').empty?
   expect(find('.fc-widget-content.holiday .fc-day-content div', match: :first).text).not_to eq ''
   find('.fc-widget-content.holiday .fc-day-content div', match: :first).text.to_i >= 0
-  expect(find('.fc-widget-content.holiday .fc-day-content .total_quantity', match: :first).text).not_to eq ''
+  expect(
+    find('.fc-widget-content.holiday .fc-day-content .total_quantity', match: :first).text
+  ).not_to eq ''
 end
 
 When /^I open the booking calendar$/ do
@@ -27,7 +27,7 @@ When /^I open the booking calendar$/ do
 end
 
 Then /^there is no limit on augmenting the quantity, thus I can overbook$/ do
-  @size = @line.model.items.where(inventory_pool_id: @current_inventory_pool).size*2
+  @size = @line.model.items.where(inventory_pool_id: @current_inventory_pool).size * 2
   find('.modal').fill_in 'booking-calendar-quantity', with: @size
   #expect(find(".modal #booking-calendar-quantity").value.to_i).to eq @size
 end
@@ -37,7 +37,12 @@ Then /^the (order|hand over) can be saved$/ do |arg1|
   step 'the booking calendar is closed'
   case arg1
   when 'order'
-    expect(@line.order.reservations.where(start_date: @line.start_date, end_date: @line.end_date, model_id: @line.model).size).to eq @size
+    expect(
+      @line.order.reservations.where(
+        start_date: @line.start_date, end_date: @line.end_date, model_id: @line.model
+      )
+        .size
+    ).to eq @size
   when 'hand over'
     expect(@line.user.reservations.approved.where(model_id: @line.model).size).to be >= @size
   else
@@ -49,7 +54,8 @@ Given /^I edit all reservations$/ do
   step 'I close the flash message'
 
   find('.multibutton .green.dropdown-toggle').click
-  find(".multibutton .dropdown-item[data-edit-lines='selected-lines']", text: _('Edit Selection')).click
+  find(".multibutton .dropdown-item[data-edit-lines='selected-lines']", text: _('Edit Selection'))
+    .click
 end
 
 Then /^the list underneath the calendar shows the respective line as not available \(red\)$/ do

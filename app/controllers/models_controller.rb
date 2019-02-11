@@ -1,8 +1,5 @@
 class ModelsController < ApplicationController
-
-  before_action do
-    require_role :customer
-  end
+  before_action { require_role :customer }
 
   def image
     image = Model.find(id_param).image(params[:offset])
@@ -12,11 +9,8 @@ class ModelsController < ApplicationController
     elsif image
       redirect_to get_image_path(image.id)
     else
-      empty_gif_pixel = \
-        "R0lGODlhAQABAIAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==\n"
-      send_data(Base64.decode64(empty_gif_pixel),
-                type: 'image/gif',
-                disposition: 'inline')
+      empty_gif_pixel = 'R0lGODlhAQABAIAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==undefined'
+      send_data(Base64.decode64(empty_gif_pixel), type: 'image/gif', disposition: 'inline')
     end
   end
 
@@ -25,5 +19,4 @@ class ModelsController < ApplicationController
   def id_param
     params.require(:id)
   end
-
 end

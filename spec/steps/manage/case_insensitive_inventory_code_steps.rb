@@ -11,10 +11,13 @@ module Manage
 
       step 'there is an item with uppercase inventory code in the current pool' do
         @inventory_code = Faker::Lorem.word.upcase
-        @item = FactoryGirl.create(:item,
-                                   inventory_pool: @current_inventory_pool,
-                                   owner: @current_inventory_pool,
-                                   inventory_code: @inventory_code)
+        @item =
+          FactoryGirl.create(
+            :item,
+            inventory_pool: @current_inventory_pool,
+            owner: @current_inventory_pool,
+            inventory_code: @inventory_code
+          )
       end
 
       step 'I open the page for creating a new item' do
@@ -27,15 +30,12 @@ module Manage
 
       step 'I select a model' do
         model = @current_inventory_pool.models.first
-        type_into_and_select_from_autocomplete(
-          'div#model_id input',
-          model.name
-        )
+        type_into_and_select_from_autocomplete('div#model_id input', model.name)
       end
 
       step 'I see an error message in regards to ' \
-           'already existing inventory code' do
-         find('#error-modal', text: _('Inventory code has already been taken'))
+             'already existing inventory code' do
+        find('#error-modal', text: _('Inventory code has already been taken'))
       end
 
       step 'the item was not saved' do
@@ -43,8 +43,7 @@ module Manage
       end
 
       step 'there is a customer in the current pool' do
-        @customer = \
-          FactoryGirl.create(:customer, inventory_pool: @current_inventory_pool)
+        @customer = FactoryGirl.create(:customer, inventory_pool: @current_inventory_pool)
       end
 
       step 'I open hand over for this customer' do
@@ -88,23 +87,24 @@ module Manage
       end
 
       step 'the new item line was created in the data base' do
-        line = Reservation.find_by(user_id: @customer.id,
-                                   item_id: @item.id,
-                                   status: :approved,
-                                   inventory_pool_id: @current_inventory_pool.id)
+        line =
+          Reservation.find_by(
+            user_id: @customer.id,
+            item_id: @item.id,
+            status: :approved,
+            inventory_pool_id: @current_inventory_pool.id
+          )
         expect(line).to be
       end
 
       step 'I choose a building' do
-        type_into_and_select_from_autocomplete \
-          'div#building_id input[name="item[building_id]"]',
-          Building.general.name
+        type_into_and_select_from_autocomplete 'div#building_id input[name="item[building_id]"]',
+                                               Building.general.name
       end
 
       step 'I choose a room' do
-        type_into_and_select_from_autocomplete \
-          'div#room_id input[name="item[room_id]"]',
-          Building.general.rooms.find_by_general(true).name
+        type_into_and_select_from_autocomplete 'div#room_id input[name="item[room_id]"]',
+                                               Building.general.rooms.find_by_general(true).name
       end
     end
   end
@@ -112,5 +112,5 @@ end
 
 RSpec.configure do |config|
   config.include Manage::Spec::CaseInsensitiveInventoryCodeSteps,
-                 manage_case_insensitive_inventory_code: true
+  manage_case_insensitive_inventory_code: true
 end

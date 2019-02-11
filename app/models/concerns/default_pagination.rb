@@ -9,8 +9,5 @@ module DefaultPagination
     end
   end
 
-  included do
-    extend Collection
-  end
-
+  included { extend Collection }
 end

@@ -37,37 +37,34 @@ module Concerns
       }
       if type == 'Item'
         h1.merge!(
-          # FIXME: using model.try because database inconsistency
-          _('Description') => model.try(:description)
+          _(
+            # FIXME: using model.try because database inconsistency
+            'Description'
+          ) =>
+            model.try(:description)
         )
       end
       h1.merge!(
-        # FIXME: using model.try because database inconsistency
-        case model.try(:type)
+        case # FIXME: using model.try because database inconsistency
+        model
+          .try(:type)
         when 'Software'
           _('Software Information')
         else
           _('Technical Details')
-        end => model.try(:technical_detail)
+        end =>
+          model.try(:technical_detail)
       )
       if type == 'Item'
         # FIXME: using model.try because database inconsistency
         h1.merge!(
+          # investment: investment
           _('Internal Description') => model.try(:internal_description),
           _('Important notes for hand over') => model.try(:hand_over_note),
           _('Categories') => categories.join('; '),
-          _('Accessories') => \
-            (model ? model.accessories.map(&:to_s) : []).join('; '),
-          _('Compatibles') => \
-            (model ? model.compatibles.map(&:to_s) : []).join('; '),
-          _('Properties') => \
-            (model ? model.properties.map(&:to_s) : []).join('; '),
-        # part_of_package: part_of_package,
-        # needs_permission: "#{self.needs_permission}",
-        # responsible: "#{self.responsible}",
-        # location: "#{self.location}",
-        # invoice: invoice,
-        # investment: investment
+          _('Accessories') => (model ? model.accessories.map(&:to_s) : []).join('; '),
+          _('Compatibles') => (model ? model.compatibles.map(&:to_s) : []).join('; '),
+          _('Properties') => (model ? model.properties.map(&:to_s) : []).join('; ')
         )
       end
 
@@ -75,7 +72,7 @@ module Concerns
 
       h2 = {}
       fields.each do |field|
-        next if %w(attachments building_id room_id shelf).include? field.id
+        next if %w[attachments building_id room_id shelf].include? field.id
         h2[_(field.data['label'])] = field.value(self)
       end
       h1.merge! h2
@@ -86,9 +83,9 @@ module Concerns
         _('Shelf') => shelf,
         "#{_('Borrower')} #{_('First name')}" => current_borrower.try(:firstname),
         "#{_('Borrower')} #{_('Last name')}" => current_borrower.try(:lastname),
-        "#{_('Borrower')} #{_('Personal ID')}" => \
-          current_borrower.try(:extended_info).try(:fetch, 'id', nil) \
-            || current_borrower.try(:org_id),
+        "#{_('Borrower')} #{_('Personal ID')}" =>
+          current_borrower.try(:extended_info).try(:fetch, 'id', nil) ||
+            current_borrower.try(:org_id),
         "#{_('Borrowed until')}" => "#{current_reservation.try(:end_date)}"
       )
       h1

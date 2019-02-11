@@ -1,5 +1,4 @@
-# TODO switch on/off through settings 
-
+# TODO switch on/off through settings
 
 # Disable for now, it messes things up on hosts that don't
 # have Internet connectivity.

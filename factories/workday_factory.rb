@@ -1,5 +1,4 @@
 FactoryGirl.define do
-
   factory :workday do
     inventory_pool
     monday { rand > 0.5 }
@@ -10,5 +9,4 @@ FactoryGirl.define do
     saturday { rand > 0.5 }
     sunday { rand > 0.5 }
   end
-
 end

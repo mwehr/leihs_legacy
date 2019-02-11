@@ -1,4 +1,6 @@
-When /^I add (a|an|a borrowable|an unborrowable) (item|license) to the hand over by providing an inventory code$/ do |item_attr, item_type|
+When /
+       ^I add (a|an|a borrowable|an unborrowable) (item|license) to the hand over by providing an inventory code$
+     / do |item_attr, item_type|
   item = FactoryGirl.create(item_type.to_sym, inventory_pool: @current_inventory_pool)
   case item_attr
   when 'a borrowable'
@@ -19,33 +21,40 @@ When /^I add (a|an|a borrowable|an unborrowable) (item|license) to the hand over
   expect(line_amount_before).to be < all('.line', minimum: 1).size
 end
 
-When /^I add (a|an|a borrowable|an unborrowable) (item|license) to the hand over by using the search input field$/ do |item_attr, item_type|
+When /
+       ^I add (a|an|a borrowable|an unborrowable) (item|license) to the hand over by using the search input field$
+     / do |item_attr, item_type|
   items = @current_inventory_pool.items.unretired.send(item_type.pluralize)
   @inventory_codes ||= []
-  @item = case item_attr
-           when 'a', 'an'
-             items.in_stock
-           when 'a borrowable'
-             items.in_stock.where(is_borrowable: true)
-           when 'an unborrowable'
-             items.in_stock.where(is_borrowable: false)
-           end.first
+  @item =
+    case item_attr
+    when 'a', 'an'
+      items.in_stock
+    when 'a borrowable'
+      items.in_stock.where(is_borrowable: true)
+    when 'an unborrowable'
+      items.in_stock.where(is_borrowable: false)
+    end
+      .first
   @model = @item.model
   @inventory_codes << @item.inventory_code
   rescue_displaced_flash do
     find('#assign-or-add-input input').set @item.model.name
     find('.ui-autocomplete .submenu-scroll li', text: @item.model.name).click
-    find('.line', text: @item.model.name, match: :first).find('form[data-assign-item-form] input').click
+    find('.line', text: @item.model.name, match: :first).find('form[data-assign-item-form] input')
+      .click
     find('.ui-menu-item', text: @item.inventory_code).click
   end
 end
 
-Then /^the item is added to the hand over for the provided date range and the inventory code is already assigend$/ do
+Then /
+       ^the item is added to the hand over for the provided date range and the inventory code is already assigend$
+     / do
   expect(
-    @customer
-    .reservations
-    .approved
-    .find_by(inventory_pool_id: @current_inventory_pool, item_id: Item.find_by_inventory_code(@inventory_code))
+    @customer.reservations.approved.find_by(
+      inventory_pool_id: @current_inventory_pool,
+      item_id: Item.find_by_inventory_code(@inventory_code)
+    )
   ).to be
   assigned_inventory_codes = all('.line input[data-assign-item]').map(&:value)
   expect(assigned_inventory_codes).to include @inventory_code
@@ -62,36 +71,38 @@ end
 
 Then /^the (.*?) is added to the hand over$/ do |type|
   case type
-    when 'option'
-      find(".line[data-line-type='option_line'] .col1of10", match: :prefer_exact, text: @inventory_code)
-      option = Option.find_by_inventory_code(@inventory_code)
-      find('#flash', text: option.name)
-      @option_line = @reservation = \
-        @customer
-        .reservations
-        .approved
-        .find_by(inventory_pool_id: @current_inventory_pool, option_id: option)
-      expect(@reservation).to be
-    when 'model'
-      find('#flash', text: 'Added')
-      @item_line = @reservation = \
-        @customer
-        .reservations
-        .approved
-        .find_by(inventory_pool_id: @current_inventory_pool, model_id: @model)
-      expect(@reservation).to be
-      find(".line[data-line-type='item_line'] .col4of10", match: :prefer_exact, text: @model.name)
+  when 'option'
+    find(
+      ".line[data-line-type='option_line'] .col1of10", match: :prefer_exact, text: @inventory_code
+    )
+    option = Option.find_by_inventory_code(@inventory_code)
+    find('#flash', text: option.name)
+    @option_line =
+      @reservation =
+        @customer.reservations.approved.find_by(
+          inventory_pool_id: @current_inventory_pool, option_id: option
+        )
+    expect(@reservation).to be
+  when 'model'
+    find('#flash', text: 'Added')
+    @item_line =
+      @reservation =
+        @customer.reservations.approved.find_by(
+          inventory_pool_id: @current_inventory_pool, model_id: @model
+        )
+    expect(@reservation).to be
+    find(".line[data-line-type='item_line'] .col4of10", match: :prefer_exact, text: @model.name)
   end
 end
 
-When /^I add an option to the hand over which is already existing in the selected date range by providing an inventory code$/ do
+When /
+       ^I add an option to the hand over which is already existing in the selected date range by providing an inventory code$
+     / do
   option_line = @contract.option_lines.first
   @option = option_line.option
   @quantity_before = option_line.quantity
   @n = rand(2..5)
-  @n.times do
-    step 'I add an option to the hand over by providing an inventory code'
-  end
+  @n.times { step 'I add an option to the hand over by providing an inventory code' }
 end
 
 Then /^the existing option quantity is increased$/ do
@@ -103,8 +114,9 @@ Then /^the existing option quantity is increased$/ do
   expect(@option_line.quantity).to eq (@quantity_before + @n)
 end
 
-When /^I type the beginning of (.*?) name to the add\/assign input field$/ do |type|
-  @target_name = case type
+When %r{^I type the beginning of (.*?) name to the add\/assign input field$} do |type|
+  @target_name =
+    case type
     when 'an option'
       @option = FactoryGirl.create(:option, inventory_pool: @current_inventory_pool)
       @inventory_code = @option.inventory_code
@@ -117,7 +129,7 @@ When /^I type the beginning of (.*?) name to the add\/assign input field$/ do |t
     when 'a template'
       @template = @current_inventory_pool.templates.first
       @template.name
-  end
+    end
   type_into_autocomplete '#assign-or-add-input input', @target_name[0..-2]
 end
 
@@ -130,17 +142,21 @@ end
 
 Then(/^I see that model in the list of suggested model names as "(.*?)"$/) do |arg1|
   case arg1
-    when 'not borrowable'
-      find('.ui-autocomplete a.light-red', match: :prefer_exact, text: @target_name)
-    else
-      'not found'
+  when 'not borrowable'
+    find('.ui-autocomplete a.light-red', match: :prefer_exact, text: @target_name)
+  else
+    'not found'
   end
 end
 
-
 When /^I select the (.*?) from the list$/ do |type|
   # trick closing possible tooltips
-  page.driver.browser.action.move_to(find('nav#topbar').native).perform
+  page
+    .driver
+    .browser
+    .action
+    .move_to(find('nav#topbar').native)
+    .perform
 
   within '.ui-autocomplete' do
     if type == 'option'
@@ -167,14 +183,19 @@ When /^I add so many reservations that I break the maximal quantity of a model$/
   start_date = Date.parse find('#add-start-date').value
   end_date = Date.parse find('#add-end-date').value
   av = @model.availability_in(@current_inventory_pool)
-  quantity_to_add = if @contract
-                      av.maximum_available_in_period_summed_for_groups start_date, end_date, @contract.user.entitlement_groups.map(&:id)
-                    elsif @order
-                      av.maximum_available_in_period_summed_for_groups start_date, end_date, @order.user.entitlement_groups.map(&:id)
-                    else
-                      @model.items.size
-                    end
-  @quantity_added = [quantity_to_add+1, 0].max
+  quantity_to_add =
+    if @contract
+      av.maximum_available_in_period_summed_for_groups start_date,
+      end_date,
+      @contract.user.entitlement_groups.map(&:id)
+    elsif @order
+      av.maximum_available_in_period_summed_for_groups start_date,
+      end_date,
+      @order.user.entitlement_groups.map(&:id)
+    else
+      @model.items.size
+    end
+  @quantity_added = [quantity_to_add + 1, 0].max
   @quantity_added.times do
     type_into_autocomplete '#assign-or-add-input input, #add-input input', @target_name
     step 'I see a list of suggested model names'
@@ -185,9 +206,7 @@ end
 Then /^I see that all reservations of that model have availability problems$/ do
   find(".line[data-line-type='item_line']", match: :prefer_exact, text: @target_name)
   @lines = all(".line[data-line-type='item_line']", text: @target_name)
-  @lines.each do |line|
-    line.find('.line-info.red')
-  end
+  @lines.each { |line| line.find('.line-info.red') }
 end
 
 When /^I add an item to the hand over$/ do
@@ -197,7 +216,10 @@ When /^I add an item to the hand over$/ do
 end
 
 Given(/^there is a model or software which all items are set to "not borrowable"$/) do
-  @model = FactoryGirl.create(:model_with_items, inventory_pool: @current_inventory_pool, is_borrowable: false)
+  @model =
+    FactoryGirl.create(
+      :model_with_items, inventory_pool: @current_inventory_pool, is_borrowable: false
+    )
 end
 
 Then(/^the quantity on the option line is (\d+)$/) do |quantity|

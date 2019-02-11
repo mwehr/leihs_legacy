@@ -26,9 +26,13 @@ class ApplicationController < ActionController::Base
 
   def status
     render json: {
-      db_schema_migrations_max_version: ActiveRecord::Base.connection \
-      .select_values('select max(version::int) from schema_migrations').first
-    }, status: 200
+             db_schema_migrations_max_version:
+               ActiveRecord::Base.connection.select_values(
+                 'select max(version::int) from schema_migrations'
+               )
+                 .first
+           },
+           status: 200
   end
 
   attr_reader :user_session, :current_user
@@ -47,18 +51,14 @@ class ApplicationController < ActionController::Base
       # because of time travel in test, AR sets the fake created at otherwise
       real_now = ActiveRecord::Base.connection.execute('SELECT now()').first['now']
 
-      UserSession.create!(user: user,
-                          token_hash: token_hash,
-                          created_at: real_now)
+      UserSession.create!(user: user, token_hash: token_hash, created_at: real_now)
 
       cookies['leihs-user-session'] = { value: token }
       redirect_to root_path
     end
 
     def sign_out
-      if current_user
-        UserSession.where(user: current_user).destroy_all
-      end
+      UserSession.where(user: current_user).destroy_all if current_user
       cookies.delete 'leihs-user-session'
       flash[:notice] = _('You have been logged out.')
       redirect_back_or_default('/')
@@ -86,9 +86,7 @@ class ApplicationController < ActionController::Base
 
   # NOTE: see hook on top of file
   def better_errors_hack
-    if request.env.key?('puma.config')
-      request.env['puma.config'].options.user_options.delete(:app)
-    end
+    request.env['puma.config'].options.user_options.delete(:app) if request.env.key?('puma.config')
   end
 
   def respond_with_presenter(presenter)
@@ -102,5 +100,4 @@ class ApplicationController < ActionController::Base
   def render_json(presenter)
     render(json: JSON.pretty_generate(presenter.dump))
   end
-
 end

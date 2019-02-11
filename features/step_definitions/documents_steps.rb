@@ -1,45 +1,57 @@
 # -*- encoding : utf-8 -*-
 
 When(/^I click on "([^"]*)" underneath my username$/) do |arg|
-  #step "ich über meinen Namen fahre"
-  step 'I hover over my name'
+  step #step "ich über meinen Namen fahre"
+       'I hover over my name'
   find("a[href='#{borrow_user_documents_path}']").click
 end
 
 Then(/^my contracts are ordered by the earliest time window$/) do
-  dates = all('div.line-col', text: /\d{2}.\d{2}.\d{4}\s\-\s\d{2}.\d{2}.\d{4}/).map {|x| Date.parse(x.text.split.first) }
+  dates =
+    all('div.line-col', text: /\d{2}.\d{2}.\d{4}\s\-\s\d{2}.\d{2}.\d{4}/).map do |x|
+      Date.parse(x.text.split.first)
+    end
   expect(dates.sort).to eq dates
 end
 
 Then(/^I see the following information for each contract:$/) do |table|
-  contracts = @current_user.contracts.sort {|a,b| b.time_window_min <=> a.time_window_min}
+  contracts = @current_user.contracts.sort { |a, b| b.time_window_min <=> a.time_window_min }
   contracts.each do |contract|
     within(".line[data-id='#{contract.id}']") do
       table.raw.flatten.each do |s|
         case s
-          when 'Contract number'
-            expect(has_content?(contract.compact_id)).to be true
-          when 'Time window with its start and end'
-            expect(has_content?(contract.time_window_min.strftime('%d/%m/%Y'))).to be true
-            expect(has_content?(contract.time_window_max.strftime('%d/%m/%Y'))).to be true
-            expect(has_content?((contract.time_window_max - contract.time_window_min).to_i.abs + 1)).to be true
-          when 'Inventory pool'
-            expect(has_content?(contract.inventory_pool.shortname)).to be true
-          when 'Purpose'
-            expect(has_content?(contract.purpose)).to be true
-          when 'Status'
-            expect(has_content?(_('Open'))).to be true if contract.state == :open
-          when 'Link to the contract'
-            expect(has_selector?("a[href='#{borrow_user_contract_path(contract.id)}']", text: _('Contract'))).to be true
-          when 'Link to the value list'
-            unless first('.dropdown')
-              find('.dropdown-holder').click
-            end
-            find("a[href='#{borrow_user_contract_path(contract.id)}'] + .dropdown-holder > .dropdown-toggle").click
-            expect(has_selector?("a[href='#{borrow_user_value_list_path(contract.id)}']")).to be true
-            find("a[href='#{borrow_user_contract_path(contract.id)}']").click # release the previous click
-          else
-            raise 'unkown section'
+        when 'Contract number'
+          expect(has_content?(contract.compact_id)).to be true
+        when 'Time window with its start and end'
+          expect(has_content?(contract.time_window_min.strftime('%d/%m/%Y'))).to be true
+          expect(has_content?(contract.time_window_max.strftime('%d/%m/%Y'))).to be true
+          expect(
+            has_content?((contract.time_window_max - contract.time_window_min).to_i.abs + 1)
+          ).to be true
+        when 'Inventory pool'
+          expect(has_content?(contract.inventory_pool.shortname)).to be true
+        when 'Purpose'
+          expect(has_content?(contract.purpose)).to be true
+        when 'Status'
+          expect(has_content?(_('Open'))).to be true if contract.state == :open
+        when 'Link to the contract'
+          expect(
+            has_selector?(
+              "a[href='#{borrow_user_contract_path(contract.id)}']", text: _('Contract')
+            )
+          ).to be true
+        when 'Link to the value list'
+          find('.dropdown-holder').click unless first('.dropdown')
+          find(
+            "a[href='#{borrow_user_contract_path(
+              contract.id
+            )}'] + .dropdown-holder > .dropdown-toggle"
+          )
+            .click
+          expect(has_selector?("a[href='#{borrow_user_value_list_path(contract.id)}']")).to be true
+          find("a[href='#{borrow_user_contract_path(contract.id)}']").click # release the previous click
+        else
+          raise 'unkown section'
         end
       end
     end
@@ -50,9 +62,7 @@ Given(/^I click the value list link$/) do
   @contract = @current_user.contracts.first
   within(".row.line[data-id='#{@contract.id}']") do
     find('.dropdown-toggle').click
-    document_window = window_opened_by do
-      click_link _('Value List')
-    end
+    document_window = window_opened_by { click_link _('Value List') }
     page.driver.browser.switch_to.window(document_window.handle)
   end
 end
@@ -63,15 +73,14 @@ end
 
 Given(/^I click the contract link$/) do
   @contract = @current_user.contracts.first
-  document_window = window_opened_by do
-    find("a[href='#{borrow_user_contract_path(@contract.id)}']", text: _('Contract')).click
-  end
+  document_window =
+    window_opened_by do
+      find("a[href='#{borrow_user_contract_path(@contract.id)}']", text: _('Contract')).click
+    end
   page.driver.browser.switch_to.window(document_window.handle)
 end
 
-Then(/^the contract opens$/) do
-  expect(current_path).to eq borrow_user_contract_path(@contract.id)
-end
+Then(/^the contract opens$/) { expect(current_path).to eq borrow_user_contract_path(@contract.id) }
 
 When(/^I open a value list from my documents$/) do
   @contract = @current_user.contracts.first
@@ -90,7 +99,7 @@ When(/^I open a contract from my documents$/) do
 end
 
 When(/^I open a contract with returned items from my documents$/) do
-  @contract = @current_user.contracts.find {|c| c.reservations.any? &:returned_to_user}
+  @contract = @current_user.contracts.find { |c| c.reservations.any? &:returned_to_user }
   visit borrow_user_contract_path(@contract.id)
   step 'the contract opens'
 end
@@ -100,15 +109,27 @@ Then(/^I see the contract and it looks like in the manage section$/) do
   # The rest is deleted: Dito, see above.
 end
 
-Then(/^the relevant reservations show the person taking back the item in the format "F. Lastname"$/) do
+Then(
+  /^the relevant reservations show the person taking back the item in the format "F. Lastname"$/
+) do
   if @reservations_to_take_back
     @reservations_to_take_back.map(&:contract).uniq.each do |contract|
-      new_window = window_opened_by do
-        find(".button[target='_blank'][href='#{manage_contract_path(@current_inventory_pool, contract)}']").click
-      end
+      new_window =
+        window_opened_by do
+          find(
+            ".button[target='_blank'][href='#{manage_contract_path(
+              @current_inventory_pool, contract
+            )}']"
+          )
+            .click
+        end
       within_window new_window do
         contract.reservations.each do |cl|
-          find('.contract .list.returned_items tr', text: /#{cl.quantity}.*#{cl.item.inventory_code}.*#{I18n.l cl.end_date}/).find('.returning_date', text: cl.returned_to_user.short_name)
+          find(
+            '.contract .list.returned_items tr',
+            text: /#{cl.quantity}.*#{cl.item.inventory_code}.*#{I18n.l cl.end_date}/
+          )
+            .find('.returning_date', text: cl.returned_to_user.short_name)
         end
       end
     end
@@ -116,7 +137,9 @@ Then(/^the relevant reservations show the person taking back the item in the for
     reservations = @contract.reservations.where.not(returned_date: nil)
     expect(reservations.size).to be > 0
     reservations.each do |cl|
-      find('.contract .list.returned_items tr', text: cl.item.inventory_code).find('.returning_date', text: cl.returned_to_user.short_name)
+      find('.contract .list.returned_items tr', text: cl.item.inventory_code).find(
+        '.returning_date', text: cl.returned_to_user.short_name
+      )
     end
   end
 end
@@ -126,11 +149,10 @@ Given(/^I am a customer with contracts with different dates$/) do
   customer = FactoryGirl.create(:user)
   customer.access_rights << FactoryGirl.create(:access_right, inventory_pool: inventory_pool)
   (Date.today..Date.today + 1.week).each do |date|
-    FactoryGirl.create(:open_contract,
-                       inventory_pool: inventory_pool,
-                       user: customer,
-                       start_date: date,
-                       end_date: date + 1.day)
+    FactoryGirl.create(
+      :open_contract,
+      inventory_pool: inventory_pool, user: customer, start_date: date, end_date: date + 1.day
+    )
   end
   step 'I am logged in as "%s"' % customer.login
 end

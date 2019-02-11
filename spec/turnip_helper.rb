@@ -13,9 +13,7 @@ if ENV['FIREFOX_ESR_45_PATH'].present?
 end
 
 [:firefox].each do |browser|
-  Capybara.register_driver browser do |app|
-    Capybara::Selenium::Driver.new app, browser: browser
-  end
+  Capybara.register_driver browser { |app| Capybara::Selenium::Driver.new app, browser: browser }
 end
 
 Capybara.configure do |config|
@@ -24,24 +22,19 @@ Capybara.configure do |config|
 end
 
 RSpec.configure do |config|
-
   config.raise_error_for_unimplemented_steps = true
 
   config.include Rails.application.routes.url_helpers
 
   config.before(type: :feature) do
-    PgTasks.truncate_tables()
+    PgTasks.truncate_tables
     FactoryGirl.create(:setting) unless Setting.first
     Capybara.current_driver = :firefox
     page.driver.browser.manage.window.maximize
   end
 
   config.after(type: :feature) do |example|
-    if ENV['CIDER_CI_TRIAL_ID'].present?
-      unless example.exception.nil?
-        take_screenshot
-      end
-    end
+    take_screenshot unless example.exception.nil? if ENV['CIDER_CI_TRIAL_ID'].present?
     page.driver.quit # OPTIMIZE force close browser popups
     Capybara.current_driver = Capybara.default_driver
     # PgTasks.truncate_tables()
@@ -50,16 +43,22 @@ RSpec.configure do |config|
   def take_screenshot(screenshot_dir = nil, name = nil)
     screenshot_dir ||= Rails.root.join('tmp', 'capybara')
     name ||= "screenshot_#{Time.zone.now.iso8601.gsub(/:/, '-')}.png"
-    Dir.mkdir screenshot_dir rescue nil
+    begin
+      Dir.mkdir screenshot_dir
+    rescue StandardError
+      nil
+    end
     path = screenshot_dir.join(name)
     case Capybara.current_driver
     when :firefox
-      page.driver.browser.save_screenshot(path) rescue nil
+      begin
+        page.driver.browser.save_screenshot(path)
+      rescue StandardError
+        nil
+      end
     else
-      Rails
-        .logger
-        .warn "Taking screenshots is not implemented for \
-      #{Capybara.current_driver}."
+      Rails.logger.warn "Taking screenshots is not implemented for undefined      #{Capybara
+        .current_driver}."
     end
   end
 end

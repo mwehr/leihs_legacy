@@ -13,5 +13,4 @@ class Property < ApplicationRecord
   def label_for_audits
     to_s
   end
-
 end

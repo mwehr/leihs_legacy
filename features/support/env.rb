@@ -59,15 +59,14 @@ end
 Before('@ldap') do
   ENV['TMPDIR'] = File.join(Rails.root, 'tmp')
   # TODO: Move this out to something that runs *before* the test suite itself?
-  unless File.exist?(ENV['TMPDIR'])
-    Dir.mkdir(ENV['TMPDIR'])
-  end
+  Dir.mkdir(ENV['TMPDIR']) unless File.exist?(ENV['TMPDIR'])
   Setting::LDAP_CONFIG = File.join(Rails.root, 'features', 'data', 'LDAP_generic.yml')
-  @ldap_server = Ladle::Server.new(
-    port: 12345,
-    ldif: File.join(Rails.root, 'features', 'data', 'ldif', 'generic.ldif'),
-    domain: 'dc=example,dc=org'
-  )
+  @ldap_server =
+    Ladle::Server.new(
+      port: 12345,
+      ldif: File.join(Rails.root, 'features', 'data', 'ldif', 'generic.ldif'),
+      domain: 'dc=example,dc=org'
+    )
   @ldap_server.start
 end
 
@@ -78,12 +77,10 @@ Before('~@rack') do
 end
 
 Before do
-  Cucumber.logger.info "Current capybara driver: %s\n" % Capybara.current_driver
+  Cucumber.logger.info 'Current capybara driver: %sundefined' % Capybara.current_driver
   Dataset.restore_dump
 end
 
 ##################################################################################
 
-After('@ldap') do
-  @ldap_server.stop
-end
+After('@ldap') { @ldap_server.stop }

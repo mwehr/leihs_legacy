@@ -19,8 +19,9 @@ module AuthenticatedSystem
       store_location
       flash[:notice] = _("You don't have permission to perform this action")
       redirect_to root_path
-    else
+
       # NOTE in case of post requests
+    else
       render status: :method_not_allowed,
              plain: _("You don't have permission to perform this action")
     end
@@ -30,8 +31,7 @@ module AuthenticatedSystem
   #
   # We can return to this location by calling #redirect_back_or_default.
   def store_location
-    session[:return_to] = \
-      request.fullpath # sellittf#Rails3.1# request.request_uri
+    session[:return_to] = request.fullpath # sellittf#Rails3.1# request.request_uri
   end
 
   # Redirect to the URI stored by the most recent store_location call or
@@ -48,11 +48,6 @@ module AuthenticatedSystem
   end
 
   def require_role(role, inventory_pool = nil)
-    if current_user and current_user.has_role?(role, inventory_pool)
-      true
-    else
-      access_denied
-    end
+    current_user and current_user.has_role?(role, inventory_pool) ? true : access_denied
   end
-
 end

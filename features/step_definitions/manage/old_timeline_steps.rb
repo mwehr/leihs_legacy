@@ -1,6 +1,5 @@
 # -*- encoding : utf-8 -*-
 
-
 def for_each_visible_model_I_can_see_the_Timeline(in_new_window)
   line_selector = nil
   parent_id = nil
@@ -28,10 +27,10 @@ def for_each_visible_model_I_can_see_the_Timeline(in_new_window)
 
   current_role = @current_user.access_right_for(@current_inventory_pool).role
 
-  line_texts = find(parent_id).all(line_selector, visible: true).map do |line_element|
-    line_element.find('.test-fix-timeline').text
-  end
-
+  line_texts =
+    find(parent_id).all(line_selector, visible: true).map do |line_element|
+      line_element.find('.test-fix-timeline').text
+    end
 
   line_texts[0..5].each do |line_text|
     line = find(line_selector, text: line_text)
@@ -45,7 +44,7 @@ def for_each_visible_model_I_can_see_the_Timeline(in_new_window)
       end
     end
     if in_new_window
-      new_window =  window_opened_by { timeline_button.click }
+      new_window = window_opened_by { timeline_button.click }
       within_window new_window do
         find('div.row > div > div > div', text: 'Total')
         new_window.close
@@ -53,7 +52,7 @@ def for_each_visible_model_I_can_see_the_Timeline(in_new_window)
     else
       timeline_button.click
       find('.modal iframe')
-      evaluate_script %Q{ $(".modal iframe").contents().first("#my_timeline").length; }
+      evaluate_script ' $(".modal iframe").contents().first("#my_timeline").length; '
       find('.modal .button', text: _('Close')).click
       step 'the modal is closed'
     end

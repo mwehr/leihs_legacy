@@ -7,9 +7,7 @@ end
 
 When /^each entry of a submitted order refers to a purpose$/ do
   reservations = rand(3..6).times.map { FactoryGirl.create :reservation, status: :submitted }
-  reservations.each do |line|
-    expect(line.purpose.is_a?(Purpose)).to be true
-  end
+  reservations.each { |line| expect(line.purpose.is_a?(Purpose)).to be true }
 end
 
 When /^each entry of an order can refer to a purpose$/ do
@@ -19,7 +17,6 @@ When /^each entry of an order can refer to a purpose$/ do
     expect(line.purpose.is_a?(Purpose)).to be true
   end
 end
-
 
 Then /^I see the purpose$/ do
   expect(has_content?(@order.purpose)).to be true
@@ -56,7 +53,7 @@ end
 Then /^I am told during hand over to assign a purpose$/ do
   find('.multibutton .button[data-hand-over-selection]').click
   within '.modal' do
-    find('#purpose-input', text: _("Please provide a purpose...")).find('#purpose')
+    find('#purpose-input', text: _('Please provide a purpose...')).find('#purpose')
   end
 end
 
@@ -69,12 +66,13 @@ Then /^only when I assign a purpose$/ do
 end
 
 Given(/^the current inventory pool (requires|doesn't require) purpose$/) do |arg1|
-  b = case arg1
-        when "requires"
-          true
-        else
-          false
-      end
+  b =
+    case arg1
+    when 'requires'
+      true
+    else
+      false
+    end
   @current_inventory_pool.update_attributes(required_purpose: b)
 end
 
@@ -109,12 +107,13 @@ When /^I define a purpose$/ do
   find('#add-purpose').click
   @added_purpose = 'Another Purpose'
   find('#purpose').set @added_purpose
-  @approved_lines = @customer.orders.approved.find_by(inventory_pool_id: @current_inventory_pool).reservations
+  @approved_lines =
+    @customer.orders.approved.find_by(inventory_pool_id: @current_inventory_pool).reservations
   step 'I can finish the hand over'
 end
 
 Then /^only items without purpose are assigned that purpose$/ do
-  @approved_lines.select{|l| l.purpose.blank?}.each do |line|
+  @approved_lines.select { |l| l.purpose.blank? }.each do |line|
     expect(line.purpose.description).to eq @added_purpose
   end
 end
@@ -124,10 +123,12 @@ When /^all selected items have an assigned purpose$/ do
   reservations = @contract.reservations
   reservations.each do |line|
     @item_line = line
+
     begin
       step 'I select one of those'
-    rescue
+
       # if we ran out of available items, and an Capybara::Element not found exception was raised, just ensure that all the selected and assigned contract reservations so far, have a purpose
+    rescue StandardError
       expect(reservations.reload.select(&:item).all?(&:purpose)).to be true
       break
     end
@@ -138,7 +139,7 @@ When /^all selected items have an assigned purpose$/ do
     step 'I select all reservations selecting all linegroups'
   end
   # ensure that only reservations with assigned items are selected before continuing with the test
-  reservations.reload.select{|l| !l.item}.each do |l|
+  reservations.reload.select { |l| !l.item }.each do |l|
     cb = find(".line[data-id='#{l.id}'] input[type='checkbox']")
     cb.click if cb.checked?
   end
@@ -149,14 +150,16 @@ When /^all selected items have an assigned purpose$/ do
   step 'the booking calendar is closed'
 
   within '#lines' do
-    reservations = reservations.select {|line| line.item and find(".line[data-id='#{line.id}'] input[type='checkbox'][data-select-line]").checked? }
+    reservations =
+      reservations.select do |line|
+        line.item and
+          find(".line[data-id='#{line.id}'] input[type='checkbox'][data-select-line]").checked?
+      end
   end
 
   find('.multibutton .button[data-hand-over-selection]').click
   within('.modal') do
-    reservations.each do |line|
-      find('.row', match: :first, text: line.purpose.to_s)
-    end
+    reservations.each { |line| find('.row', match: :first, text: line.purpose.to_s) }
   end
 end
 
@@ -164,9 +167,7 @@ Then /^I cannot assign any more purposes$/ do
   expect(has_no_selector?('.modal .purpose button', visible: true)).to be true
 end
 
-When(/^I click on hand over$/) do
-  find('[data-hand-over-selection]').click
-end
+When(/^I click on hand over$/) { find('[data-hand-over-selection]').click }
 
 When(/^I add a purpose$/) do
   within '.modal' do
@@ -177,9 +178,7 @@ When(/^I add a purpose$/) do
 end
 
 When(/^I finish the hand over$/) do
-  @contract_window = window_opened_by do
-    find('.modal [data-hand-over]').click
-  end
+  @contract_window = window_opened_by { find('.modal [data-hand-over]').click }
 end
 
 Then(/^the contract has the original plus the added purpose$/) do
@@ -193,11 +192,13 @@ end
 Then(/^there is an approved and assigned reservation with purpose for a customer$/) do
   @customer = FactoryGirl.create(:customer, inventory_pool: @current_inventory_pool)
   @purpose = Faker::Lorem.sentence
-  @reservation = FactoryGirl.create(:item_line, :with_assigned_item, :with_purpose,
-                                    purpose: @purpose,
-                                    user: @customer,
-                                    inventory_pool: @current_inventory_pool,
-                                    status: :approved)
+  @reservation =
+    FactoryGirl.create(
+      :item_line,
+      :with_assigned_item,
+      :with_purpose,
+      purpose: @purpose, user: @customer, inventory_pool: @current_inventory_pool, status: :approved
+    )
 end
 
 Then(/^I open the hand over page for this customer$/) do
@@ -210,11 +211,16 @@ end
 
 Given(/^there is another approved and assigned reservation with purpose for a customer$/) do
   @another_purpose = Faker::Lorem.sentence
-  @another_reservation = FactoryGirl.create(:item_line, :with_assigned_item, :with_purpose,
-                                            purpose: @another_purpose,
-                                            user: @customer,
-                                            inventory_pool: @current_inventory_pool,
-                                            status: :approved)
+  @another_reservation =
+    FactoryGirl.create(
+      :item_line,
+      :with_assigned_item,
+      :with_purpose,
+      purpose: @another_purpose,
+      user: @customer,
+      inventory_pool: @current_inventory_pool,
+      status: :approved
+    )
 end
 
 Then(/^the contract has both the purposes$/) do
@@ -224,4 +230,3 @@ Then(/^the contract has both the purposes$/) do
     expect(current_scope).to have_content @another_purpose
   end
 end
-

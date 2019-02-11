@@ -1,6 +1,5 @@
 module LeihsAdmin
   class SettingsController < AdminController
-
     def edit
       @settings = app_settings || Setting.new
     end
@@ -16,7 +15,5 @@ module LeihsAdmin
         render :edit
       end
     end
-
   end
-
 end

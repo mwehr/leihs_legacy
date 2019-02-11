@@ -3,15 +3,12 @@ module ExpertComparators
   extend ActiveSupport::Concern
 
   included do
-
     private
 
     def reduce_for_radio(items, filter_value, field_config)
       selection_id = filter_value['selection']
 
-      if selection_id.nil?
-        return items
-      end
+      return items if selection_id.nil?
 
       generic_equal_value(items, selection_id, field_config)
     end
@@ -19,18 +16,11 @@ module ExpertComparators
     def reduce_for_select(items, field_id, filter_value, field_config)
       value = filter_value['selection']
 
-      if value.nil?
-        return items
-      end
+      return items if value.nil?
 
       case field_id
       when 'retired'
-
-        if value == true
-          return items.where.not(retired: nil)
-        else
-          return items.where(retired: nil)
-        end
+        value == true ? return items.where.not(retired: nil) : return items.where(retired: nil)
       else
         generic_equal_value(items, value, field_config)
       end
@@ -38,24 +28,14 @@ module ExpertComparators
 
     def reduce_for_text(items, filter_value, field_config)
       if field_config['currency']
-
         from_string = filter_value['from']
         to_string = filter_value['to']
 
-        if (from_string == '' || number?(from_string)) \
-          && (to_string == '' || number?(to_string))
-          from = \
-            if number?(from_string)
-              from_string.to_f
-            end
-          to = \
-            if number?(to_string)
-              to_string.to_f
-            end
+        if (from_string == '' || number?(from_string)) && (to_string == '' || number?(to_string))
+          from = from_string.to_f if number?(from_string)
+          to = to_string.to_f if number?(to_string)
 
-          if from.nil? && to.nil?
-            return items
-          end
+          return items if from.nil? && to.nil?
 
           generic_between_value(items, from, to, field_config)
         else
@@ -64,9 +44,7 @@ module ExpertComparators
       else
         text = filter_value['text']
 
-        if text == ''
-          return items
-        end
+        return items if text == ''
 
         generic_ilike(items, text, field_config)
       end
@@ -75,9 +53,7 @@ module ExpertComparators
     def reduce_for_textarea(items, filter_value, field_config)
       text = filter_value['text']
 
-      if text == ''
-        return items
-      end
+      return items if text == ''
 
       generic_ilike(items, text, field_config)
     end
@@ -85,27 +61,16 @@ module ExpertComparators
     def reduce_for_date(items, filter_value, field_config)
       date = filter_value['date']
 
-      if date == ''
-        return items
-      end
+      return items if date == ''
 
       from_string = filter_value['from']
       to_string = filter_value['to']
 
-      if (from_string == '' || date?(from_string)) \
-        && (to_string == '' || date?(to_string))
-        from = \
-          if date?(from_string)
-            Date.parse(from_string)
-          end
-        to = \
-          if date?(to_string)
-            Date.parse(to_string)
-          end
+      if (from_string == '' || date?(from_string)) && (to_string == '' || date?(to_string))
+        from = Date.parse(from_string) if date?(from_string)
+        to = Date.parse(to_string) if date?(to_string)
 
-        if from.nil? && to.nil?
-          return items
-        end
+        return items if from.nil? && to.nil?
 
         generic_between_value(items, from, to, field_config)
       else
@@ -123,22 +88,12 @@ module ExpertComparators
         result = result.where("items.#{attribute} <= :to", to: to) if to
         result
       elsif attribute.is_a?(Array)
-        if attribute.length != 2
-          throw 'Attribute length must be 2, but is: ' + attribute.to_s
-        end
-        if attribute[0] != 'properties'
-          throw 'We expect properties, but is: ' + attribute.to_s
-        end
+        throw 'Attribute length must be 2, but is: ' + attribute.to_s if attribute.length != 2
+        throw 'We expect properties, but is: ' + attribute.to_s if attribute[0] != 'properties'
 
         result = items
-        if from
-          result = result.where(
-            "items.properties ->> '#{attribute[1]}' >= :from", from: from)
-        end
-        if to
-          result = result.where(
-            "items.properties ->> '#{attribute[1]}' <= :to", to: to)
-        end
+        result = result.where("items.properties ->> '#{attribute[1]}' >= :from", from: from) if from
+        result = result.where("items.properties ->> '#{attribute[1]}' <= :to", to: to) if to
         result
       else
         throw 'Not supported attribute: ' + attribute.to_s
@@ -152,17 +107,10 @@ module ExpertComparators
         check_that_item_attribute(attribute)
         return items.where(attribute => value)
       elsif attribute.is_a?(Array)
+        throw 'Attribute length must be 2, but is: ' + attribute.to_s if attribute.length != 2
+        throw 'We expect properties, but is: ' + attribute.to_s if attribute[0] != 'properties'
 
-        if attribute.length != 2
-          throw 'Attribute length must be 2, but is: ' + attribute.to_s
-        end
-        if attribute[0] != 'properties'
-          throw 'We expect properties, but is: ' + attribute.to_s
-        end
-
-        items.where(
-          "items.properties ->> '#{attribute[1]}' = :value",
-          value: value)
+        items.where("items.properties ->> '#{attribute[1]}' = :value", value: value)
       else
         throw 'Not supported attribute: ' + attribute.to_s
       end
@@ -173,21 +121,12 @@ module ExpertComparators
 
       if attribute.is_a?(String)
         check_that_item_attribute(attribute)
-        return items.where(
-          "items.#{attribute} ILIKE :value",
-          value: "%#{value}%")
+        return items.where("items.#{attribute} ILIKE :value", value: "%#{value}%")
       elsif attribute.is_a?(Array)
+        throw 'Attribute length must be 2, but is: ' + attribute.to_s if attribute.length != 2
+        throw 'We expect properties, but is: ' + attribute.to_s if attribute[0] != 'properties'
 
-        if attribute.length != 2
-          throw 'Attribute length must be 2, but is: ' + attribute.to_s
-        end
-        if attribute[0] != 'properties'
-          throw 'We expect properties, but is: ' + attribute.to_s
-        end
-
-        items.where(
-          "items.properties ->> '#{attribute[1]}' ILIKE :value",
-          value: "%#{value}%")
+        items.where("items.properties ->> '#{attribute[1]}' ILIKE :value", value: "%#{value}%")
       else
         throw 'Not supported attribute: ' + attribute.to_s
       end
@@ -196,23 +135,17 @@ module ExpertComparators
     def reduce_for_autocomplete(items, field_id, filter_value, field_config)
       selection_id = filter_value['id']
 
-      if selection_id.nil?
-        return items
-      end
+      return items if selection_id.nil?
 
       case field_id
       when 'building_id'
-        items.joins(:room).where(
-          rooms: { building_id: selection_id })
+        items.joins(:room).where(rooms: { building_id: selection_id })
       when 'inventory_pool_id'
-        items.joins(:inventory_pool).where(
-          inventory_pools: { id: selection_id })
+        items.joins(:inventory_pool).where(inventory_pools: { id: selection_id })
       when 'owner_id'
-        items.joins(:owner).where(
-          inventory_pools: { id: selection_id })
+        items.joins(:owner).where(inventory_pools: { id: selection_id })
       when 'supplier_id'
-        items.joins(:supplier).where(
-          suppliers: { id: selection_id })
+        items.joins(:supplier).where(suppliers: { id: selection_id })
       else
         generic_equal_value(items, selection_id, field_config)
       end
@@ -221,9 +154,7 @@ module ExpertComparators
     def reduce_for_autocomplete_search(items, field_id, filter_value, field_config)
       selection_id = filter_value['id']
 
-      if selection_id.nil?
-        return items
-      end
+      return items if selection_id.nil?
 
       case field_id
       when 'model_id'
@@ -234,7 +165,7 @@ module ExpertComparators
     end
 
     def valid_attributes
-      %w(
+      %w[
         inventory_code
         invoice_date
         invoice_number
@@ -254,21 +185,27 @@ module ExpertComparators
         shelf
         status_note
         user_name
-      )
+      ]
     end
 
     def check_that_item_attribute(attribute)
-      unless valid_attributes.include?(attribute)
-        throw 'Unexpected attribute: ' + attribute
-      end
+      throw 'Unexpected attribute: ' + attribute unless valid_attributes.include?(attribute)
     end
 
     def number?(string)
-      true if Float(string) rescue false
+      begin
+        true if Float(string)
+      rescue StandardError
+        false
+      end
     end
 
     def date?(string)
-      true if Date.parse(string) rescue false
+      begin
+        true if Date.parse(string)
+      rescue StandardError
+        false
+      end
     end
   end
 end

@@ -1,14 +1,11 @@
 module LeihsAdmin
   class BuildingsController < AdminController
-
     before_action only: [:edit, :update, :destroy] do
       @building = Building.find(params[:id])
     end
 
     def index
-      respond_to do |format|
-        format.html { @buildings = Building.filter(params) }
-      end
+      respond_to { |format| format.html { @buildings = Building.filter(params) } }
     end
 
     def new
@@ -18,8 +15,7 @@ module LeihsAdmin
     def create
       @building = Building.create params[:building]
       if @building.persisted?
-        flash[:notice] = \
-          _('Building together with a general room successfully created')
+        flash[:notice] = _('Building together with a general room successfully created')
         redirect_to action: :index
       else
         flash.now[:error] = @building.errors.full_messages.uniq.join(', ')
@@ -27,8 +23,7 @@ module LeihsAdmin
       end
     end
 
-    def edit
-    end
+    def edit; end
 
     def update
       if @building.update_attributes params[:building]
@@ -49,6 +44,5 @@ module LeihsAdmin
       end
       redirect_to action: :index
     end
-
   end
 end

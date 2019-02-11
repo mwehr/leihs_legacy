@@ -1,9 +1,7 @@
 class Borrow::UsersController < Borrow::ApplicationController
-
   def documents
     @contracts = current_user.contracts
-    @contracts = \
-      @contracts.to_a.sort { |a, b| a.time_window_min <=> b.time_window_min }
+    @contracts = @contracts.to_a.sort { |a, b| a.time_window_min <=> b.time_window_min }
   end
 
   def delegations
@@ -41,5 +39,4 @@ class Borrow::UsersController < Borrow::ApplicationController
     @inventory_pool = @contract.inventory_pool
     render 'documents/value_list', layout: 'print'
   end
-
 end

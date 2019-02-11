@@ -1,8 +1,6 @@
 # -*- encoding : utf-8 -*-
 
-Given(/^I am listing visits$/) do
-  visit manage_inventory_pool_visits_path @current_inventory_pool
-end
+Given(/^I am listing visits$/) { visit manage_inventory_pool_visits_path @current_inventory_pool }
 
 Then(/^each visit shows a human-readable difference between now and its respective date$/) do
   extend ActionView::Helpers::DateHelper

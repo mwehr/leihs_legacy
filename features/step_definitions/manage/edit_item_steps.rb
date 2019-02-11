@@ -1,14 +1,18 @@
 # -*- encoding : utf-8 -*-
 
-Given(/^I edit an item that belongs to the current inventory pool( and is in stock)?( and is not part of any contract)?$/) do |in_stock, not_in_contract|
-  items = @current_inventory_pool.items.items.where(owner_id: @current_inventory_pool, models: {is_package: false})
+Given(
+  /
+    ^I edit an item that belongs to the current inventory pool( and is in stock)?( and is not part of any contract)?$
+  /
+) do |in_stock, not_in_contract|
+  items =
+    @current_inventory_pool.items.items.where(
+      owner_id: @current_inventory_pool, models: { is_package: false }
+    )
   items = items.in_stock if in_stock
 
-  @item = if not_in_contract
-            items.detect { |i| Reservation.where(item_id: i.id).empty? }
-          else
-            items.first
-          end
+  @item =
+    not_in_contract ? items.detect { |i| Reservation.where(item_id: i.id).empty? } : items.first
 
   visit manage_edit_item_path @current_inventory_pool, @item
   expect(has_selector?('.row.emboss')).to be true
@@ -30,9 +34,7 @@ Then(/^all required fields are marked with an asterisk$/) do
   all(".field[data-required='true']", visible: true).each do |field|
     expect(field.text[/\*/]).not_to be_nil
   end
-  all(".field:not([data-required='true'])").each do |field|
-    expect(field.text[/\*/]).to eq nil
-  end
+  all(".field:not([data-required='true'])").each { |field| expect(field.text[/\*/]).to eq nil }
 end
 
 Then(/^I cannot save the item if a required field is empty$/) do
@@ -43,17 +45,17 @@ Then(/^I cannot save the item if a required field is empty$/) do
   expect(@item.to_json).to eq @item.reload.to_json
 end
 
-
 When(/^the required fields are highlighted in red$/) do
   all(".field[data-required='true']", visible: true).each do |field|
     if field.all('input[type=text]').any? { |input| input.value == 0 } or
-        field.all('textarea').any? { |textarea| textarea.value == 0 } or
-        (ips = field.all('input[type=radio]'); ips.all? { |input| not input.checked? } if not ips.empty?)
+      field.all('textarea').any? { |textarea| textarea.value == 0 } or
+      (ips = field.all('input[type=radio]'); if not ips.empty?
+        ips.all? { |input| not input.checked? }
+      end)
       expect(field[:class][/invalid/]).not_to be_nil
     end
   end
 end
-
 
 Then(/^I see form fields in the following order:$/) do |table|
   expected_values = []
@@ -63,9 +65,10 @@ Then(/^I see form fields in the following order:$/) do |table|
     expected_values << tr[0].chomp if !tr[0].match(/^\-.*\-$/)
   end
   headlines = find('#flexible-fields').all('h2').map { |hl| "- #{hl.text} -" }.compact
-  values = find('#flexible-fields').all("div[data-type='key']").map do |element|
-    element.text.gsub(' *','').chomp
-  end
+  values =
+    find('#flexible-fields').all("div[data-type='key']").map do |element|
+      element.text.gsub(' *', '').chomp
+    end
   expect(headlines).to eq(expected_headlines)
   expect(values).to eq(expected_values)
 end
@@ -101,7 +104,7 @@ end
 When(/^I change the supplier$/) do
   @supplier = Supplier.first
   @new_supplier = @supplier.name # A later step looks for this instead of @supplier, maybe
-                            # fix the later step instead?
+  # fix the later step instead?
   fill_in_autocomplete_field _('Supplier'), @supplier.name
 end
 
@@ -112,16 +115,22 @@ Given(/^I edit an item that belongs to the current inventory pool and is not in 
 end
 
 When(/^I change the responsible department$/) do
-  fill_in_autocomplete_field _('Responsible'), InventoryPool.where('id != ?', @item.inventory_pool.id).first.name
+  fill_in_autocomplete_field _('Responsible'),
+                             InventoryPool.where('id != ?', @item.inventory_pool.id).first.name
 end
 
 When(/^I change the model$/) do
-  fill_in_autocomplete_field _('Model'), @current_inventory_pool.models.detect { |m| m != @item.model }.name
+  fill_in_autocomplete_field _('Model'),
+                             @current_inventory_pool.models.detect { |m| m != @item.model }.name
 end
 
 When(/^I retire the item$/) do
-  find('.row.emboss', match: :prefer_exact, text: _('Retirement')).find('select', match: :first).select _('Yes')
-  find('.row.emboss', match: :prefer_exact, text: _('Reason for Retirement')).find('input, textarea', match: :first).set 'Retirement reason'
+  find('.row.emboss', match: :prefer_exact, text: _('Retirement')).find(
+    'select', match: :first
+  ).select _('Yes')
+  find('.row.emboss', match: :prefer_exact, text: _('Reason for Retirement')).find(
+    'input, textarea', match: :first
+  ).set 'Retirement reason'
 end
 
 Given(/^there is a model without a version$/) do
@@ -129,16 +138,16 @@ Given(/^there is a model without a version$/) do
   expect(@model).not_to be_nil
 end
 
-When(/^I assign this model to the item$/) do
-  fill_in_autocomplete_field _('Model'), @model.name
-end
+When(/^I assign this model to the item$/) { fill_in_autocomplete_field _('Model'), @model.name }
 
 Then(/^there is only product name in the input field of the model$/) do
   expect(find('div.field[data-id=model_id]').find('input').value).to eq @model.product
 end
 
 Given(/^exists an item that belongs to the current inventory pool but is not owned by it$/) do
-  @item = Item.where(inventory_pool: @current_inventory_pool).where.not(owner: @current_inventory_pool).first
+  @item =
+    Item.where(inventory_pool: @current_inventory_pool).where.not(owner: @current_inventory_pool)
+      .first
   expect(@item).to be
 end
 
@@ -156,14 +165,10 @@ Given(/^the item has (\d+) attachment$/) do |count|
   end
 end
 
-Then(/^I cannot add attachments$/) do
-  expect(find('#attachments')).not_to have_selector('button')
-end
+Then(/^I cannot add attachments$/) { expect(find('#attachments')).not_to have_selector('button') }
 
 Then(/^I cannot remove attachments$/) do
   expect(find('#attachments')).not_to have_selector('.list-of-lines button')
 end
 
-When(/^I edit the item$/) do
-  visit manage_edit_item_path @current_inventory_pool, @item
-end
+When(/^I edit the item$/) { visit manage_edit_item_path @current_inventory_pool, @item }

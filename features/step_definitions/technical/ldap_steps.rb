@@ -6,15 +6,13 @@ Given(/^the LDAP authentication system is enabled and configured$/) do
 end
 
 When(/^there are some inventory pools with automatic access enabled$/) do
-      3.times do
-        FactoryGirl.create :inventory_pool
-      end
-      ips_with_automatic_access = InventoryPool.limit(2)
-      ips_with_automatic_access.each {|ip| ip.update_attributes automatic_access: true}
+  3.times { FactoryGirl.create :inventory_pool }
+  ips_with_automatic_access = InventoryPool.limit(2)
+  ips_with_automatic_access.each { |ip| ip.update_attributes automatic_access: true }
 end
 
 When(/^I log in as LDAP user "(.*?)"$/) do |username|
-  post 'authenticator/ldap/login', {login: { user: username, password: 'pass' }}, {}
+  post 'authenticator/ldap/login', { login: { user: username, password: 'pass' } }, {}
 end
 
 Then(/^a leihs user should exist for "(.*?)"$/) do |username|
@@ -23,14 +21,14 @@ end
 
 Then(/^the user "(.*?)" should (not have any|have) admin privileges$/) do |username, arg1|
   user = User.where(login: username).first
-  b = case arg1
-        when 'not have any'
-          access_rights = user.access_rights.where(role: 'customer')
-          expect(access_rights.count).to be > 0
-          false
-        when 'have'
-          true
-      end
+  b =
+    case arg1
+    when 'not have any'
+      access_rights = user.access_rights.where(role: 'customer')
+      expect(access_rights.count).to be > 0
+      false
+    when 'have'
+      true
+    end
   expect(user.is_admin).to be b
 end
-

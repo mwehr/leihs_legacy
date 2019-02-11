@@ -14,8 +14,7 @@ module Manage
       end
 
       step 'there is a lending manager in this inventory pool' do
-        @lending_manager = FactoryGirl.create(:lending_manager,
-                                              inventory_pool: @inventory_pool)
+        @lending_manager = FactoryGirl.create(:lending_manager, inventory_pool: @inventory_pool)
       end
 
       step 'I am logged in as the lending manager' do
@@ -26,8 +25,7 @@ module Manage
       end
 
       step 'there is an entitlement group with required verification' do
-        @entitlement_group = \
-          FactoryGirl.create(:group, is_verification_required: true)
+        @entitlement_group = FactoryGirl.create(:group, is_verification_required: true)
         @inventory_pool.entitlement_groups << @entitlement_group
       end
 
@@ -36,8 +34,7 @@ module Manage
       end
 
       step 'there is a hand over :n without required verification' do |n|
-        user = FactoryGirl.create(:customer,
-                                  inventory_pool: @inventory_pool)
+        user = FactoryGirl.create(:customer, inventory_pool: @inventory_pool)
         date = Date.today + n.to_i.day
 
         FactoryGirl.create(
@@ -52,18 +49,12 @@ module Manage
 
         instance_variable_set(
           "@hand_over_#{n}",
-          Visit.find_by(
-            user: user,
-            inventory_pool: @inventory_pool,
-            type: 'hand_over',
-            date: date
-          )
+          Visit.find_by(user: user, inventory_pool: @inventory_pool, type: 'hand_over', date: date)
         )
       end
 
       step 'there is a hand over :n with user to verify' do |n|
-        user = FactoryGirl.create(:customer,
-                                  inventory_pool: @inventory_pool)
+        user = FactoryGirl.create(:customer, inventory_pool: @inventory_pool)
         @entitlement_group.users << user
         date = Date.today + n.to_i.day
 
@@ -79,24 +70,16 @@ module Manage
 
         instance_variable_set(
           "@hand_over_#{n}",
-          Visit.find_by(
-            user: user,
-            inventory_pool: @inventory_pool,
-            type: 'hand_over',
-            date: date
-          )
+          Visit.find_by(user: user, inventory_pool: @inventory_pool, type: 'hand_over', date: date)
         )
       end
 
       step 'there is a hand over :n with user and model to verify' do |n|
-        user = FactoryGirl.create(:customer,
-                                  inventory_pool: @inventory_pool)
+        user = FactoryGirl.create(:customer, inventory_pool: @inventory_pool)
         model = FactoryGirl.create(:model_with_items)
         @entitlement_group.users << user
-        @entitlement_group.entitlements << \
-          FactoryGirl.create(:entitlement,
-                             model: model,
-                             quantity: 1)
+        @entitlement_group.entitlements <<
+          FactoryGirl.create(:entitlement, model: model, quantity: 1)
         date = Date.today + n.to_i.day
 
         FactoryGirl.create(
@@ -111,27 +94,19 @@ module Manage
 
         instance_variable_set(
           "@hand_over_#{n}",
-          Visit.find_by(
-            user: user,
-            inventory_pool: @inventory_pool,
-            type: 'hand_over',
-            date: date
-          )
+          Visit.find_by(user: user, inventory_pool: @inventory_pool, type: 'hand_over', date: date)
         )
       end
 
       step 'there is a take back :n without required verification' do |n|
-        user = FactoryGirl.create(:customer,
-                                  inventory_pool: @inventory_pool)
+        user = FactoryGirl.create(:customer, inventory_pool: @inventory_pool)
         date = Date.today + n.to_i.day
         model = FactoryGirl.create(:model_with_items)
 
         ApplicationRecord.transaction do
-          contract = FactoryGirl.build(:contract,
-                                       user: user,
-                                       state: :open,
-                                       inventory_pool: @inventory_pool)
-          contract.reservations << \
+          contract =
+            FactoryGirl.build(:contract, user: user, state: :open, inventory_pool: @inventory_pool)
+          contract.reservations <<
             FactoryGirl.build(
               :reservation,
               inventory_pool: @inventory_pool,
@@ -148,28 +123,20 @@ module Manage
 
         instance_variable_set(
           "@take_back_#{n}",
-          Visit.find_by(
-            user: user,
-            inventory_pool: @inventory_pool,
-            type: 'take_back',
-            date: date
-          )
+          Visit.find_by(user: user, inventory_pool: @inventory_pool, type: 'take_back', date: date)
         )
       end
 
       step 'there is a take back :n with user to verify' do |n|
-        user = FactoryGirl.create(:customer,
-                                  inventory_pool: @inventory_pool)
+        user = FactoryGirl.create(:customer, inventory_pool: @inventory_pool)
         model = FactoryGirl.create(:model_with_items)
         @entitlement_group.users << user
         date = Date.today + n.to_i.day
 
         ApplicationRecord.transaction do
-          contract = FactoryGirl.build(:contract,
-                                       user: user,
-                                       state: :open,
-                                       inventory_pool: @inventory_pool)
-          contract.reservations << \
+          contract =
+            FactoryGirl.build(:contract, user: user, state: :open, inventory_pool: @inventory_pool)
+          contract.reservations <<
             FactoryGirl.build(
               :reservation,
               inventory_pool: @inventory_pool,
@@ -186,32 +153,22 @@ module Manage
 
         instance_variable_set(
           "@take_back_#{n}",
-          Visit.find_by(
-            user: user,
-            inventory_pool: @inventory_pool,
-            type: 'take_back',
-            date: date
-          )
+          Visit.find_by(user: user, inventory_pool: @inventory_pool, type: 'take_back', date: date)
         )
       end
 
       step 'there is a take back :n with user and model to verify' do |n|
-        user = FactoryGirl.create(:customer,
-                                  inventory_pool: @inventory_pool)
+        user = FactoryGirl.create(:customer, inventory_pool: @inventory_pool)
         model = FactoryGirl.create(:model_with_items)
         @entitlement_group.users << user
-        @entitlement_group.entitlements << \
-          FactoryGirl.create(:entitlement,
-                             model: model,
-                             quantity: 1)
+        @entitlement_group.entitlements <<
+          FactoryGirl.create(:entitlement, model: model, quantity: 1)
         date = Date.today + n.to_i.day
 
         ApplicationRecord.transaction do
-          contract = FactoryGirl.build(:contract,
-                                       user: user,
-                                       state: :open,
-                                       inventory_pool: @inventory_pool)
-          contract.reservations << \
+          contract =
+            FactoryGirl.build(:contract, user: user, state: :open, inventory_pool: @inventory_pool)
+          contract.reservations <<
             FactoryGirl.build(
               :reservation,
               inventory_pool: @inventory_pool,
@@ -228,12 +185,7 @@ module Manage
 
         instance_variable_set(
           "@take_back_#{n}",
-          Visit.find_by(
-            user: user,
-            inventory_pool: @inventory_pool,
-            type: 'take_back',
-            date: date
-          )
+          Visit.find_by(user: user, inventory_pool: @inventory_pool, type: 'take_back', date: date)
         )
       end
 
@@ -255,9 +207,7 @@ module Manage
 
       step 'I see :n visits' do |n|
         within '#visits' do
-          unless n.to_i.zero?
-            find('[data-id]', match: :first)
-          end
+          find('[data-id]', match: :first) unless n.to_i.zero?
           expect(all('[data-id]').count).to be == n.to_i
         end
       end
@@ -285,5 +235,5 @@ end
 
 RSpec.configure do |config|
   config.include Manage::Spec::VisitsVerificationFilterSteps,
-                 manage_visits_verification_filter: true
+  manage_visits_verification_filter: true
 end

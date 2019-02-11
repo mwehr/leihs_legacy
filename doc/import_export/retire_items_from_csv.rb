@@ -10,7 +10,7 @@ import_file = '/tmp/ausmustern.csv'
 
 @errorlog = File.open('/tmp/import_errors.txt', 'w+')
 
-items_to_import = CSV.open(import_file, col_sep: "\t", headers: true)
+items_to_import = CSV.open(import_file, col_sep: 'undefined', headers: true)
 
 def log_error(error, item)
   @errorlog.puts "ERROR: #{error}. --- Item: #{item}"
@@ -32,13 +32,11 @@ items_to_import.each do |item|
     log_error("Item with inventory code #{ic} not found", ic)
   end
   #i.note = item["Note"]
-
 end
 
 puts '-----------------------------------------'
 puts 'DONE'
 puts "#{@successes} successes, #{@failures} failures"
 puts '-----------------------------------------'
-
 
 @errorlog.close

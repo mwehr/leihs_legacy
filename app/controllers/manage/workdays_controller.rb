@@ -1,5 +1,4 @@
 class Manage::WorkdaysController < Manage::ApplicationController
-
   before_action do
     @workday = current_inventory_pool.workday
     @holidays = current_inventory_pool.holidays.future
@@ -9,5 +8,4 @@ class Manage::WorkdaysController < Manage::ApplicationController
   def index
     @workday = current_inventory_pool.workday
   end
-
 end

@@ -1,30 +1,34 @@
 class Manage::EntitlementGroupsController < Manage::ApplicationController
-
   before_action do
     params[:group_id] ||= params[:id] if params[:id]
-    if params[:group_id]
-      @group = current_inventory_pool.entitlement_groups.find(params[:group_id])
-    end
+    @group = current_inventory_pool.entitlement_groups.find(params[:group_id]) if params[:group_id]
   end
 
   def map_params(params)
-    ActionController::Parameters.new(params[:group].map do |k, v|
-      case k
-      when 'partitions_attributes'
-        [:entitlements_attributes, v.map do |ep|
-          ActionController::Parameters.new (ep.map do |k, v|
-            case k
-            when 'group_id'
-              [:entitlement_group_id, v]
-            else
-              [k, v]
+    ActionController::Parameters.new(
+      params[:group].map do |k, v|
+        case k
+        when 'partitions_attributes'
+          [
+            :entitlements_attributes,
+            v.map do |ep|
+              ActionController::Parameters.new (ep.map do |k, v|
+                case k
+                when 'group_id'
+                  [:entitlement_group_id, v]
+                else
+                  [k, v]
+                end
+              end
+                .to_h)
             end
-          end.to_h)
-        end]
-      else
-        [k, v]
+          ]
+        else
+          [k, v]
+        end
       end
-    end.to_h)
+        .to_h
+    )
   end
 
   ######################################################################
@@ -36,18 +40,14 @@ class Manage::EntitlementGroupsController < Manage::ApplicationController
     @groups = @groups.order(:name)
   end
 
-  def new
-  end
+  def new; end
 
-  def edit
-  end
+  def edit; end
 
   def create
     @group = EntitlementGroup.new name: params[:group][:name]
     @group.inventory_pool = current_inventory_pool
-    if params[:group].key?(:users)
-      update_users(@group, params[:group].delete(:users))
-    end
+    update_users(@group, params[:group].delete(:users)) if params[:group].key?(:users)
     mapped_params = map_params params
     mapped_params.permit!
     mapped_params.delete(:users)
@@ -61,18 +61,14 @@ class Manage::EntitlementGroupsController < Manage::ApplicationController
   end
 
   def update
-    if params[:group].key?(:users)
-      update_users(@group, params[:group].delete(:users))
-    end
+    update_users(@group, params[:group].delete(:users)) if params[:group].key?(:users)
     mapped_params = map_params params
     mapped_params.permit!
     mapped_params.delete(:users)
     if @group.update_attributes(mapped_params)
-      redirect_to manage_inventory_pool_groups_path,
-                  flash: { success: _('%s saved') % _('Group') }
+      redirect_to manage_inventory_pool_groups_path, flash: { success: _('%s saved') % _('Group') }
     else
-      render plain: @group.errors.full_messages.uniq.join(', '),
-             status: :bad_request
+      render plain: @group.errors.full_messages.uniq.join(', '), status: :bad_request
     end
   end
 
@@ -81,14 +77,12 @@ class Manage::EntitlementGroupsController < Manage::ApplicationController
       format.html do
         begin
           @group.destroy
-          redirect_to \
-            manage_inventory_pool_groups_path,
-            flash: { success: _('%s successfully deleted') % _('Group') }
+          redirect_to manage_inventory_pool_groups_path,
+                      flash: { success: _('%s successfully deleted') % _('Group') }
         rescue ActiveRecord::DeleteRestrictionError => e
           @group.errors.add(:base, e)
-          redirect_to \
-            manage_inventory_pool_groups_path,
-            flash: { error: @group.errors.full_messages.uniq.join(', ') }
+          redirect_to manage_inventory_pool_groups_path,
+                      flash: { error: @group.errors.full_messages.uniq.join(', ') }
         end
       end
     end
@@ -108,5 +102,4 @@ class Manage::EntitlementGroupsController < Manage::ApplicationController
     end
     group.users
   end
-
 end

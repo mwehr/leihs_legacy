@@ -4,7 +4,6 @@ Given(/^I am in the admin area's groups section$/) do
   visit manage_inventory_pool_groups_path(@current_inventory_pool)
 end
 
-
 Then(/^I am listing groups$/) do
   @current_inventory_pool.entitlement_groups.reload.each do |group|
     find('.list-of-lines .line strong', text: group.name)
@@ -29,27 +28,25 @@ Then(/^each group shows how many of each model are assigned to it$/) do
 end
 
 Then(/^the list is sorted alphabetically$/) do
-  expect((all('.list-of-lines .line strong').map(&:text).to_json == @current_inventory_pool.entitlement_groups.map(&:name).sort.to_json)).to be true
+  expect(
+    (all('.list-of-lines .line strong').map(&:text).to_json ==
+      @current_inventory_pool.entitlement_groups.map(&:name).sort.to_json)
+  ).to be true
 end
 
-When(/^I create a group$/) do
-  find('.button', text: _('New Group')).click
-end
+When(/^I create a group$/) { find('.button', text: _('New Group')).click }
 
 When(/^I fill in the group's name$/) do
   @name = Faker::Name.name
   fill_in 'group[name]', with: @name
 end
 
-
 When(/^I add users to the group$/) do
   @users = @current_inventory_pool.users.customers
   @users.each do |user|
     find('input[data-search-users]').set user.name
-    within('.ui-autocomplete') do
-      find('.ui-menu-item', text: user.name)
-    end
-    page.execute_script %[ $(".ui-menu-item:contains('#{user.name}')").click() ]
+    within('.ui-autocomplete') { find('.ui-menu-item', text: user.name) }
+    page.execute_script " $(\".ui-menu-item:contains('#{user.name}')\").click() "
   end
 end
 
@@ -59,10 +56,15 @@ When(/^I add models and capacities to the group$/) do
   @models.each do |model|
     find('input[data-search-models]').set model.name
     find('.ui-menu-item a', match: :prefer_exact, text: model.name).click
-    borrowable_items = model.items.where(inventory_pool_id: @current_inventory_pool.id).borrowable.size - 1
-    partition = {model_id: model.id, quantity: (borrowable_items.zero? ? 0 : rand(borrowable_items)) + 1}
+    borrowable_items =
+      model.items.where(inventory_pool_id: @current_inventory_pool.id).borrowable.size - 1
+    partition = {
+      model_id: model.id, quantity: (borrowable_items.zero? ? 0 : rand(borrowable_items)) + 1
+    }
     @partitions.push partition
-    find('.list-of-lines .line', text: model.name).fill_in 'group[partitions_attributes][][quantity]', with: partition[:quantity]
+    find(
+      '.list-of-lines .line', text: model.name
+    ).fill_in 'group[partitions_attributes][][quantity]', with: partition[:quantity]
   end
 end
 
@@ -74,7 +76,9 @@ end
 
 Then(/^the group has users as well as models and their capacities$/) do
   expect(@group.users.reload.map(&:id).sort).to eq @users.map(&:id).sort
-  expect(Set.new(@group.entitlements.map{|p| {model_id: p.model_id, quantity: p.quantity}})).to eq Set.new(@partitions)
+  expect(
+    Set.new(@group.entitlements.map { |p| { model_id: p.model_id, quantity: p.quantity } })
+  ).to eq Set.new(@partitions)
 end
 
 Then(/^the group list is sorted alphabetically$/) do
@@ -84,15 +88,16 @@ end
 
 When(/^I edit an existing( non verifiable| verifiable)? group$/) do |arg1|
   groups = @current_inventory_pool.entitlement_groups
-  groups = case arg1
-             when ' non verifiable'
-               groups.where(is_verification_required: false)
-             when ' verifiable'
-               groups.where(is_verification_required: true)
-             else
-               groups
-           end
-  @group = groups.find {|g| g.models.length >= 2 and g.users.length >= 2}
+  groups =
+    case arg1
+    when ' non verifiable'
+      groups.where(is_verification_required: false)
+    when ' verifiable'
+      groups.where(is_verification_required: true)
+    else
+      groups
+    end
+  @group = groups.find { |g| g.models.length >= 2 and g.users.length >= 2 }
   visit manage_edit_inventory_pool_group_path @group.inventory_pool_id, @group
 end
 
@@ -111,29 +116,44 @@ end
 
 When(/^I add and remove users from the group$/) do
   @users = @group.users
-  @users.sample(@users.size/2).each do |user|
-    find("input[name='group[users][][id]'][value='#{user.id}']", visible: false).first(:xpath, './..').find('.button[data-remove-user]', text: _('Remove')).click
+  @users.sample(@users.size / 2).each do |user|
+    find("input[name='group[users][][id]'][value='#{user.id}']", visible: false).first(
+      :xpath, './..'
+    )
+      .find('.button[data-remove-user]', text: _('Remove'))
+      .click
     @users.delete user
   end
 end
 
 When(/^I add and remove models and their capacities from the group$/) do
   all("[name='group[partitions_attributes][][quantity]']").each do |existing_partition_line|
-    existing_partition_line.first(:xpath, './../../..').find('.button[data-remove-group]', text: _('Remove')).click
+    existing_partition_line.first(:xpath, './../../..').find(
+      '.button[data-remove-group]', text: _('Remove')
+    )
+      .click
   end
-  model = (@current_inventory_pool.models-@group.models).first
+  model = (@current_inventory_pool.models - @group.models).first
   find('input[data-search-models]').set model.name
   find('.ui-menu-item a', match: :prefer_exact, text: model.name).click
-  partition = {model_id: model.id, quantity: rand(1..model.items.where(inventory_pool_id: @current_inventory_pool.id).borrowable.size)}
+  partition = {
+    model_id: model.id,
+    quantity:
+      rand(1..model.items.where(inventory_pool_id: @current_inventory_pool.id).borrowable.size)
+  }
   @partitions = [partition]
-  find('.list-of-lines .line', text: model.name).fill_in 'group[partitions_attributes][][quantity]', with: partition[:quantity]
+  find('.list-of-lines .line', text: model.name).fill_in 'group[partitions_attributes][][quantity]',
+  with: partition[:quantity]
 end
-
 
 Then(/^I see any capacities that are still available for assignment$/) do
   @partitions.each do |partition|
     model = Model.find partition[:model_id]
-    expect(all("input[value='#{model.id}']", visible: false).first.parent.has_content?("/ #{model.items.where(inventory_pool_id: @current_inventory_pool.id).borrowable.size}")).to be true
+    expect(
+      all("input[value='#{model.id}']", visible: false).first.parent.has_content?(
+        "/ #{model.items.where(inventory_pool_id: @current_inventory_pool.id).borrowable.size}"
+      )
+    ).to be true
   end
 end
 
@@ -152,7 +172,6 @@ Then(/^the group has been deleted from the database$/) do
   expect(EntitlementGroup.find_by_name(@group.name)).to eq nil
 end
 
-
 When(/^I add one user to the group$/) do
   fill_in_autocomplete_field _('Users'), @user_name = @current_inventory_pool.users.first.name
 end
@@ -160,7 +179,6 @@ end
 Then(/^the user is added to the top of the list$/) do
   find('#users .list-of-lines .line [data-user-name]', text: @user_name)
 end
-
 
 When(/^I add a model to the group$/) do
   @model = @current_inventory_pool.models.first
@@ -172,7 +190,6 @@ Then(/^the model is added to the top of the list$/) do
   find('#models-allocations .list-of-lines .line', match: :first, text: @model.name)
 end
 
-
 Then(/^the already present models are sorted alphabetically$/) do
   within('#models-allocations') do
     entries = all('.list-of-lines .line', minimum: 1)
@@ -183,7 +200,9 @@ end
 When(/^I add a model that is already present in the group$/) do
   @model = @group.models.first
   @quantity = 2
-  find('#models-allocations .list-of-lines .line', match: :prefer_exact, text: @model.name).fill_in 'group[partitions_attributes][][quantity]', with: @quantity
+  find(
+    '#models-allocations .list-of-lines .line', match: :prefer_exact, text: @model.name
+  ).fill_in 'group[partitions_attributes][][quantity]', with: @quantity
   fill_in_autocomplete_field _('Models'), @model.name
 end
 
@@ -210,5 +229,11 @@ Then(/^the already existing user slides to the top of the list$/) do
 end
 
 Then(/^the already existing model keeps whatever capacity was set for it$/) do
-  expect(find('#models-allocations .list-of-lines .line', match: :prefer_exact, text: @model.name).find("input[name='group[partitions_attributes][][quantity]']").value.to_i).to eq @quantity
+  expect(
+    find('#models-allocations .list-of-lines .line', match: :prefer_exact, text: @model.name).find(
+      "input[name='group[partitions_attributes][][quantity]']"
+    )
+      .value
+      .to_i
+  ).to eq @quantity
 end

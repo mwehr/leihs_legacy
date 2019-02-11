@@ -1,13 +1,10 @@
 # -*- encoding : utf-8 -*-
 
-
 Then(/^I see a link to the templates underneath the categories$/) do
-  find("a[href='#{borrow_templates_path}'][title='#{_("Borrow template")}']", match: :first)
+  find("a[href='#{borrow_templates_path}'][title='#{_('Borrow template')}']", match: :first)
 end
 
-When(/^I am listing templates in the borrow section$/) do
-  visit borrow_templates_path
-end
+When(/^I am listing templates in the borrow section$/) { visit borrow_templates_path }
 
 Then(/^I see the templates$/) do
   @current_user.templates.each do |template|
@@ -16,7 +13,7 @@ Then(/^I see the templates$/) do
 end
 
 Then(/^the templates are sorted alphabetically by name$/) do
-  all_names = all(".separated-top > a[href*='#{borrow_templates_path}']").map {|x| x.text.strip }
+  all_names = all(".separated-top > a[href*='#{borrow_templates_path}']").map { |x| x.text.strip }
   expect(all_names.sort).to eq all_names
   expect(all_names.count).to eq @current_user.templates.count
 end
@@ -28,14 +25,17 @@ Then(/^I can look at one of the templates in detail$/) do
 end
 
 When(/^I am looking at a template$/) do
-  @template = @current_user.templates.find do |t|
-    # choose a template, whose all models provide some borrowable quantity (> 0) considering all customer's groups from all his inventory pools
-    t.models.all? do |m|
-      t.inventory_pools.map do |ip|
-        m.total_borrowable_items_for_user_and_pool(@current_user, ip)
-      end.max > 0
+  @template =
+    @current_user.templates.find do |t|
+      # choose a template, whose all models provide some borrowable quantity (> 0) considering all customer's groups from all his inventory pools
+      t
+        .models
+        .all? do |m|
+        t.inventory_pools.map { |ip| m.total_borrowable_items_for_user_and_pool(@current_user, ip) }
+          .max >
+          0
+      end
     end
-  end
 
   visit borrow_template_path(@template)
   find("nav a[href='#{borrow_template_path(@template)}']", match: :first)
@@ -43,37 +43,60 @@ end
 
 Then(/^I see all models that template contains$/) do
   @template.model_links.each do |model_link|
-    find('.line', match: :prefer_exact, text: model_link.model.name).find("input[name='reservations[][quantity]'][value='#{model_link.quantity}']")
+    find('.line', match: :prefer_exact, text: model_link.model.name).find(
+      "input[name='reservations[][quantity]'][value='#{model_link.quantity}']"
+    )
   end
 end
 
 Then(/^the models in that template are ordered alphabetically$/) do
-  all_names = all('.separated-top > .row.line').map {|x| x.text.strip }
+  all_names = all('.separated-top > .row.line').map { |x| x.text.strip }
   expect(all_names.sort).to eq all_names
   expect(all_names.count).to eq @template.models.count
 end
 
 Then(/^for each model I see the quantity as specified by the template$/) do
   @template.model_links.each do |model_link|
-    find('.row', match: :first, text: model_link.model.name).find("input[name='reservations[][quantity]'][value='#{model_link.quantity}']", match: :first)
+    find('.row', match: :first, text: model_link.model.name).find(
+      "input[name='reservations[][quantity]'][value='#{model_link.quantity}']", match: :first
+    )
   end
 end
 
 When(/^I can modify the quantity of each model before ordering$/) do
   @model_link = @template.model_links.first
-  find('.row', match: :first, text: @model_link.model.name).find("input[name='reservations[][quantity]'][value='#{@model_link.quantity}']", match: :first).set rand(10)
+  find('.row', match: :first, text: @model_link.model.name).find(
+    "input[name='reservations[][quantity]'][value='#{@model_link.quantity}']", match: :first
+  ).set rand(10)
 end
 
 Then(/^I can specify at most the maximum available quantity per model$/) do
-  max = find('.row', match: :first, text: @model_link.model.name).find("input[name='reservations[][quantity]']", match: :first)[:max].to_i
-  find('.row', match: :first, text: @model_link.model.name).find("input[name='reservations[][quantity]']", match: :first).set max+1
+  max =
+    find('.row', match: :first, text: @model_link.model.name).find(
+      "input[name='reservations[][quantity]']", match: :first
+    )[
+      :max
+    ]
+      .to_i
+  find('.row', match: :first, text: @model_link.model.name).find(
+    "input[name='reservations[][quantity]']", match: :first
+  ).set max + 1
   wait_until do
-    find('.row', match: :first, text: @model_link.model.name).find("input[name='reservations[][quantity]']", match: :first).value.to_i == max
+    find('.row', match: :first, text: @model_link.model.name).find(
+      "input[name='reservations[][quantity]']", match: :first
+    )
+      .value
+      .to_i ==
+      max
   end
 end
 
 Then(/^I see a warning on the page itself and on every affected model$/) do
-  find('.emboss.red', match: :first, text: _('The highlighted entries are not accomplishable for the intended quantity.'))
+  find(
+    '.emboss.red',
+    match: :first,
+    text: _('The highlighted entries are not accomplishable for the intended quantity.')
+  )
   find('.separated-top .row.line .line-info.red', match: :first)
 end
 
@@ -89,8 +112,12 @@ Then(/^all entries get the chosen start and end date$/) do
   end
 end
 
-When(/^this template contains models that don't have enough items to satisfy the quantity required by the template$/) do
-  @template = @current_user.templates.detect {|t| not t.accomplishable?(@current_user) }
+When(
+  /
+    ^this template contains models that don't have enough items to satisfy the quantity required by the template$
+  /
+) do
+  @template = @current_user.templates.detect { |t| not t.accomplishable?(@current_user) }
   visit borrow_template_path(@template)
   find("nav a[href='#{borrow_template_path(@template)}']", match: :first)
 end
@@ -105,20 +132,20 @@ end
 
 Then(/^those models are highlighted that are no longer available at this time$/) do
   within '#template-lines' do
-    all('.row.line').each do |line|
-      line.find('.line-info.red', match: :first)
-    end
+    all('.row.line').each { |line| line.find('.line-info.red', match: :first) }
   end
 end
 
 Then(/^I can remove the models from the view$/) do
   within('.row.line', match: :first) do
-    if has_selector? '.multibutton .dropdown-toggle'
-      find('.multibutton .dropdown-toggle').click
-    end
+    find('.multibutton .dropdown-toggle').click if has_selector? '.multibutton .dropdown-toggle'
     find('.red', text: _('Delete')).click
   end
-  page.driver.browser.switch_to.alert.accept rescue nil
+  begin
+    page.driver.browser.switch_to.alert.accept
+  rescue StandardError
+    nil
+  end
 end
 
 Then(/^I can change the quantity of the models$/) do
@@ -130,12 +157,14 @@ end
 
 def select_available_not_closed_date(as = :start, from = Date.today)
   current_date = from
-  step "I set the %s in the calendar to '#{I18n::l(current_date)}'" % (as == :start ? 'start date' : 'end date')
-  while page.has_selector?("#booking-calendar-errors") do
+  step "I set the %s in the calendar to '#{I18n.l(current_date)}'" %
+         (as == :start ? 'start date' : 'end date')
+  while page.has_selector?('#booking-calendar-errors')
     before_date = current_date
     current_date += 1.day
     find('.fc-button-next').click if before_date.month < current_date.month
-    step "I set the %s in the calendar to '#{I18n::l(current_date)}'" % (as == :start ? 'start date' : 'end date')
+    step "I set the %s in the calendar to '#{I18n.l(current_date)}'" %
+           (as == :start ? 'start date' : 'end date')
   end
   current_date
 end
@@ -160,11 +189,9 @@ Given(/^I am looking at the availability of a template that contains unavailable
   step 'I am looking at a template'
   find("[type='submit']", match: :first).click
   date = Date.today
-  while @template.inventory_pools.first.open_on?(date) do
-   date += 1.day
-  end
-  find('#start_date').set I18n::localize(date)
-  find('#end_date').set I18n::localize(date)
+  date += 1.day while @template.inventory_pools.first.open_on?(date)
+  find('#start_date').set I18n.localize(date)
+  find('#end_date').set I18n.localize(date)
   step 'I can follow the process to the availability display of the template'
 end
 

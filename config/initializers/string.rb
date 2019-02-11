@@ -1,5 +1,9 @@
 class String
   def numeric?
-    Float(self) != nil rescue false
+    begin
+      Float(self) != nil
+    rescue StandardError
+      false
+    end
   end
 end

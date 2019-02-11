@@ -1,5 +1,4 @@
 FactoryGirl.define do
-
   sequence :version
 
   trait :shared_model_software_attributes do
@@ -32,16 +31,15 @@ FactoryGirl.define do
       end
       after(:create) do |model, evaluator|
         3.times do
-          model.items << \
-            FactoryGirl.create(:item,
-                               is_borrowable: evaluator.is_borrowable,
-                               inventory_pool: evaluator.inventory_pool)
+          model.items <<
+            FactoryGirl.create(
+              :item,
+              is_borrowable: evaluator.is_borrowable, inventory_pool: evaluator.inventory_pool
+            )
         end
       end
     end
-
   end
 
   factory :software, traits: [:shared_model_software_attributes]
-
 end

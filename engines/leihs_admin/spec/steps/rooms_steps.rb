@@ -13,8 +13,7 @@ module LeihsAdmin
       include ::Spec::FactorySteps
       include ::Spec::LoginSteps
 
-      step 'there exists a room :room for building :building' \
-        do |room_name, building_name|
+      step 'there exists a room :room for building :building' do |room_name, building_name|
         building = Building.find_by_name(building_name)
         building ||= FactoryGirl.create(:building, name: building_name)
         @room = FactoryGirl.create(:room, name: room_name, building: building)
@@ -30,10 +29,9 @@ module LeihsAdmin
 
       step 'I see the list of rooms sorted in the following manner:' do |table|
         table.hashes.each_with_index do |h, i|
-          expect(all('.list-of-lines .row .col-sm-3:nth-child(1)')[i].text)
-            .to be == h['room_name']
-          expect(all('.list-of-lines .row .col-sm-3:nth-child(2)')[i].text)
-            .to be == h['building_name']
+          expect(all('.list-of-lines .row .col-sm-3:nth-child(1)')[i].text).to be == h['room_name']
+          expect(all('.list-of-lines .row .col-sm-3:nth-child(2)')[i].text).to be ==
+            h['building_name']
         end
       end
 
@@ -43,8 +41,7 @@ module LeihsAdmin
           building_name = row.find('div:nth-child(2)', match: :first).text
           building = Building.find_by_name(building_name)
           room = Room.find_by(name: room_name, building_id: building.id)
-          expect(row.find('div:nth-child(4)', match: :first).text)
-            .to match /^#{room.items.count}/
+          expect(row.find('div:nth-child(4)', match: :first).text).to match /^#{room.items.count}/
         end
       end
 
@@ -65,14 +62,11 @@ module LeihsAdmin
       end
 
       step 'the edit button' do
-        all('.list-of-lines .row').each do |row|
-          row.find('[href]', text: _('Edit'))
-        end
+        all('.list-of-lines .row').each { |row| row.find('[href]', text: _('Edit')) }
       end
 
       step 'I click on the edit button for the row of the room' do
-        button = \
-          find(".list-of-lines .row [href='#{admin.edit_room_path(@room)}']")
+        button = find(".list-of-lines .row [href='#{admin.edit_room_path(@room)}']")
         button.click
       end
 
@@ -107,19 +101,16 @@ module LeihsAdmin
       end
 
       step 'a second room with name :room and ' \
-           'building :building was not created' do |room, building|
+             'building :building was not created' do |room, building|
         expect(
-          Room.includes(:building)
-          .where(name: room, buildings: { name: building })
-          .count
+          Room.includes(:building).where(name: room, buildings: { name: building }).count
         ).to be == 1
       end
 
       step 'the room with name :room and ' \
-           'building :building was not created' do |room, building|
+             'building :building was not created' do |room, building|
         expect(
-          Room.includes(:building)
-          .find_by(name: room, buildings: { name: building })
+          Room.includes(:building).find_by(name: room, buildings: { name: building })
         ).not_to be
       end
 
@@ -128,9 +119,7 @@ module LeihsAdmin
       end
 
       step 'the room was saved successfully' do
-        Room.find_by(name: @new_name,
-                     description: @new_description,
-                     building: @building)
+        Room.find_by(name: @new_name, description: @new_description, building: @building)
       end
 
       step 'I click on create room button' do
@@ -143,14 +132,12 @@ module LeihsAdmin
       end
 
       step "I don't see the delete button on the row for the room" do
-        row = \
-          find('.list-of-lines .row', text: "#{@room.name} #{@room.building.name}")
+        row = find('.list-of-lines .row', text: "#{@room.name} #{@room.building.name}")
         expect(row).not_to have_content _('Delete')
       end
 
       step 'I click on the delete button for the room' do
-        row = \
-          find('.list-of-lines .row', text: "#{@room.name} #{@room.building.name}")
+        row = find('.list-of-lines .row', text: "#{@room.name} #{@room.building.name}")
         row.find("[data-toggle='dropdown']").click
         row.find("a[data-method='delete']").click
       end
@@ -161,9 +148,7 @@ module LeihsAdmin
 
       step 'I click on the edit button for the row of the general room' do
         @room ||= Room.general.first
-        within(".list-of-lines .row[data-id='#{@room.id}']") do
-          click_on _('Edit')
-        end
+        within(".list-of-lines .row[data-id='#{@room.id}']") { click_on _('Edit') }
       end
 
       step 'I search for the name of a general room' do
@@ -187,9 +172,7 @@ module LeihsAdmin
 
       step 'there are no items for the general room' do
         room = FactoryGirl.create(:room)
-        Item.where(room_id: @room.id).each do |item|
-          item.update_column(:room_id, room.id)
-        end
+        Item.where(room_id: @room.id).each { |item| item.update_column(:room_id, room.id) }
       end
 
       step 'I scrool down until I see the line for the general room' do
@@ -203,6 +186,4 @@ module LeihsAdmin
   end
 end
 
-RSpec.configure do |config|
-  config.include LeihsAdmin::Spec::RoomsSteps, leihs_admin_rooms: true
-end
+RSpec.configure { |config| config.include LeihsAdmin::Spec::RoomsSteps, leihs_admin_rooms: true }

@@ -42,10 +42,7 @@ class Notification < ApplicationRecord
   def self.deadline_soon_reminder(user, reservations, send_mail = true)
     reservations.map(&:inventory_pool).uniq.each do |inventory_pool|
       if send_mail
-        o = \
-          Mailer::User
-            .deadline_soon_reminder(user, inventory_pool, reservations)
-            .deliver_now
+        o = Mailer::User.deadline_soon_reminder(user, inventory_pool, reservations).deliver_now
       end
       title = (o.nil? ? _('Deadline soon') : o.subject)
       Notification.create(user: user, title: title)
@@ -54,9 +51,7 @@ class Notification < ApplicationRecord
 
   def self.remind_user(user, reservations, send_mail = true)
     reservations.map(&:inventory_pool).uniq.each do |inventory_pool|
-      if send_mail
-        o = Mailer::User.remind(user, inventory_pool, reservations).deliver_now
-      end
+      o = Mailer::User.remind(user, inventory_pool, reservations).deliver_now if send_mail
       title = (o.nil? ? _('Reminder') : o.subject)
       Notification.create(user: user, title: title)
     end
@@ -70,5 +65,4 @@ class Notification < ApplicationRecord
   def label_for_audits
     "#{user.try(&:name)} - #{title}"
   end
-
 end

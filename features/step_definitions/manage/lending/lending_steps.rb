@@ -1,15 +1,13 @@
 When(/^I open a hand over with an unassigned item line$/) do
   @event = 'hand_over'
   @customer = FactoryGirl.create(:user)
-  FactoryGirl.create(:access_right,
-                     user: @customer,
-                     inventory_pool: @current_inventory_pool,
-                     role: :customer)
-  FactoryGirl.create(:reservation,
-                     status: :approved,
-                     item: nil,
-                     inventory_pool: @current_inventory_pool,
-                     user: @customer)
+  FactoryGirl.create(
+    :access_right, user: @customer, inventory_pool: @current_inventory_pool, role: :customer
+  )
+  FactoryGirl.create(
+    :reservation,
+    status: :approved, item: nil, inventory_pool: @current_inventory_pool, user: @customer
+  )
   visit manage_hand_over_path(@current_inventory_pool, @customer)
 end
 
@@ -30,11 +28,13 @@ end
 
 When /^I try to complete a hand over that contains a model with unborrowable items$/ do
   @reservation = nil
-  @order = @current_inventory_pool.orders.approved.detect do |c|
-    @reservation = c.item_lines.where(item_id: nil).detect do |l|
-      l.model.items.unborrowable.where(inventory_pool_id: @current_inventory_pool).first
+  @order =
+    @current_inventory_pool.orders.approved.detect do |c|
+      @reservation =
+        c.item_lines.where(item_id: nil).detect do |l|
+          l.model.items.unborrowable.where(inventory_pool_id: @current_inventory_pool).first
+        end
     end
-  end
   @model = @reservation.model
   @customer = @order.user
   step 'I open a hand over for this customer'
@@ -57,14 +57,20 @@ Then /^unborrowable items are highlighted$/ do
 end
 
 Given /^I (open|return to) the daily view$/ do |arg1|
-  @current_inventory_pool = @current_user.inventory_pools.managed.detect {|ip| ip.visits.hand_over.where(date: Date.today).exists? }
+  @current_inventory_pool =
+    @current_user.inventory_pools.managed.detect do |ip|
+      ip.visits.hand_over.where(date: Date.today).exists?
+    end
   visit manage_daily_view_path(@current_inventory_pool)
   find('#daily-view')
 end
 
 When(/^I edit an order for a user who is not suspended$/) do
   @event = 'order'
-  @order = @current_inventory_pool.orders.submitted.detect { |o| not o.user.suspended?(@current_inventory_pool) }
+  @order =
+    @current_inventory_pool.orders.submitted.detect do |o|
+      not o.user.suspended?(@current_inventory_pool)
+    end
   @user = @order.user
   @customer = @order.user
   step 'I edit the order'
@@ -80,9 +86,9 @@ end
 
 When(/^I edit the latest problematic order$/) do
   @event = 'order'
-  @order = @current_inventory_pool.orders.submitted
-    .where(user_id: 'baf29045-ea7d-5880-be5b-efb8095a3216')
-    .first
+  @order =
+    @current_inventory_pool.orders.submitted.where(user_id: 'baf29045-ea7d-5880-be5b-efb8095a3216')
+      .first
   @user = @order.user
   @customer = @order.user
   step 'I edit the order'
@@ -98,8 +104,8 @@ Then(/^the user appears under last visitors$/) do
 end
 
 When /^the chosen items contain some from a future hand over$/ do
-  find('#add-start-date').set I18n.l(Date.today+2.days)
-  find('#add-end-date').set I18n.l(Date.today+2.days)
+  find('#add-start-date').set I18n.l(Date.today + 2.days)
+  find('#add-end-date').set I18n.l(Date.today + 2.days)
   step 'I add an item to the hand over by providing an inventory code'
 end
 
@@ -117,17 +123,14 @@ Then /^I see an error message in modal$/ do
   find('#error-modal')
 end
 
-
 Then /^I cannot hand over the items$/ do
   expect(has_no_selector?('.hand_over .summary')).to be true
 end
 
-
 Given /^the customer is in multiple groups$/ do
-  @customer = @current_inventory_pool.users.detect{|u| u.entitlement_groups.exists? }
+  @customer = @current_inventory_pool.users.detect { |u| u.entitlement_groups.exists? }
   expect(@customer).not_to be_nil
 end
-
 
 When /^I open a hand over to this customer$/ do
   visit manage_hand_over_path(@current_inventory_pool, @customer)
@@ -135,19 +138,25 @@ When /^I open a hand over to this customer$/ do
   step 'the availability is loaded'
 end
 
-
 When /^I edit a line containing group partitions$/ do
-  @inventory_code = @current_inventory_pool.models.detect {|m| m.entitlements.size > 1}.items.in_stock.borrowable.first.inventory_code
+  @inventory_code =
+    @current_inventory_pool.models.detect { |m| m.entitlements.size > 1 }.items.in_stock.borrowable
+      .first
+      .inventory_code
   @model = Item.find_by_inventory_code(@inventory_code).model
   step 'I assign an item to the hand over by providing an inventory code and a date range'
-  find(:xpath, "//*[contains(@class, 'line') and descendant::input[@data-assign-item and @value='#{@inventory_code}']]", match: :first).find('button[data-edit-lines]').click
+  find(
+    :xpath,
+    "//*[contains(@class, 'line') and descendant::input[@data-assign-item and @value='#{@inventory_code}']]",
+    match: :first
+  )
+    .find('button[data-edit-lines]')
+    .click
 end
-
 
 When /^I expand the group selector$/ do
   find('#booking-calendar-partitions')
 end
-
 
 Then /^I see which groups the customer is a member of$/ do
   @customer_group_ids = @customer.entitlement_groups.map(&:id)
@@ -155,7 +164,7 @@ Then /^I see which groups the customer is a member of$/ do
     unless partition.entitlement_group_id.nil?
       if @customer_group_ids.include? partition.entitlement_group_id
         expect(
-          find("#booking-calendar-partitions optgroup[label='#{_("Groups of this customer")}']")
+          find("#booking-calendar-partitions optgroup[label='#{_('Groups of this customer')}']")
         ).to have_content partition.entitlement_group.name
       end
     end
@@ -165,21 +174,24 @@ end
 Then /^I see which groups the customer is not a member of$/ do
   @model.entitlements.each do |entitlement|
     unless entitlement.entitlement_group_id.nil? &&
-        @customer_group_ids.include?(entitlement.entitlement_group_id)
+      @customer_group_ids.include?(entitlement.entitlement_group_id)
       expect(
-        find( "#booking-calendar-partitions optgroup[label='#{_("Other groups")}']")
+        find("#booking-calendar-partitions optgroup[label='#{_('Other groups')}']")
       ).to have_content entitlement.entitlement_group.name
     end
   end
 end
 
-
-When /^I open a hand over for a customer that has things to pick up today as well as in the future$/ do
-  @customer = @current_inventory_pool.users.detect{|u| u.visits.hand_over.to_a.size > 1} # NOTE count returns a Hash because the group() in default scope
+When /
+       ^I open a hand over for a customer that has things to pick up today as well as in the future$
+     / do
+  @customer = @current_inventory_pool.users.detect { |u| u.visits.hand_over.to_a.size > 1 } # NOTE count returns a Hash because the group() in default scope
   step 'I open a hand over to this customer'
 end
 
-When /^I scan something \(assign it using its inventory code\) and it is already assigned to a future contract$/ do
+When /
+       ^I scan something \(assign it using its inventory code\) and it is already assigned to a future contract$
+     / do
   @customer.orders.approved.where(inventory_pool_id: @current_inventory_pool).detect do |order|
     order.models.detect do |model|
       @item = model.items.borrowable.in_stock.where(inventory_pool: @current_inventory_pool).first
@@ -191,17 +203,18 @@ When /^I scan something \(assign it using its inventory code\) and it is already
   @assigned_line = find("[data-assign-item][disabled][value='#{@item.inventory_code}']")
 end
 
-
 Then /^it is assigned \(whether it is selected or not\)$/ do
   @assigned_line.find(:xpath, './../../..').find("input[type='checkbox'][data-select-line]:checked")
 end
 
 When /^it doesn't exist in any future contracts$/ do
-  @model_not_in_order = (@current_inventory_pool.items.borrowable.in_stock.map(&:model).uniq -
-                              @customer.orders.approved.find_by(inventory_pool_id: @current_inventory_pool).models).sample
+  @model_not_in_order =
+    (@current_inventory_pool.items.borrowable.in_stock.map(&:model).uniq -
+      @customer.orders.approved.find_by(inventory_pool_id: @current_inventory_pool).models)
+      .sample
   @item = @model_not_in_order.items.borrowable.in_stock.first
-  find('#add-start-date').set I18n.l(Date.today+7.days)
-  find('#add-end-date').set I18n.l(Date.today+8.days)
+  find('#add-start-date').set I18n.l(Date.today + 7.days)
+  find('#add-end-date').set I18n.l(Date.today + 8.days)
   find('#assign-or-add-input input').set @item.inventory_code
   @amount_lines_before = all('.line').size
   find('#assign-or-add button').click
@@ -213,7 +226,6 @@ Then /^it is added for the selected time span$/ do
   sleep 2
   expect(@amount_lines_before).to be < all('.line').size
 end
-
 
 Given /^I am doing a hand over( with models)?$/ do |with_models|
   @event = 'hand_over'
@@ -229,9 +241,7 @@ When(/^I click on "(.*?)"$/) do |arg1|
   when 'Delegations'
     find('.dropdown-item', text: _('Delegations')).click
   else
-    rescue_displaced_flash do
-      step %Q(I press "#{arg1}")
-    end
+    rescue_displaced_flash { step "I press \"#{arg1}\"" }
   end
 end
 
@@ -253,18 +263,13 @@ end
 Then(/^there are inventory codes for item and license in the contract$/) do
   # Sleeps are not sexy, but for some reason on busy systems, the contract
   # window opens very slowly and then this test is reliably red.
-  if page.driver.browser.window_handles.count < 2
-    sleep 2
-  end
+  sleep 2 if page.driver.browser.window_handles.count < 2
   page.driver.browser.switch_to.window(page.driver.browser.window_handles.last)
-  @inventory_codes.each {|inv_code|
-    expect(has_content?(inv_code)).to be true
-  }
+  @inventory_codes.each { |inv_code| expect(has_content?(inv_code)).to be true }
 end
 
-
 Then /^I can inspect each item$/ do
-  line_ids = all(".line[data-line-type='item_line']", minimum: 1).map {|l| l['data-id']}
+  line_ids = all(".line[data-line-type='item_line']", minimum: 1).map { |l| l['data-id'] }
   line_ids.each do |id|
     within find(".line[data-id='#{id}'] .multibutton") do
       find('.dropdown-toggle').click
@@ -272,7 +277,6 @@ Then /^I can inspect each item$/ do
     end
   end
 end
-
 
 When /^I inspect an item$/ do
   within all(".line[data-line-type='item_line']", minimum: 1).to_a.sample.find('.multibutton') do
@@ -321,9 +325,15 @@ Then /^the print dialog opens automatically$/ do
   check_printed_contract(window_handles, @current_inventory_pool, @item_line)
 end
 
-When(/^start and end date are set to the corresponding dates of the hand over's first time window$/) do
-  first_dates = find('#hand-over-view #lines [data-selected-lines-container]', match: :first).find('.row .col1of2 p.paragraph-s', match: :first).text
-  start_date, end_date = first_dates.split('-').map{|x| Date.parse x}
+When(
+  /^start and end date are set to the corresponding dates of the hand over's first time window$/
+) do
+  first_dates =
+    find('#hand-over-view #lines [data-selected-lines-container]', match: :first).find(
+      '.row .col1of2 p.paragraph-s', match: :first
+    )
+      .text
+  start_date, end_date = first_dates.split('-').map { |x| Date.parse x }
   expect(Date.parse find('#add-start-date').value).to eq [start_date, Date.today].max
   expect(Date.parse find('#add-end-date').value).to eq [end_date, Date.today].max
 end
@@ -334,30 +344,29 @@ Given /^I search for '(.*)'$/ do |arg1|
   find('#search_term').native.send_key :enter
 end
 
-
 Then /^I see search results in the following categories:$/ do |table|
   within '#search-overview' do
     table.hashes.each do |t|
       case t[:category]
-        when 'Users'
-          find('#users .list-of-lines .line', match: :first)
-        when 'Models'
-          find('#models .list-of-lines .line', match: :first)
-        when 'Items'
-          find('#items .list-of-lines .line', match: :first)
-        when 'orders'
-          find('#orders .list-of-lines .line', match: :first)
-        when 'Orders'
-          find('#orders .list-of-lines .line', match: :first)
-        when 'Options'
-          find('#options .list-of-lines .line', match: :first)
+      when 'Users'
+        find('#users .list-of-lines .line', match: :first)
+      when 'Models'
+        find('#models .list-of-lines .line', match: :first)
+      when 'Items'
+        find('#items .list-of-lines .line', match: :first)
+      when 'orders'
+        find('#orders .list-of-lines .line', match: :first)
+      when 'Orders'
+        find('#orders .list-of-lines .line', match: :first)
+      when 'Options'
+        find('#options .list-of-lines .line', match: :first)
       end
     end
   end
 end
 
 Then /^I see at most the first (\d+) results from each category$/ do |amount|
-  amount = (amount.to_i+2)
+  amount = (amount.to_i + 2)
   expect(all('.user .list .line:not(.toggle)', visible: true).size).to be <= amount
   expect(all('.model .list .line:not(.toggle)', visible: true).size).to be <= amount
   expect(all('.item .list .line:not(.toggle)', visible: true).size).to be <= amount
@@ -373,42 +382,37 @@ When /^a category has more than (\d+) results$/ do |amount|
 end
 
 Then /^I can choose to see more results from that category$/ do
-
-  @lists.each do |list|
-    list.find('.toggle', match: :first)
-  end
+  @lists.each { |list| list.find('.toggle', match: :first) }
 end
 
 When /^I choose to see more results$/ do
-  @lists.each do |list|
-    list.find('.toggle .text', match: :first).click
-  end
+  @lists.each { |list| list.find('.toggle .text', match: :first).click }
 end
-
 
 Then /^I see the first (\d+) results$/ do |amount|
   amount = amount.to_i + 2
   @lists.each do |list|
-    if list.all('.show-all').size > 0
-      expect(list.all('.line').size).to eq amount
-    end
+    expect(list.all('.line').size).to eq amount if list.all('.show-all').size > 0
   end
 end
 
 When /^the category has more than (\d+) results$/ do |amount|
   amount = amount.to_i
-  @list_with_more_matches = all('.inlinetabs .badge').map do |badge|
-    badge.first(:xpath, '../../..').find('.list', match: :first) if badge.text.to_i > amount
-  end.compact
+  @list_with_more_matches =
+    all('.inlinetabs .badge').map do |badge|
+      badge.first(:xpath, '../../..').find('.list', match: :first) if badge.text.to_i > amount
+    end
+      .compact
 end
 
 Then /^I can choose to see all results$/ do
-  @links_of_more_results = @list_with_more_matches.map do |list|
-    list.find('.line.show-all a', visible: false)[:href]
-  end
+  @links_of_more_results =
+    @list_with_more_matches.map { |list| list.find('.line.show-all a', visible: false)[:href] }
 end
 
-When /^I choose to see all results, I receive a separate list with all results from this category$/ do
+When /
+       ^I choose to see all results, I receive a separate list with all results from this category$
+     / do
   @links_of_more_results.each do |link|
     visit link
     find('#search_results.focused')
@@ -436,16 +440,17 @@ end
 
 Then /^each line shows the sum of items of the respective model$/ do
   within('.tooltipster-default', match: :first, visible: true) do
-    quantities = all('.row .col1of8:nth-child(1)', minimum: 1, text: /.+/).map{|x| x.text.to_i}
+    quantities = all('.row .col1of8:nth-child(1)', minimum: 1, text: /.+/).map { |x| x.text.to_i }
     expect(quantities.sum).to be >= quantities.size
   end
 end
 
 Then /^I open an order( placed by "(.*?)")$/ do |arg0, arg1|
-  step %Q(I uncheck the "No verification required" button)
+  step 'I uncheck the "No verification required" button'
 
   if arg0
-    @order = @current_inventory_pool.orders.find find('.line', match: :prefer_exact, text: arg1)['data-id']
+    @order =
+      @current_inventory_pool.orders.find find('.line', match: :prefer_exact, text: arg1)['data-id']
     within('.line', match: :prefer_exact, text: arg1) do
       find('.line-actions .multibutton .dropdown-holder').click
       find('.dropdown-item', text: _('Edit')).click
@@ -463,7 +468,6 @@ Then /^I see the last visitors$/ do
   find('#daily-view strong', text: _('Last Visitors:'))
 end
 
-
 Then(/^I see the previously opened order's user as last visitor$/) do
   find('#daily-view #last-visitors', text: @order.user.name)
 end
@@ -473,20 +477,24 @@ When(/^I click on the last visitor's name$/) do
 end
 
 Then(/^I see search results matching that user's name$/) do
-  find('#search-overview h1', text: _("Search Results for \"%s\"") % @order.user.name)
+  find('#search-overview h1', text: _('Search Results for "%s"') % @order.user.name)
 end
 
 When(/^I enter something in the "(.*?)" field$/) do |field_label|
   case field_label
-    when 'Inventory Code/Name'
-      find('#assign-or-add-input input, #assign-input').set ' '
-    else
-      raise
+  when 'Inventory Code/Name'
+    find('#assign-or-add-input input, #assign-input').set ' '
+  else
+    raise
   end
 end
 
 When(/^I open a take back that contains options$/) do
-  @customer = @current_inventory_pool.users.all.select {|x| x.contracts.open.exists? and !x.contracts.open.detect{|c| c.options.exists? }.nil? }.first
+  @customer =
+    @current_inventory_pool.users.all.select do |x|
+      x.contracts.open.exists? and !x.contracts.open.detect { |c| c.options.exists? }.nil?
+    end
+      .first
   visit manage_take_back_path(@current_inventory_pool, @customer)
   expect(has_selector?('#take-back-view')).to be true
 end

@@ -10,10 +10,12 @@ module Manage
       include ::Spec::PersonasDumpSteps
 
       step 'there is an item with serial number :serial_number' do |serial_number|
-        FactoryGirl.create(:item,
-                           owner_id: @current_inventory_pool.id,
-                           serial_number: serial_number,
-                           skip_serial_number_validation: true)
+        FactoryGirl.create(
+          :item,
+          owner_id: @current_inventory_pool.id,
+          serial_number: serial_number,
+          skip_serial_number_validation: true
+        )
       end
 
       step 'I open the page for creating a new item' do
@@ -26,10 +28,7 @@ module Manage
 
       step 'I select a model' do
         model = @current_inventory_pool.models.first
-        type_into_and_select_from_autocomplete(
-          'div#model_id input',
-          model.name
-        )
+        type_into_and_select_from_autocomplete('div#model_id input', model.name)
       end
 
       step 'I enter serial number :serial_number' do |serial_number|
@@ -38,9 +37,8 @@ module Manage
       end
 
       step 'I see a confirmation dialog that there already exists same ' \
-           'or similar serial number' do
-        expect(page.driver.browser.switch_to.alert.text)
-          .to match /serial number already exists/
+             'or similar serial number' do
+        expect(page.driver.browser.switch_to.alert.text).to match /serial number already exists/
       end
 
       step 'I stay on the create item page' do
@@ -48,8 +46,7 @@ module Manage
       end
 
       step 'I stay on the edit item page' do
-        expect(current_path)
-          .to be == manage_edit_item_path(@current_inventory_pool, @item)
+        expect(current_path).to be == manage_edit_item_path(@current_inventory_pool, @item)
       end
 
       step 'the loading icon was hidden' do
@@ -66,13 +63,11 @@ module Manage
 
       step 'I was redirected to the inventory page' do
         find('#inventory')
-        expect(current_path)
-          .to be == manage_inventory_path(@current_inventory_pool)
+        expect(current_path).to be == manage_inventory_path(@current_inventory_pool)
       end
 
       step 'there is another item in the current inventory pool' do
-        @item = FactoryGirl.create(:item,
-                                   owner_id: @current_inventory_pool.id)
+        @item = FactoryGirl.create(:item, owner_id: @current_inventory_pool.id)
       end
 
       step 'I open the page for editing an item' do
@@ -88,15 +83,13 @@ module Manage
       end
 
       step 'I choose a building' do
-        type_into_and_select_from_autocomplete \
-          'div#building_id input[name="item[building_id]"]',
-          Building.general.name
+        type_into_and_select_from_autocomplete 'div#building_id input[name="item[building_id]"]',
+                                               Building.general.name
       end
 
       step 'I choose a room' do
-        type_into_and_select_from_autocomplete \
-          'div#room_id input[name="item[room_id]"]',
-          Building.general.rooms.find_by_general(true).name
+        type_into_and_select_from_autocomplete 'div#room_id input[name="item[room_id]"]',
+                                               Building.general.rooms.find_by_general(true).name
       end
 
       step 'I open the inventory helper page' do
@@ -111,36 +104,30 @@ module Manage
         fill_in('item[shelf]', with: (@shelf = Faker::Lorem.word))
       end
 
-      step 'I apply the values on item with serial number :serial_number' \
-        do |serial_number|
+      step 'I apply the values on item with serial number :serial_number' do |serial_number|
         @item = Item.find_by_serial_number(serial_number)
         type_into_and_select_from_autocomplete('#item-input', @item.inventory_code)
       end
 
       step 'I see a warning in regards to existing serial number' do
         within('#flash .notice') do
-          page.should \
-            have_content _('Same or similar serial number already exists.')
+          page.should have_content _('Same or similar serial number already exists.')
         end
       end
 
       step 'the values were successfully applied to the item ' \
-           'with serial number :serial_number' do |serial_number|
+             'with serial number :serial_number' do |serial_number|
         expect(@item.reload.shelf).to be == @shelf
       end
 
-      step 'there is first item with serial number :serial_number' \
-        do |serial_number|
-        @item_1 = FactoryGirl.create(:item,
-                                     owner: @current_inventory_pool,
-                                     serial_number: serial_number)
+      step 'there is first item with serial number :serial_number' do |serial_number|
+        @item_1 =
+          FactoryGirl.create(:item, owner: @current_inventory_pool, serial_number: serial_number)
       end
 
-      step 'there is second item with serial number :serial_number' \
-        do |serial_number|
-        @item_2 = FactoryGirl.build(:item,
-                                    owner: @current_inventory_pool,
-                                    serial_number: serial_number)
+      step 'there is second item with serial number :serial_number' do |serial_number|
+        @item_2 =
+          FactoryGirl.build(:item, owner: @current_inventory_pool, serial_number: serial_number)
         @item_2.skip_serial_number_validation = true
         @item_2.save!
       end
@@ -158,13 +145,11 @@ module Manage
       end
 
       step 'I add the first item' do
-        type_into_and_select_from_autocomplete('#search-item',
-                                               @item_1.inventory_code)
+        type_into_and_select_from_autocomplete('#search-item', @item_1.inventory_code)
       end
 
       step 'I add the second item' do
-        type_into_and_select_from_autocomplete('#search-item',
-                                               @item_2.inventory_code)
+        type_into_and_select_from_autocomplete('#search-item', @item_2.inventory_code)
       end
 
       step 'I choose the general building' do
@@ -200,6 +185,5 @@ module Manage
 end
 
 RSpec.configure do |config|
-  config.include Manage::Spec::SerialNumberValidationSteps,
-                 manage_serial_number_validation: true
+  config.include Manage::Spec::SerialNumberValidationSteps, manage_serial_number_validation: true
 end

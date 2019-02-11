@@ -5,7 +5,7 @@
 #   @response = response
 # end
 
-When "$who chooses $name's order" do | who, name |
+When "$who chooses $name's order" do |who, name|
   order = @orders.detect { |o| o.user.login == name }
   get manage_edit_order_path(@inventory_pool, order)
   response.should render_template('backend/acknowledge/show')
@@ -14,12 +14,14 @@ When "$who chooses $name's order" do | who, name |
 end
 
 When "$who rejects order with reason '$reason'" do |who, reason|
-  post "/manage/#{@inventory_pool.id}/orders/#{@order.id}/reject", {comment: reason}
+  post "/manage/#{@inventory_pool.id}/orders/#{@order.id}/reject", { comment: reason }
   @order = assigns(:order)
   expect(@orders).not_to be_nil
   expect(@order).not_to be_nil
   @response = response
-  expect(response.redirect_url).to eq "http://www.example.com/backend/inventory_pools/#{@inventory_pool.id}/acknowledge"
+  expect(
+    response.redirect_url
+  ).to eq "http://www.example.com/backend/inventory_pools/#{@inventory_pool.id}/acknowledge"
 end
 
 # When "$who adds $quantity item '$model'" do |who, quantity, model|
@@ -32,7 +34,6 @@ end
 #   @response = response #new#
 #   expect(@response.redirect_url).to include("backend/inventory_pools/#{@inventory_pool.id}/acknowledge/#{@order.id}")
 # end
-
 
 When "$who adds a personal message: '$message'" do |who, message|
   @comment = message
@@ -60,7 +61,7 @@ end
 #   expect(@order).not_to be_nil
 # end
 
-Then /^(.*) see(s)? ([0-9]+) order(s?)$/ do | who, foo, size, s |
+Then /^(.*) see(s)? ([0-9]+) order(s?)$/ do |who, foo, size, s|
   find('.table-overview .fresh')
 end
 
@@ -78,8 +79,12 @@ end
 #  @order.user.id.should == user.id
 #end
 
-Then 'Swap Item screen opens' do 
-  expect(@response.redirect_url).to include("/backend/inventory_pools/#{@inventory_pool.id}/models?layout=modal&reservation_id=#{@reservation_id}&source_path=%2Fbackend%2Finventory_pools%2F#{@inventory_pool.id}%2Facknowledge%2F#{@order.id}%2Fswap_model_line%3Fline_id%3D#{@reservation_id}")
+Then 'Swap Item screen opens' do
+  expect(@response.redirect_url).to include(
+    "/backend/inventory_pools/#{@inventory_pool
+      .id}/models?layout=modal&reservation_id=#{@reservation_id}&source_path=%2Fbackend%2Finventory_pools%2F#{@inventory_pool
+      .id}%2Facknowledge%2F#{@order.id}%2Fswap_model_line%3Fline_id%3D#{@reservation_id}"
+  )
 end
 
 Then 'a choice of $size item appears' do |size|
@@ -93,8 +98,11 @@ Then "$who sees $quantity items of model '$model'" do |who, quantity, model|
 end
 
 Then "all '$what' order reservations are marked as invalid" do |what|
-  # TODO: VERY ugly - we need have_tag "td.valid_false"
-  expect(@response.body).to match /valid_false/
+  expect(
+    # TODO: VERY ugly - we need have_tag "td.valid_false"
+    @response
+      .body
+  ).to match /valid_false/
 end
 
 Then /the order should( not)? be approvable(.*)/ do |arg1, reason|

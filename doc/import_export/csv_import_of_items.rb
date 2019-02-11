@@ -10,7 +10,7 @@ import_file = '/tmp/items.csv'
 
 @errorlog = File.open('/tmp/import_errors.txt', 'w+')
 
-items_to_import = CSV.open(import_file, col_sep: "\t", headers: true)
+items_to_import = CSV.open(import_file, col_sep: 'undefined', headers: true)
 
 def log_error(error, item)
   @errorlog.puts "ERROR: #{error}. --- Item: #{item}"
@@ -21,9 +21,9 @@ def validate_item(item)
 
   begin
     Model.find item['Leihs-Modellnummer']
-  rescue
+  rescue StandardError
     errors = true
-    log_error "Model '#{item["Leihs-Modellname"]}' not found.", item
+    log_error "Model '#{item['Leihs-Modellname']}' not found.", item
   end
 
   if item['Verantwortliche Abteilung'].blank?
@@ -33,7 +33,8 @@ def validate_item(item)
     responsible_ip = InventoryPool.where(name: item['Verantwortliche Abteilung']).first
     if responsible_ip.nil?
       errors = true
-      log_error "Responsible inventory pool '#{item["Verantwortliche Abteilung"]}' does not exist", item
+      log_error "Responsible inventory pool '#{item['Verantwortliche Abteilung']}' does not exist",
+                item
     end
   end
 
@@ -44,10 +45,9 @@ def validate_item(item)
     owner_ip = InventoryPool.where(name: item['Besitzer']).first
     if owner_ip.nil?
       errors = true
-      log_error "Owner '#{item["Besitzer"]}' does not exist", item
+      log_error "Owner '#{item['Besitzer']}' does not exist", item
     end
   end
-
 
   if errors
     @failures += 1
@@ -88,24 +88,25 @@ items_to_import.each do |item|
 
   room = nil
   room = item['Raum'] unless item['Raum'].blank?
-  location = Location.find_or_create({'building_id' => b.id, 'room' => room})
+  location = Location.find_or_create({ 'building_id' => b.id, 'room' => room })
   i.location = location
 
   # Invoice
   i.invoice_number = item['Invoice Number']
-  i.invoice_date = Date.strptime(item['Invoice Date'], '%m/%d/%Y') unless item['Invoice Date'].blank?
-
+  unless item['Invoice Date'].blank?
+    i.invoice_date = Date.strptime(item['Invoice Date'], '%m/%d/%Y')
+  end
 
   i.responsible = item['Responsible person'] unless item['Responsible person'].blank?
   i.price = item['Initial Price'] unless item['Initial Price'].blank?
 
-  i.last_check = Date.strptime(item['letzte Inventur'], '%m/%d/%Y') unless item['letzte Inventur'].blank?
+  unless item['letzte Inventur'].blank?
+    i.last_check = Date.strptime(item['letzte Inventur'], '%m/%d/%Y')
+  end
 
   # Supplier
   i.supplier = Supplier.where(name: item['Lieferant']).first
-  if i.supplier.nil?
-    i.supplier = Supplier.create(name: item['Lieferant'])
-  end
+  i.supplier = Supplier.create(name: item['Lieferant']) if i.supplier.nil?
 
   # Properties
   i.properties[:anschaffungskategorie] = item['Anschaffungskategorie']
@@ -114,22 +115,19 @@ items_to_import.each do |item|
 
   puts i
 
-
   if i.save
-  #  puts "Item imported correctly:"
+    #  puts "Item imported correctly:"
     @successes += 1
-  #  puts i.inspect
+    #  puts i.inspect
   else
     @failures += 1
     @errorlog.puts "Could not import item #{i.inventory_code}. Errors: #{i.errors.full_messages}"
   end
-
 end
 
 puts '-----------------------------------------'
 puts 'DONE'
 puts "#{@successes} successes, #{@failures} failures"
 puts '-----------------------------------------'
-
 
 @errorlog.close

@@ -1,20 +1,15 @@
-
-
 require 'rubygems'
-
-
 
 unfound = []
 
 require 'csv'
 CSV.foreach('/tmp/mike_update.csv', col_sep: ';', headers: :first_row) do |row|
-
   owner = row[0]
   number = row[1]
   ip = row[6]
   date = row[8]
 
-  parsed_date = Date.strptime(date, '%m/%d/%Y') 
+  parsed_date = Date.strptime(date, '%m/%d/%Y')
   ownerpool = InventoryPool.find_by_name(owner)
   responsible = InventoryPool.find_by_name(ip)
 
@@ -39,8 +34,6 @@ CSV.foreach('/tmp/mike_update.csv', col_sep: ';', headers: :first_row) do |row|
   #item.invoice_date = parsed_date
   item.save
   puts '-----------------'
-
 end
 
 unfound = unfound.uniq
-

@@ -1,15 +1,15 @@
 # encoding : utf-8
 
 MoneyRails.configure do |config|
-
   # To set the default currency
   #
   # config.default_currency = :usd
-  config.default_currency = begin
-                              Setting.first.local_currency_string.downcase.to_sym
-                            rescue
-                              :chf
-                            end
+  config.default_currency =
+    begin
+      Setting.first.local_currency_string.downcase.to_sym
+    rescue StandardError
+      :chf
+    end
 
   # Set default bank object
   #
@@ -39,14 +39,17 @@ MoneyRails.configure do |config|
   #                          default: 0
   #                        }
 
-  config.amount_column = { prefix: '',
-                           postfix: '_cents', # NOTE avoid the translation according to the default_currency (i.e.: chf -> '_rappens')
-                           column_name: nil,
-                           type: :integer,
-                           present: true,
-                           null: false,
-                           default: 0
-                         }
+  config.amount_column = {
+    prefix: '',
+    postfix: '_cents',
+    column_name:
+      # NOTE avoid the translation according to the default_currency (i.e.: chf -> '_rappens')
+      nil,
+    type: :integer,
+    present: true,
+    null: false,
+    default: 0
+  }
 
   # config.currency_column = { prefix: '',
   #                            postfix: '_currency',
@@ -56,18 +59,20 @@ MoneyRails.configure do |config|
   #                            null: false,
   #                            default: 'USD'
   #                          }
-  config.currency_column = { prefix: '',
-                             postfix: '_currency',
-                             column_name: nil,
-                             type: :string,
-                             present: true,
-                             null: false,
-                             default: begin
-                               Setting.first.local_currency_string
-                             rescue
-                               'CHF'
-                             end
-                           }
+  config.currency_column = {
+    prefix: '',
+    postfix: '_currency',
+    column_name: nil,
+    type: :string,
+    present: true,
+    null: false,
+    default:
+      begin
+        Setting.first.local_currency_string
+      rescue StandardError
+        'CHF'
+      end
+  }
 
   # Register a custom currency
   #

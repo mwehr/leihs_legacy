@@ -9,34 +9,31 @@ class Entitlement < ApplicationRecord
   validates_numericality_of :quantity, only_integer: true, greater_than: 0
   validates_uniqueness_of :entitlement_group_id, scope: :model_id
 
-  scope :with_generals, lambda {|model_ids: nil, inventory_pool_id: nil|
-    find_by_sql query(model_ids: model_ids,
-                      inventory_pool_id: inventory_pool_id)
-  }
+  scope :with_generals,
+        lambda do |model_ids: nil, inventory_pool_id: nil|
+          find_by_sql query(model_ids: model_ids, inventory_pool_id: inventory_pool_id)
+        end
 
   # returns a hash as {entitlement_group_id => quantity}
   # like {nil => 10, 41 => 3, 42 => 6, ...}
-  def self.hash_with_generals(inventory_pool,
-                              model,
-                              entitlement_groups = nil,
-                              ensure_non_negative_general: false)
+  def self.hash_with_generals(inventory_pool, model, entitlement_groups = nil, ensure_non_negative_general: false)
     # NOTE: `ensure_non_negative_general` is necessary for the borrow
     # booking calendar. Negative quantity makes no sense there and leads to buggy
     # behaviour. How does the negative value come to existence and if it is a
     # desired feature remains questionable.
-    entitlements = with_generals(model_ids: [model.id],
-                                 inventory_pool_id: inventory_pool.id)
+    entitlements = with_generals(model_ids: [model.id], inventory_pool_id: inventory_pool.id)
 
     if entitlement_groups
       entitlement_group_ids = entitlement_groups.map { |eg| eg.try(:id) }
-      entitlements = entitlements.select do |entitlement|
-        entitlement_group_ids.include? entitlement.entitlement_group_id
-      end
+      entitlements =
+        entitlements.select do |entitlement|
+          entitlement_group_ids.include? entitlement.entitlement_group_id
+        end
     end
 
     result = Hash[entitlements.map { |e| [e.entitlement_group_id, e.quantity] }]
     if missing_general_group_id?(result) or
-        (negative_general_quantity?(result) and ensure_non_negative_general)
+      (negative_general_quantity?(result) and ensure_non_negative_general)
       result[EntitlementGroup::GENERAL_GROUP_ID] = 0
     end
     result
@@ -52,7 +49,7 @@ class Entitlement < ApplicationRecord
 
   def self.query(model_ids: nil, inventory_pool_id: nil)
     <<-SQL
-      SELECT model_id,
+          SELECT model_id,
              entitlement_groups.inventory_pool_id,
              entitlement_group_id,
              quantity
@@ -60,8 +57,12 @@ class Entitlement < ApplicationRecord
       INNER JOIN entitlement_groups
         ON entitlements.entitlement_group_id = entitlement_groups.id
       WHERE TRUE
-     #{"AND model_id IN ('#{model_ids.join('\', \'')}') " if model_ids}
-     #{"AND entitlement_groups.inventory_pool_id = \'#{inventory_pool_id}\' " if inventory_pool_id}
+     #{if model_ids
+      "AND model_id IN ('#{model_ids.join("', '")}') "
+    end}
+     #{if inventory_pool_id
+      "AND entitlement_groups.inventory_pool_id = '#{inventory_pool_id}' "
+    end}
 
       UNION
 
@@ -81,27 +82,23 @@ class Entitlement < ApplicationRecord
       FROM items AS i
       WHERE i.retired IS NULL AND i.is_borrowable = true
         AND i.parent_id IS NULL
-     #{"AND i.model_id IN ('#{model_ids.join('\', \'')}') " if model_ids}
-     #{"AND i.inventory_pool_id = \'#{inventory_pool_id}\' " if inventory_pool_id}
+     #{if model_ids
+      "AND i.model_id IN ('#{model_ids.join("', '")}') "
+    end}
+     #{if inventory_pool_id
+      "AND i.inventory_pool_id = '#{inventory_pool_id}' "
+    end}
       GROUP BY i.inventory_pool_id, i.model_id
     SQL
   end
 
   def entitled_quantity_in_other_groups
-    qty = \
-      Entitlement
-      .where(model_id: model.id)
-      .where.not(id: id)
-      .map(&:quantity)
-      .reduce(&:+)
+    qty = Entitlement.where(model_id: model.id).where.not(id: id).map(&:quantity).reduce(&:+)
     qty || 0
   end
 
   def max_possible_quantity
-    model
-      .borrowable_items
-      .where(inventory_pool_id: entitlement_group.inventory_pool.id)
-      .size
+    model.borrowable_items.where(inventory_pool_id: entitlement_group.inventory_pool.id).size
   end
 
   def max_possible_unentitled_quantity

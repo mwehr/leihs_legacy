@@ -23,9 +23,7 @@ Rails.application.configure do
 end
 
 # add http mappings for our custom error classes
-errors_to_http_status = {
-  'Pundit::NotAuthorizedError' => :forbidden # 403
-}
+errors_to_http_status = { 'Pundit::NotAuthorizedError' => :forbidden } # 403
 Rails.application.config.before_configuration do
   ActionDispatch::ExceptionWrapper.rescue_responses.merge!(errors_to_http_status)
 end

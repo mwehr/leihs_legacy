@@ -1,9 +1,8 @@
 class Manage::OrdersController < Manage::ApplicationController
-
   # NOTE overriding super controller
   private def required_manager_role
-    require_role :group_manager, current_inventory_pool
-  end
+            require_role :group_manager, current_inventory_pool
+          end
 
   def index
     respond_to do |format|
@@ -12,18 +11,20 @@ class Manage::OrdersController < Manage::ApplicationController
         @orders = Order.filter2(params, nil, current_inventory_pool)
 
         if params[:order_by_created_at_group_by_user]
-          @orders = @orders.select('orders.*').select(
-            <<-SQL
-              first_value(orders.created_at)
+          @orders =
+            @orders.select('orders.*').select(
+              <<-SQL
+                            first_value(orders.created_at)
               over (partition by orders.user_id order by orders.created_at desc)
               as newest_created_at_per_user
             SQL
-          ).reorder('newest_created_at_per_user desc, user_id, created_at desc')
+            )
+              .reorder('newest_created_at_per_user desc, user_id, created_at desc')
         end
 
-        set_pagination_header @orders, disable_total_count: (
-          params[:disable_total_count] == 'true' ? true : false
-        )
+        set_pagination_header @orders,
+                              disable_total_count:
+                                (params[:disable_total_count] == 'true' ? true : false)
       end
     end
   end
@@ -36,14 +37,10 @@ class Manage::OrdersController < Manage::ApplicationController
     @reservations = @order.reservations
     @models = @reservations.map(&:model).select { |m| m.type == 'Model' }.uniq
     @software = @reservations.map(&:model).select { |m| m.type == 'Software' }.uniq
-    @items = \
-      @reservations.where.not(item_id: nil)
-      .map(&:item)
-      .select { |i| i.type == 'Item' }
+    @items = @reservations.where.not(item_id: nil).map(&:item).select { |i| i.type == 'Item' }
     @grouped_lines = @reservations.group_by { |g| [g.start_date, g.end_date] }
     @grouped_lines.each_pair do |k, reservations|
-      @grouped_lines[k] = \
-        reservations.sort_by { |line| line.model.name }.group_by(&:model)
+      @grouped_lines[k] = reservations.sort_by { |line| line.model.name }.group_by(&:model)
     end
     @start_date = @order.min_date
     @end_date = @order.max_date
@@ -51,6 +48,7 @@ class Manage::OrdersController < Manage::ApplicationController
 
   def update
     @order = Order.find(id_param)
+
     begin
       @order.update_attributes!(purpose: purpose_param)
       render json: @order, status: 200
@@ -66,8 +64,7 @@ class Manage::OrdersController < Manage::ApplicationController
         @order.update_attributes!(user_id: user_id_param)
         @order.reservations.each do |reservation|
           reservation.update_attributes!(
-            user_id: user_id_param,
-            delegated_user_id: delegated_user_id_param
+            user_id: user_id_param, delegated_user_id: delegated_user_id_param
           )
         end
         head :ok
@@ -81,32 +78,23 @@ class Manage::OrdersController < Manage::ApplicationController
     @order = Order.find(id_param)
 
     if @order.approve(params[:comment], true, current_user, force_param)
-      respond_to do |format|
-        format.json { render json: true, status: 200 }
-      end
+      respond_to { |format| format.json { render json: true, status: 200 } }
     else
-      errors = @order.errors.full_messages.uniq.join("\n")
-      respond_to do |format|
-        format.json { render plain: errors, status: 500 }
-      end
+      errors = @order.errors.full_messages.uniq.join('undefined')
+      respond_to { |format| format.json { render plain: errors, status: 500 } }
     end
   end
 
   def reject
     @order = Order.find(id_param)
 
-    if request.post? \
-      and params[:comment] \
-      and @order.reject(params[:comment], current_user)
+    if request.post? and params[:comment] and @order.reject(params[:comment], current_user)
       respond_to do |format|
         format.json { render json: true, status: 200 }
-        format.html do
-          redirect_to manage_daily_view_path,
-                      flash: { success: _('Order rejected') }
-        end
+        format.html { redirect_to manage_daily_view_path, flash: { success: _('Order rejected') } }
       end
     else
-      errors = @order.errors.full_messages.uniq.join("\n")
+      errors = @order.errors.full_messages.uniq.join('undefined')
       respond_to do |format|
         format.json { render plain: errors, status: 500 }
         format.html { render :edit }

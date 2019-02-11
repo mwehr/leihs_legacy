@@ -17,23 +17,22 @@ class Supplier < ApplicationRecord
   def self.filter(search_term: nil, pool_id: nil)
     suppliers = search(search_term).order(:name)
     if pool_id.present?
-      suppliers = suppliers.joins(:items)
-        .where('items.inventory_pool_id': pool_id).distinct
+      suppliers = suppliers.joins(:items).where(:"items.inventory_pool_id" => pool_id).distinct
     end
     # FIXME: not used?
     # suppliers = suppliers.where(id: params[:ids]) if params[:ids]
     suppliers
   end
 
-  scope :search, lambda { |query|
-                 sql = all
-                 return sql if query.blank?
+  scope :search,
+        lambda do |query|
+          sql = all
+          return sql if query.blank?
 
-                 query.split.each do |q|
-                   q = "%#{q}%"
-                   sql = sql.where(arel_table[:name].matches(q))
-                 end
-                 sql
-  }
-
+          query.split.each do |q|
+            q = "%#{q}%"
+            sql = sql.where(arel_table[:name].matches(q))
+          end
+          sql
+        end
 end

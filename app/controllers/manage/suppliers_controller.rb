@@ -1,5 +1,4 @@
 class Manage::SuppliersController < Manage::ApplicationController
-
   before_action only: [:show, :update, :destroy] do
     @supplier = Supplier.find(params[:id])
   end
@@ -9,10 +8,8 @@ class Manage::SuppliersController < Manage::ApplicationController
   end
 
   def show
-    @items = \
-      @supplier
-        .items
-        .where("'#{current_inventory_pool.id}' IN (inventory_pool_id, owner_id)")
+    @items =
+      @supplier.items.where("'#{current_inventory_pool.id}' IN (inventory_pool_id, owner_id)")
         .includes(:model, :inventory_pool)
   end
 
@@ -25,5 +22,4 @@ class Manage::SuppliersController < Manage::ApplicationController
     end
     redirect_to action: :index
   end
-
 end

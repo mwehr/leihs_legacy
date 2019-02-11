@@ -19,6 +19,5 @@ module LeihsAdmin
 end
 
 RSpec.configure do |config|
-  config.include(LeihsAdmin::Spec::InventoryCsvSteps,
-                 leihs_admin_inventory_csv: true)
+  config.include(LeihsAdmin::Spec::InventoryCsvSteps, leihs_admin_inventory_csv: true)
 end

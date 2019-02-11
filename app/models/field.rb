@@ -5,15 +5,17 @@ class Field < ApplicationRecord
 
   ####################################
 
-  GROUPS_ORDER = [nil,
-                  'General Information',
-                  'Status',
-                  'Location',
-                  'Inventory',
-                  'Invoice Information',
-                  'Umzug',
-                  'Toni Ankunftskontrolle',
-                  'Maintenance']
+  GROUPS_ORDER = [
+    nil,
+    'General Information',
+    'Status',
+    'Location',
+    'Inventory',
+    'Invoice Information',
+    'Umzug',
+    'Toni Ankunftskontrolle',
+    'Maintenance'
+  ]
 
   default_scope { where(active: true).order(:position) }
 
@@ -21,15 +23,7 @@ class Field < ApplicationRecord
 
   def value(item)
     Array(data['attribute']).inject(item) do |r, m|
-      if r.is_a?(Hash)
-        r[m]
-      else
-        if m == 'id'
-          r
-        else
-          r.try(:send, m)
-        end
-      end
+      r.is_a?(Hash) ? r[m] : m == 'id' ? r : r.try(:send, m)
     end
   end
 
@@ -40,17 +34,9 @@ class Field < ApplicationRecord
     attrs = Array(data['attribute'])
     attrs.inject(item) do |r, m|
       if m == attrs[-1]
-        if r.is_a?(Hash)
-          r[m] = default
-        else
-          r.send "#{m}=", default
-        end
+        r.is_a?(Hash) ? r[m] = default : r.send "#{m}=", default
       else
-        if r.is_a?(Hash)
-          r[m]
-        else
-          r.send m
-        end
+        r.is_a?(Hash) ? r[m] : r.send m
       end
     end
   end
@@ -64,8 +50,9 @@ class Field < ApplicationRecord
     when 'all_suppliers'
       Supplier.order(:name).map { |x| { value: x.id, label: x.name } }.as_json
     when 'all_currencies'
-      Money::Currency.all.map(&:iso_code).uniq \
-        .sort.map { |iso_code| { label: iso_code, value: iso_code } }
+      Money::Currency.all.map(&:iso_code).uniq.sort.map do |iso_code|
+        { label: iso_code, value: iso_code }
+      end
     else
       data['values']
     end
@@ -83,17 +70,11 @@ class Field < ApplicationRecord
   def search_path(inventory_pool)
     case data['search_path']
     when 'models'
-      Rails
-        .application
-        .routes
-        .url_helpers
-        .manage_models_path(inventory_pool, all: true)
+      Rails.application.routes.url_helpers.manage_models_path(inventory_pool, all: true)
     when 'software'
-      Rails
-        .application
-        .routes
-        .url_helpers
-        .manage_models_path(inventory_pool, all: true, type: :software)
+      Rails.application.routes.url_helpers.manage_models_path(
+        inventory_pool, all: true, type: :software
+      )
     else
       data['search_path']
     end
@@ -112,14 +93,10 @@ class Field < ApplicationRecord
   def get_value_from_params(params)
     if data['attribute'].is_a? Array
       begin
-        data['attribute'].inject(params) do|params, attr|
-          if params.is_a? Hash
-            params[attr.to_sym]
-          else
-            params.send attr
-          end
+        data['attribute'].inject(params) do |params, attr|
+          params.is_a? Hash ? params[attr.to_sym] : params.send attr
         end
-      rescue
+      rescue StandardError
         nil
       end
     else
@@ -130,13 +107,11 @@ class Field < ApplicationRecord
   def editable(user, inventory_pool, item)
     return true unless data['permissions']
 
-    if data['permissions']['role'] \
-      and not user.has_role? data['permissions']['role'], inventory_pool
+    if data['permissions']['role'] and
+      not user.has_role? data['permissions']['role'], inventory_pool
       return false
     end
-    if data['permissions']['owner'] and item.owner != inventory_pool
-      return false
-    end
+    return false if data['permissions']['owner'] and item.owner != inventory_pool
 
     true
   end
@@ -144,15 +119,10 @@ class Field < ApplicationRecord
   ########
 
   def accessible_by?(user, inventory_pool)
-    if data['permissions']
-      user.has_role? data['permissions']['role'], inventory_pool
-    else
-      true
-    end
+    data['permissions'] ? user.has_role? data['permissions']['role'], inventory_pool : true
   end
 
   def label_for_audits
     id
   end
-
 end

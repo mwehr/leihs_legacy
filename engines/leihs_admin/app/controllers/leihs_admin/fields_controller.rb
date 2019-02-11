@@ -1,10 +1,11 @@
 module LeihsAdmin
   class FieldsController < AdminController
-
     def index
-      @grouped_fields = Field.unscoped.order(:position).sort_by do |f|
-        [Field::GROUPS_ORDER.index(f.data['group']) || 999, f.position]
-      end.group_by { |f| f.data['group'] }
+      @grouped_fields =
+        Field.unscoped.order(:position).sort_by do |f|
+          [Field::GROUPS_ORDER.index(f.data['group']) || 999, f.position]
+        end
+          .group_by { |f| f.data['group'] }
     end
 
     def batch_update
@@ -29,9 +30,7 @@ module LeihsAdmin
     def get_active_status_value!(field, field_spec)
       case field_spec.require(:active)
       when '0'
-        if field.data['required']
-          raise "Disabling a required field #{field.id} is not possible!"
-        end
+        raise "Disabling a required field #{field.id} is not possible!" if field.data['required']
         false
       when '1'
         true

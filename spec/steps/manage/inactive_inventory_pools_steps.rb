@@ -10,13 +10,12 @@ module Manage
       include ::Spec::PersonasDumpSteps
 
       step 'there exists an inactive inventory pool ' \
-           'I have access to as :role' do |role|
-        @inactive_inventory_pool = \
-          FactoryGirl.create(:inventory_pool, is_active: false)
-        FactoryGirl.create(:access_right,
-                           user: @current_user,
-                           inventory_pool: @inactive_inventory_pool,
-                           role: role.sub(' ', '_'))
+             'I have access to as :role' do |role|
+        @inactive_inventory_pool = FactoryGirl.create(:inventory_pool, is_active: false)
+        FactoryGirl.create(
+          :access_right,
+          user: @current_user, inventory_pool: @inactive_inventory_pool, role: role.sub(' ', '_')
+        )
       end
 
       step 'I hover over the current inventory pool in navigation bar' do
@@ -35,8 +34,7 @@ module Manage
       end
 
       step 'there exists an inactive inventory pool' do
-        @inactive_inventory_pool = FactoryGirl.create(:inventory_pool,
-                                                      is_active: false)
+        @inactive_inventory_pool = FactoryGirl.create(:inventory_pool, is_active: false)
       end
 
       step 'open the edit page for the item' do
@@ -44,7 +42,7 @@ module Manage
       end
 
       step 'I fill in the name of the inactive inventory pool ' \
-           'for "Responsible department"' do
+             'for "Responsible department"' do
         find('#inventory_pool_id input').set @inactive_inventory_pool.name
       end
 
@@ -53,12 +51,15 @@ module Manage
       end
 
       step 'there is a retired item which is owned by the the current pool ' \
-           'but in responsibility of the inactive inventory pool' do
-        @item = FactoryGirl.create(:item,
-                                   retired: Date.today,
-                                   retired_reason: Faker::Lorem.sentence,
-                                   inventory_pool: @inactive_inventory_pool,
-                                   owner: @current_inventory_pool)
+             'but in responsibility of the inactive inventory pool' do
+        @item =
+          FactoryGirl.create(
+            :item,
+            retired: Date.today,
+            retired_reason: Faker::Lorem.sentence,
+            inventory_pool: @inactive_inventory_pool,
+            owner: @current_inventory_pool
+          )
       end
 
       step 'I open the inventory list' do
@@ -66,7 +67,7 @@ module Manage
       end
 
       step 'I enter the inventory code of the item ' \
-           'in the inventory search field' do
+             'in the inventory search field' do
         find('#list-search').set @item.inventory_code
       end
 
@@ -77,7 +78,7 @@ module Manage
       end
 
       step 'I there is not possibility to choose the inactive inventory pool ' \
-           'from the inventory pools select field' do
+             'from the inventory pools select field' do
         within "select[name='responsible_inventory_pool_id']" do
           expect(page).not_to have_content @inactive_inventory_pool.name
         end
@@ -88,19 +89,17 @@ module Manage
       end
 
       step 'choose the responsible department via field select box' do
-        type_into_and_select_from_autocomplete(
-          '#field-input', _('Responsible department')
-        )
+        type_into_and_select_from_autocomplete('#field-input', _('Responsible department'))
       end
 
       step 'I fill in the name of the inactive inventory pool ' \
-           'in the responsible department field' do
+             'in the responsible department field' do
+
       end
     end
   end
 end
 
 RSpec.configure do |config|
-  config.include Manage::Spec::InactiveInventoryPoolSteps,
-                 manage_inactive_inventory_pools: true
+  config.include Manage::Spec::InactiveInventoryPoolSteps, manage_inactive_inventory_pools: true
 end

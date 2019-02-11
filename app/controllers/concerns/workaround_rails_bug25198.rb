@@ -6,12 +6,12 @@ module WorkaroundRailsBug25198
         thumbnails = Image.where(parent_id: image_id)
         thumbnails.each do |thumbnail|
           ActiveRecord::Base.connection.exec_delete <<-SQL
-            DELETE FROM images WHERE id = '#{thumbnail.id}'
+                      DELETE FROM images WHERE id = '#{thumbnail.id}'
           SQL
         end
 
         ActiveRecord::Base.connection.exec_delete <<-SQL
-          DELETE FROM images WHERE id = '#{UUIDTools::UUID.parse(image_id)}'
+                  DELETE FROM images WHERE id = '#{UUIDTools::UUID.parse(image_id)}'
         SQL
 
         images_attrs.delete(image_id)

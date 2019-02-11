@@ -10,10 +10,10 @@ Then(/^I see image, name and manufacturer of the first 6 matching models$/) do
     within '.ui-autocomplete' do
       matches = all('.ui-autocomplete a', minimum: 1)
       expect(matches.length).to be >= 6
-      matches[0,6].each do |match|
+      matches[0, 6].each do |match|
         within match do
           text = find('strong', text: @search_term).text
-          model = @current_user.models.borrowable.find {|m| [m.name, m.product].include? text }
+          model = @current_user.models.borrowable.find { |m| [m.name, m.product].include? text }
           find('div > div:nth-child(2)', text: model.manufacturer)
           find("div > img[src='/models/#{model.id}/image_thumb']")
         end
@@ -29,16 +29,20 @@ end
 Given(/^I pick a model from the ones suggested$/) do
   #step 'man einen Suchbegriff eingibt'
   step 'I enter a search term'
-  @model = @current_user.models.find {|m| [m.name, m.product].include? find('.ui-autocomplete a strong', match: :first).text }
+  @model =
+    @current_user.models.find do |m|
+      [m.name, m.product].include? find('.ui-autocomplete a strong', match: :first).text
+    end
   find('.ui-autocomplete a', match: :first, text: @model.name).click
 end
 
-Then(/^I see the model's detail page$/) do
-  expect(current_path).to eq borrow_model_path(@model)
-end
+Then(/^I see the model's detail page$/) { expect(current_path).to eq borrow_model_path(@model) }
 
 Given(/^I enter a search term$/) do
-  @model ||= @current_user.models.borrowable.detect {|m| @current_user.models.borrowable.where("models.product LIKE '%#{m.name[0..3]}%'").length >= 6}
+  @model ||=
+    @current_user.models.borrowable.detect do |m|
+      @current_user.models.borrowable.where("models.product LIKE '%#{m.name[0..3]}%'").length >= 6
+    end
   @search_term = @model.name[0..3]
   fill_in 'search_term', with: @search_term
 end
@@ -55,12 +59,15 @@ Given(/^I press the Enter key$/) do
 end
 
 Then(/^the search result page is shown$/) do
-  find("nav .navigation-tab-item.active span[title=\"%s\"]" % _("Search for '%s'") % @search_term)
+  find('nav .navigation-tab-item.active span[title="%s"]' % _("Search for '%s'") % @search_term)
   expect(current_path).to eq borrow_search_results_path
 end
 
 Then(/^I see image, name and manufacturer of all matching models$/) do
-  @models = @current_user.models.borrowable.search(@search_term, [:manufacturer, :product, :version]).default_order.paginate(page: 1, per_page: 20)
+  @models =
+    @current_user.models.borrowable.search(@search_term, [:manufacturer, :product, :version])
+      .default_order
+      .paginate(page: 1, per_page: 20)
   @models.each do |model|
     within "#model-list .line[data-id='#{model.id}']" do
       find('div .col1of6', text: model.manufacturer, match: :prefer_exact)

@@ -35,7 +35,7 @@ class ApplicationRecordPresenter < ApplicationPresenter
   end
 
   # pundit helpers (if library is used)
-  if defined? Pundit
+  if defined?(Pundit)
     include Pundit
 
     def policy_for(user)

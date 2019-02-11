@@ -40,22 +40,20 @@ class Manage::CategoriesController < Manage::ApplicationController
     @parent = Category.find(params[:parent_id]) unless params[:parent_id].blank?
     if @category and @parent
       @parent.children.delete(@category) # if @parent.children.include?(@category)
-      redirect_to \
-        manage_inventory_pool_category_parents_path(current_inventory_pool,
-                                                    @category)
+      redirect_to manage_inventory_pool_category_parents_path(current_inventory_pool, @category)
     else
       if @category.models.empty?
         @category.destroy
         respond_to do |format|
           format.json { head :ok }
           format.html do
-            redirect_to \
-              manage_categories_path(current_inventory_pool),
-              notice: _('%s successfully deleted') % _('Category')
+            redirect_to manage_categories_path(current_inventory_pool),
+                        notice: _('%s successfully deleted') % _('Category')
           end
         end
-      else
+
         # TODO: 0607 ajax delete
+      else
         @category.errors.add(:base, _('The Category must be empty'))
         render action: 'show' # TODO: 24** redirect to the correct tabbed form
       end
@@ -83,8 +81,7 @@ class Manage::CategoriesController < Manage::ApplicationController
       manage_links @category, links
       render status: :ok, json: { id: @category.id }
     else
-      render status: :bad_request,
-             text: @model.errors.full_messages.uniq.join(', ')
+      render status: :bad_request, text: @model.errors.full_messages.uniq.join(', ')
     end
   end
 

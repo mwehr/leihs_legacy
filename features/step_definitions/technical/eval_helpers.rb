@@ -1,4 +1,4 @@
-def exact_match? v
+def exact_match?(v)
   [
     'Faker::Commerce.product_name',
     'Faker::Lorem.sentence',
@@ -7,7 +7,7 @@ def exact_match? v
     'Faker::Name.last_name',
     'Faker::Name.first_name',
     'Faker::Internet.email',
-    "Faker::Address.street_address + \", \"",
+    'Faker::Address.street_address + ", "',
     '[true, false].sample',
     'Date.today',
     'Date.yesterday',
@@ -17,7 +17,7 @@ def exact_match? v
     .include?(v)
 end
 
-def regex_match? v
+def regex_match?(v)
   [
     /^rand\(\d{1}\.\.\d{,3}\)$/,
     /^rand\(\d{,3}\)$/,
@@ -27,15 +27,15 @@ def regex_match? v
     .any? { |r| r.match v }
 end
 
-def allowed_code? v
+def allowed_code?(v)
   exact_match? v or regex_match? v
 end
 
-def nilify_empty_string v
+def nilify_empty_string(v)
   v unless v.empty?
 end
 
-def substitute_with_eval v
+def substitute_with_eval(v)
   match = /(#\{(.*)\})/.match(v)
   if match
     if allowed_code?($2)
@@ -48,8 +48,6 @@ def substitute_with_eval v
   end
 end
 
-def hashes_with_evaled_and_nilified_values table
-  table.hashes.map do |h|
-    h.each { |k, v| h[k] = nilify_empty_string(substitute_with_eval v) }
-  end
+def hashes_with_evaled_and_nilified_values(table)
+  table.hashes.map { |h| h.each { |k, v| h[k] = nilify_empty_string(substitute_with_eval v) } }
 end

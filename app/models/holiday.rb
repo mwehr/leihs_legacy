@@ -6,12 +6,9 @@ class Holiday < ApplicationRecord
 
   scope :future, -> { where(['end_date >= ?', Time.zone.today]) }
 
-  before_save do
-    self.end_date = self.start_date if self.end_date < self.start_date
-  end
+  before_save { self.end_date = self.start_date if self.end_date < self.start_date }
 
   def label_for_audits
     name
   end
-
 end

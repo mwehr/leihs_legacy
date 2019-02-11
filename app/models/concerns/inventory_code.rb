@@ -15,7 +15,6 @@ module Concerns
     ####################################################################
 
     module ClassMethods
-
       # extract *last* number sequence in string
       def last_number(inventory_code)
         inventory_code ||= ''
@@ -26,24 +25,20 @@ module Concerns
       # tries to take the next free inventory code
       # after the previously created Item
       def proposed_inventory_code(inventory_pool, type = :last)
-        latest_inventory_code = \
-          Item
-          .where(owner_id: inventory_pool)
-          .order('created_at DESC')
-          .first
-          .try(:inventory_code)
+        latest_inventory_code =
+          Item.where(owner_id: inventory_pool).order('created_at DESC').first.try(:inventory_code)
 
-        next_num = case type
-                   when :lowest
-                     free_inventory_code_ranges(from: 0).first.first
-                   when :highest
-                     free_inventory_code_ranges(from: 0).last.first
-                   else # :last
-                     latest_number = last_number(latest_inventory_code)
-                     free_inventory_code_ranges(from: latest_number)
-                       .first
-                       .first
-                   end
+        next_num =
+          case type
+          when :lowest
+            free_inventory_code_ranges(from: 0).first.first
+          when :highest
+            free_inventory_code_ranges(from: 0).last.first
+            # :last
+          else
+            latest_number = last_number(latest_inventory_code)
+            free_inventory_code_ranges(from: latest_number).first.first
+          end
 
         "#{inventory_pool.shortname}#{next_num}"
       end
@@ -64,17 +59,16 @@ module Concerns
       #
       def allocated_inventory_code_numbers(with_allocated_codes = false)
         h = {}
-        inventory_codes = \
-          ApplicationRecord
-          .connection
-          .select_values('SELECT inventory_code FROM items')
+        inventory_codes =
+          ApplicationRecord.connection.select_values('SELECT inventory_code FROM items')
         inventory_codes.each do |code|
           num = last_number(code)
-          h[num] = if with_allocated_codes
-                     (h[num].nil? ? code : Array(h[num]) << code)
-                   else
-                     Integer(h[num].presence || 0) + 1
-                   end
+          h[num] =
+            if with_allocated_codes
+              (h[num].nil? ? code : Array(h[num]) << code)
+            else
+              Integer(h[num].presence || 0) + 1
+            end
         end
         h
       end
@@ -100,15 +94,10 @@ module Concerns
         ranges = []
         last_n = from - 1
 
-        sorted_numbers = \
-          allocated_inventory_code_numbers
-          .keys
-          .select { |n| n >= from and n <= to }
-          .sort
+        sorted_numbers =
+          allocated_inventory_code_numbers.keys.select { |n| n >= from and n <= to }.sort
         sorted_numbers.each do |n|
-          if n - 1 != last_n and (n - 1 - last_n >= min_gap)
-            ranges << [last_n + 1, n - 1]
-          end
+          ranges << [last_n + 1, n - 1] if n - 1 != last_n and (n - 1 - last_n >= min_gap)
           last_n = n
         end
         ranges << [last_n + 1, to] if last_n + 1 <= to and (to - last_n >= min_gap)

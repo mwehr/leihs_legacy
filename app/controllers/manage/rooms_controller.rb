@@ -1,14 +1,10 @@
 class Manage::RoomsController < Manage::ApplicationController
-
   include RoomsDiff
 
   def index
-    @rooms = \
-      Room.where(building_id: building_id_param).order(:name)
+    @rooms = Room.where(building_id: building_id_param).order(:name)
 
-    respond_to do |format|
-      format.json
-    end
+    respond_to(&:json)
   end
 
   private
@@ -16,5 +12,4 @@ class Manage::RoomsController < Manage::ApplicationController
   def building_id_param
     params.require(:building_id)
   end
-
 end

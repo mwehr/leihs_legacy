@@ -10,11 +10,7 @@ class Building < ApplicationRecord
 
   ########################################################
 
-  after_create do
-    Room.create!(name: 'general room',
-                 building_id: id,
-                 general: true)
-  end
+  after_create { Room.create!(name: 'general room', building_id: id, general: true) }
 
   ########################################################
 
@@ -31,11 +27,7 @@ class Building < ApplicationRecord
   end
 
   def to_s
-    if code.presence
-      "#{name} (#{code})"
-    else
-      name
-    end
+    code.presence ? "#{name} (#{code})" : name
   end
 
   def label_for_audits
@@ -48,19 +40,15 @@ class Building < ApplicationRecord
     buildings
   end
 
-  scope :search, lambda { |query|
-    sql = all
-    return sql if query.blank?
+  scope :search,
+        lambda do |query|
+          sql = all
+          return sql if query.blank?
 
-    query.split.each do |q|
-      q = "%#{q}%"
-      sql = \
-        sql
-        .where(
-          arel_table[:name].matches(q)
-          .or(arel_table[:code].matches(q)))
-    end
-    sql
-  }
-
+          query.split.each do |q|
+            q = "%#{q}%"
+            sql = sql.where(arel_table[:name].matches(q).or(arel_table[:code].matches(q)))
+          end
+          sql
+        end
 end

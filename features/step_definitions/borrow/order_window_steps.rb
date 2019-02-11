@@ -1,18 +1,14 @@
 # -*- encoding : utf-8 -*-
 
-When(/^I am viewing my current order$/) do
-  visit borrow_current_order_path
-end
+When(/^I am viewing my current order$/) { visit borrow_current_order_path }
 
 Then(/^I am redirected to my current order$/) do
   expect(current_path).to eq borrow_current_order_path
 end
 
-
 Then(/^I do not see the order window$/) do
   expect(has_no_selector?('.col1of5 .navigation-tab-item', text: _('Order'))).to be true
 end
-
 
 Then(/^I see the order window$/) do
   expect(has_selector?('.col1of5 .navigation-tab-item', text: _('Order'))).to be true
@@ -25,21 +21,21 @@ end
 
 Then(/^the models in the order window are sorted alphabetically$/) do
   within '#current-order-basket #current-order-lines' do
-    @names = all('.line').map{|l| l[:title] }
+    @names = all('.line').map { |l| l[:title] }
     expect(@names.sort == @names).to be true
   end
 end
 
-Then(/^identical models are collapsed$/) do
-  expect(@names.uniq == @names).to be true
-end
+Then(/^identical models are collapsed$/) { expect(@names.uniq == @names).to be true }
 
 When(/^I add the same model one more time$/) do
-  FactoryGirl.create(:reservation,
-                     user: @current_user,
-                     status: :unsubmitted,
-                     inventory_pool: @inventory_pool,
-                     model: @new_reservation.model)
+  FactoryGirl.create(
+    :reservation,
+    user: @current_user,
+    status: :unsubmitted,
+    inventory_pool: @inventory_pool,
+    model: @new_reservation.model
+  )
   #step "erscheint es im Bestellfensterchen"
   step 'it appears in the order window'
 end
@@ -73,7 +69,10 @@ Then(/^the order window is updated$/) do
   step 'the model has been added to the order with the respective start and end date, quantity and inventory pool'
   #step "erscheint es im Bestellfensterchen"
   step 'it appears in the order window'
-  find("#current-order-basket #current-order-lines .line[title='#{@model.name}']", match: :first, text: "#{@quantity}x #{@model.name}")
+  find(
+    "#current-order-basket #current-order-lines .line[title='#{@model.name}']",
+    match: :first, text: "#{@quantity}x #{@model.name}"
+  )
 end
 
 Given(/^my order is empty$/) do
@@ -90,16 +89,20 @@ end
 Then(/^I see a timer$/) do
   step 'I visit the homepage'
   expect(has_selector?('#current-order-basket #timeout-countdown', visible: true)).to be true
-  @timeoutStart = if @current_user.reservations.unsubmitted.empty?
-                    Time.now
-                  else
-                    @current_user.reservations.unsubmitted.first.updated_at
-                  end
+  @timeoutStart =
+    if @current_user.reservations.unsubmitted.empty?
+      Time.now
+    else
+      @current_user.reservations.unsubmitted.first.updated_at
+    end
   @countdown = find('#timeout-countdown-time', match: :first).text
 end
 
 Then(/^the timer is near the basket$/) do
-  find('#current-order-basket .navigation-tab-item #timeout-countdown #timeout-countdown-time', match: :first)
+  find(
+    '#current-order-basket .navigation-tab-item #timeout-countdown #timeout-countdown-time',
+    match: :first
+  )
 end
 
 Then(/^the timer counts down from (\d+) minutes$/) do |timeout_minutes|
@@ -108,7 +111,8 @@ Then(/^the timer counts down from (\d+) minutes$/) do |timeout_minutes|
   seconds = @countdown.split(':')[1].to_i
   sleep(1) # NOTE this sleep is required in order to test the countdown
   expect(Setting.first.timeout_minutes - 1).to be <= minutes
-  expect(find('#timeout-countdown-time', match: :first).reload.text.split(':')[1].to_i).to be < seconds
+  expect(find('#timeout-countdown-time', match: :first).reload.text.split(':')[1].to_i).to be <
+    seconds
 end
 
 Given(/^my order is not empty$/) do
@@ -132,6 +136,4 @@ Given(/^the timeout is set to (\d+) minutes?$/) do |arg1|
   expect(Setting.first.timeout_minutes).to eq arg1.to_i
 end
 
-When(/^the timer has run down$/) do
-  sleep(Setting.first.timeout_minutes * 60 + 1) # NOTE this sleep is required to test the timeout
-end
+When(/^the timer has run down$/) { sleep(Setting.first.timeout_minutes * 60 + 1) } # NOTE this sleep is required to test the timeout

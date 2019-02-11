@@ -1,14 +1,14 @@
 class Manage::ApplicationController < ApplicationController
-
   layout 'manage'
 
   before_action do
     unless logged_in?
       store_location
-      error_response = proc do
-        flash[:error] = _('You are not logged in.')
-        head :unauthorized
-      end
+      error_response =
+        proc do
+          flash[:error] = _('You are not logged in.')
+          head :unauthorized
+        end
       respond_to do |format|
         format.html { redirect_to root_path }
         format.json &error_response
@@ -35,8 +35,7 @@ class Manage::ApplicationController < ApplicationController
   # NOTE this method may be overridden in the sub controllers
   def required_manager_role
     open_actions = [:root]
-    if not open_actions.include?(action_name.to_sym) \
-      and (request.post? or not request.format.json?)
+    if not open_actions.include?(action_name.to_sym) and (request.post? or not request.format.json?)
       require_role :lending_manager, current_inventory_pool
     else
       require_role :group_manager, current_inventory_pool
@@ -52,46 +51,42 @@ class Manage::ApplicationController < ApplicationController
     # if start_screen
     #   redirect_to current_user.start_screen
 
-    last_ip_id = \
-      session[:current_inventory_pool_id] \
-      || current_user.latest_inventory_pool_id_before_logout
-    if last_ip_id
-      ip = current_user.inventory_pools.managed.detect { |x| x.id == last_ip_id }
-    end
+    last_ip_id =
+      session[:current_inventory_pool_id] || current_user.latest_inventory_pool_id_before_logout
+    ip = current_user.inventory_pools.managed.detect { |x| x.id == last_ip_id } if last_ip_id
     role_for_last_ip = current_user.access_right_for(ip).try :role if ip
 
-    if [:inventory_manager, nil].include?(role_for_last_ip) \
-      and current_user.access_rights.active.where(role: :inventory_manager).exists?
+    if [:inventory_manager, nil].include?(role_for_last_ip) and
+      current_user.access_rights.active.where(role: :inventory_manager).exists?
       ip ||= current_user.inventory_pools.managed(:inventory_manager).first
       redirect_to manage_inventory_path(ip)
-    elsif [:lending_manager, nil].include?(role_for_last_ip) \
-      and current_user.access_rights.active.where(role: :lending_manager).exists?
+    elsif [:lending_manager, nil].include?(role_for_last_ip) and
+      current_user.access_rights.active.where(role: :lending_manager).exists?
       ip ||= current_user.inventory_pools.managed(:lending_manager).first
       redirect_to manage_daily_view_path(ip)
-    elsif [:group_manager, nil].include?(role_for_last_ip) \
-      and current_user.access_rights.active.where(role: :group_manager).exists?
+    elsif [:group_manager, nil].include?(role_for_last_ip) and
+      current_user.access_rights.active.where(role: :group_manager).exists?
       ip ||= current_user.inventory_pools.managed(:group_manager).first
-      redirect_to manage_orders_path(ip, status: [:approved,
-                                                  :submitted,
-                                                  :rejected])
+      redirect_to manage_orders_path(ip, status: [:approved, :submitted, :rejected])
     else
       head :bad_request
     end
   end
 
-  def maintenance
-  end
+  def maintenance; end
 
   ###############################################################
 
   protected
 
-  helper_method(:owner?,
-                :privileged_user?,
-                :super_user?,
-                :inventory_manager?,
-                :lending_manager?,
-                :group_manager?)
+  helper_method(
+    :owner?,
+    :privileged_user?,
+    :super_user?,
+    :inventory_manager?,
+    :lending_manager?,
+    :group_manager?
+  )
 
   def current_inventory_pool
     return @current_inventory_pool if @current_inventory_pool # OPTIMIZE
@@ -105,8 +100,7 @@ class Manage::ApplicationController < ApplicationController
     end
     if @current_inventory_pool
       session[:current_inventory_pool_id] = @current_inventory_pool.id
-      current_user.latest_inventory_pool_id_before_logout = \
-        @current_inventory_pool.id
+      current_user.latest_inventory_pool_id_before_logout = @current_inventory_pool.id
       current_user.save
     end
     @current_inventory_pool
@@ -138,5 +132,4 @@ class Manage::ApplicationController < ApplicationController
   def owner?
     @item.nil? or (current_inventory_pool.id == @item.owner_id)
   end
-
 end

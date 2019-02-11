@@ -1,10 +1,18 @@
-Given /^a list of changes\/availabilities$/ do
-  @model = @current_inventory_pool.models.max {|a,b| a.availability_in(@current_inventory_pool).changes.length <=> b.availability_in(@current_inventory_pool).changes.length}
+Given %r{^a list of changes\/availabilities$} do
+  @model =
+    @current_inventory_pool.models.max do |a, b|
+      a.availability_in(@current_inventory_pool).changes.length <=>
+        b.availability_in(@current_inventory_pool).changes.length
+    end
   @reference = @model.availability_in(@current_inventory_pool).available_total_quantities
 end
 
-When /^I request that list multiple times the allocation of the reservations should always be the same$/ do
+When /
+       ^I request that list multiple times the allocation of the reservations should always be the same$
+     / do
   50.times do
-    expect(@reference.to_json).to eq @model.availability_in(@current_inventory_pool).available_total_quantities.to_json
+    expect(@reference.to_json).to eq @model.availability_in(@current_inventory_pool)
+         .available_total_quantities
+         .to_json
   end
 end

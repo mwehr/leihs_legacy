@@ -1,5 +1,4 @@
 class Manage::MailsController < Manage::ApplicationController
-
   before_action do
     @user = User.find params[:user_id]
 
@@ -13,29 +12,30 @@ class Manage::MailsController < Manage::ApplicationController
       flash[:error] = _('The user does not have an email address')
       # TODO
       redirect
-    else
+
       # instead of sanitizing the user's name (see to_full_email_address
       # below, we use her email address only
-      @to   = @user.email
-      @from = if current_inventory_pool
-                to_full_email_address(current_inventory_pool.name,
-                                      (if current_inventory_pool.email.blank?
-                                         app_settings.default_email
-                                       else
-                                         current_inventory_pool.email
-                                       end))
-              else
-                app_settings.default_email
-              end
+    else
+      @to = @user.email
+      @from =
+        if current_inventory_pool
+          to_full_email_address(
+            current_inventory_pool.name,
+            (if current_inventory_pool.email.blank?
+              app_settings.default_email
+            else
+              current_inventory_pool.email
+            end)
+          )
+        else
+          app_settings.default_email
+        end
       @source_path = params[:source_path]
     end
   end
 
   def create
-    Notification.user_email(params[:from],
-                            params[:to],
-                            params[:subject],
-                            params[:body])
+    Notification.user_email(params[:from], params[:to], params[:subject], params[:body])
     flash[:notice] = _('The mail was sent')
     redirect_to params[:source_path]
   end

@@ -1,6 +1,6 @@
 When(/^the mail delivery method is set to "(.*?)"$/) do |method|
   ApplicationRecord.connection.execute <<-SQL
-    UPDATE settings SET mail_delivery_method = '#{method}'
+      UPDATE settings SET mail_delivery_method = '#{method}'
   SQL
   expect(Setting.first.mail_delivery_method).to eq method
 end
@@ -11,14 +11,14 @@ end
 
 When(/^the SMTP username is set to "(.*?)"$/) do |username|
   ApplicationRecord.connection.execute <<-SQL
-    UPDATE settings SET smtp_username = '#{username}'
+      UPDATE settings SET smtp_username = '#{username}'
   SQL
   expect(Setting.first.smtp_username).to eq username
 end
 
 When(/^the SMTP password is set to "(.*?)"$/) do |password|
   ApplicationRecord.connection.execute <<-SQL
-    UPDATE settings SET smtp_password = '#{password}'
+      UPDATE settings SET smtp_password = '#{password}'
   SQL
   expect(Setting.first.smtp_password).to eq password
 end

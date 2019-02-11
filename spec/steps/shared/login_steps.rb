@@ -9,8 +9,7 @@ module Spec
     end
 
     step 'I log out' do
-      sign_out_button = first(".topbar form[action='/sign-out'] button",
-                              visible: :all)
+      sign_out_button = first(".topbar form[action='/sign-out'] button", visible: :all)
       if sign_out_button
         sign_out_button.click
       else
@@ -18,13 +17,11 @@ module Spec
       end
     end
 
-    [:customer, :group_manager, :lending_manager, :inventory_manager]
-      .each do |role|
+    [:customer, :group_manager, :lending_manager, :inventory_manager].each do |role|
       step "I am logged in as #{role.to_s.sub('_', ' ')}" do
         ip = FactoryGirl.create(:inventory_pool)
         role == :customer ? @inventory_pool = ip : @current_inventory_pool = ip
-        @current_user = @customer = \
-          FactoryGirl.create(role, inventory_pool: ip)
+        @current_user = @customer = FactoryGirl.create(role, inventory_pool: ip)
         step 'I log out'
         set_locale
         login_as_current_user
@@ -54,10 +51,7 @@ module Spec
         if role == 'admin'
           user.update_attributes! is_admin: true
         else
-          FactoryGirl.create(
-            :access_right,
-            user: user, inventory_pool: ip, role: role
-          )
+          FactoryGirl.create(:access_right, user: user, inventory_pool: ip, role: role)
         end
       end
     end
@@ -69,11 +63,12 @@ module Spec
     end
 
     def set_locale
-      I18n.locale = if @current_user.language
-                      @current_user.language.locale_name.to_sym
-                    else
-                      Language.default_language
-                    end
+      I18n.locale =
+        if @current_user.language
+          @current_user.language.locale_name.to_sym
+        else
+          Language.default_language
+        end
     end
 
     def login_as_current_user

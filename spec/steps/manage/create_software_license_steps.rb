@@ -13,32 +13,25 @@ module Manage
         visit manage_new_item_path(@current_inventory_pool, type: :license)
       end
 
-      step 'the possible select values for :field are as follows:' \
-        do |field, table|
+      step 'the possible select values for :field are as follows:' do |field, table|
         within find('.field', text: _(field)) do
           options = all('select option').map(&:text)
           expect(table.raw.flatten).to be == options
         end
       end
 
-      step 'the possible radio button values for :field are as follows:' \
-        do |field, table|
+      step 'the possible radio button values for :field are as follows:' do |field, table|
         within find('.field', text: _(field)) do
           table.raw.flatten.each do |val|
-            within('label', text: val) do
-              find("input[type='radio']")
-            end
+            within('label', text: val) { find("input[type='radio']") }
           end
         end
       end
 
-      step 'the possible checkbox values for :field are as follows:' \
-        do |field, table|
+      step 'the possible checkbox values for :field are as follows:' do |field, table|
         within find('.field', text: _(field)) do
           table.raw.flatten.each do |val|
-            within('label', text: val) do
-              find("input[type='checkbox']")
-            end
+            within('label', text: val) { find("input[type='checkbox']") }
           end
         end
       end
@@ -63,9 +56,7 @@ module Manage
 
       step 'the default radio button for :field is :value' do |field, value|
         within find('.field', text: _(field)) do
-          within('label', text: _(value)) do
-            expect(find('input').checked?).to eq(true)
-          end
+          within('label', text: _(value)) { expect(find('input').checked?).to eq(true) }
         end
       end
 
@@ -131,9 +122,7 @@ module Manage
           find('input[data-quantity-allocation]').set quantity
           find('input[data-room-allocation]').set room
         end
-        @attributes[:properties].merge!(
-          quantity_allocations: [{ quantity: quantity, room: room }]
-        )
+        @attributes[:properties].merge!(quantity_allocations: [{ quantity: quantity, room: room }])
       end
 
       step "I check 'Linux' for operating system" do
@@ -150,9 +139,7 @@ module Manage
       end
 
       step 'I set a date for license expiration' do
-        within('.field', text: _('License expiration')) do
-          find('input').set '01/01/2099'
-        end
+        within('.field', text: _('License expiration')) { find('input').set '01/01/2099' }
         @attributes[:properties].merge!(license_expiration: '2099-01-01')
       end
 
@@ -162,8 +149,7 @@ module Manage
       end
 
       step 'the field :field is not visible' do |field|
-        expect(page).not_to \
-          have_selector('.field', text: /^#{field}/)
+        expect(page).not_to have_selector('.field', text: /^#{field}/)
       end
 
       step "I select 'Yes' for maintenance contract" do
@@ -172,9 +158,7 @@ module Manage
       end
 
       step 'I set a date for maintenance expiration' do
-        within('.field', text: _('Maintenance expiration')) do
-          find('input').set '01/01/2099'
-        end
+        within('.field', text: _('Maintenance expiration')) { find('input').set '01/01/2099' }
         @attributes[:properties].merge!(maintenance_expiration: '2099-01-01')
       end
 
@@ -186,9 +170,7 @@ module Manage
       end
 
       step "I select 'OK' for borrowable" do
-        within('.field', text: _('Borrowable')) do
-          find('label', text: 'OK').find('input').click
-        end
+        within('.field', text: _('Borrowable')) { find('label', text: 'OK').find('input').click }
         @attributes.merge!(is_borrowable: true)
       end
 
@@ -206,11 +188,8 @@ module Manage
 
       step 'the license has been saved in the database successfully' do
         license = nil
-        wait_until do
-          license = Item.find_by_inventory_code(@inventory_code)
-        end
-        expect(license.attributes.deep_include? @attributes.deep_stringify_keys)
-          .to be true
+        wait_until { license = Item.find_by_inventory_code(@inventory_code) }
+        expect(license.attributes.deep_include? @attributes.deep_stringify_keys).to be true
       end
 
       #############################################################################
@@ -218,8 +197,8 @@ module Manage
       class ::Hash
         def deep_include?(sub_hash)
           sub_hash.keys.all? do |key|
-            self.key?(key) && (
-              if sub_hash[key].is_a?(Hash)
+            self.key?(key) &&
+              (if sub_hash[key].is_a?(Hash)
                 self[key].is_a?(Hash) && self[key].deep_include?(sub_hash[key])
               else
                 self[key] == sub_hash[key]
@@ -232,6 +211,5 @@ module Manage
 end
 
 RSpec.configure do |config|
-  config.include Manage::Spec::CreateSoftwareLicenseSteps,
-                 manage_create_software_license: true
+  config.include Manage::Spec::CreateSoftwareLicenseSteps, manage_create_software_license: true
 end

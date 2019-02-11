@@ -16,40 +16,42 @@ class Option < ApplicationRecord
   has_many :option_lines, dependent: :restrict_with_exception
 
   validates_presence_of :inventory_pool, :product
-  validates_uniqueness_of(:inventory_code,
-                          scope: :inventory_pool_id,
-                          unless: proc { |record| record.inventory_code.blank? })
+  validates_uniqueness_of(
+    :inventory_code,
+    scope: :inventory_pool_id, unless: proc { |record| record.inventory_code.blank? }
+  )
 
   before_validation do |record|
-    if !record.inventory_code.nil? and record.inventory_code.blank?
-      record.inventory_code = nil
-    end
+    record.inventory_code = nil if !record.inventory_code.nil? and record.inventory_code.blank?
   end
 
   ##########################################
 
-  SEARCHABLE_FIELDS = %w(manufacturer product version inventory_code)
+  SEARCHABLE_FIELDS = %w[manufacturer product version inventory_code]
 
-  scope :search, lambda { |query, fields = []|
-    sql = all
-    return sql if query.blank?
+  scope :search,
+        lambda do |query, fields = []|
+          sql = all
+          return sql if query.blank?
 
-    query.split.each do|q|
-      q = "%#{q}%"
-      # FIXME: use fields with SEARCHABLE_FIELDS
-      sql = sql.where(arel_table[:manufacturer].matches(q)
-                      .or(arel_table[:product].matches(q))
-                      .or(arel_table[:version].matches(q))
-                      .or(arel_table[:inventory_code].matches(q)))
-    end
-    sql
-  }
+          query.split.each do |q|
+            q = "%#{q}%"
+            # FIXME: use fields with SEARCHABLE_FIELDS
+            sql =
+              sql.where(
+                arel_table[:manufacturer].matches(q).or(arel_table[:product].matches(q)).or(
+                  arel_table[:version].matches(q)
+                )
+                  .or(arel_table[:inventory_code].matches(q))
+              )
+          end
+          sql
+        end
 
   def self.filter(params, inventory_pool = nil)
     options = inventory_pool ? inventory_pool.options : all
     unless params[:search_term].blank?
-      options = options.search(params[:search_term],
-                               [:manufacturer, :product, :versin])
+      options = options.search(params[:search_term], [:manufacturer, :product, :versin])
     end
     options = options.where(id: params[:ids]) if params[:ids]
     if params[:sort] and params[:order]
@@ -84,6 +86,7 @@ class Option < ApplicationRecord
   # Generates an array suitable for outputting a line of CSV using CSV
   def to_csv_array
     # Using #{} notation to catch nils gracefully and silently
+
     {
       _('Model Name') => "#{self.name}",
       _('Inventory Code') => "#{self.inventory_code}",
@@ -97,5 +100,4 @@ class Option < ApplicationRecord
   def type
     nil
   end
-
 end

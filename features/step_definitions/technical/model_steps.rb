@@ -11,9 +11,7 @@ end
 When /^the quantity of items of a user for a specific model is retrieved$/ do
   @quantities_1 = []
   @users.each do |user|
-    @models.each do |model|
-      @quantities_1 << user.items.where(model_id: model).count
-    end
+    @models.each { |model| @quantities_1 << user.items.where(model_id: model).count }
   end
 end
 

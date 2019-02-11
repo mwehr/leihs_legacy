@@ -21,23 +21,18 @@ module LeihsAdmin
 
       step 'the delegation has no access rights to any inventory pool' do
         expect(
-          AccessRight
-          .where(user_id: @delegation.id)
-          .where(role: [:customer,
-                        :group_manager,
-                        :lending_manager,
-                        :inventory_manager])
-          .exists?
+          AccessRight.where(user_id: @delegation.id).where(
+            role: [:customer, :group_manager, :lending_manager, :inventory_manager]
+          )
+            .exists?
         ).to be false
       end
 
       step 'I click on the dropdown toggle for the delegation' do
-        find('.list-of-lines .row', text: @delegation.name)
-          .find('.dropdown-toggle')
-          .click
+        find('.list-of-lines .row', text: @delegation.name).find('.dropdown-toggle').click
       end
 
-      step 'the delegation doesn\'t exist anymore' do
+      step "the delegation doesn't exist anymore" do
         expect(User.find_by_id(@delegation.id)).not_to be
       end
 

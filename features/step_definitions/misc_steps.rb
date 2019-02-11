@@ -1,3 +1,1 @@
-When(/^I pry$/) do
-  binding.pry
-end
+When(/^I pry$/) { binding.pry }

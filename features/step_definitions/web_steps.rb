@@ -18,7 +18,6 @@
 # * http://elabs.se/blog/15-you-re-cuking-it-wrong
 #
 
-
 require 'uri'
 require 'cgi'
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'support', 'paths'))
@@ -36,43 +35,25 @@ World(WithinHelpers)
 #  visit path_to(page_name)
 #end
 
-When(/^(?:|I )go to (.+)$/) do |page_name|
-  visit path_to(page_name)
-end
+When(/^(?:|I )go to (.+)$/) { |page_name| visit path_to(page_name) }
 
-When(/^(?:|I )am on (.+)$/) do |page_name|
-  expect(current_path).to eq path_to(page_name)
-end
+When(/^(?:|I )am on (.+)$/) { |page_name| expect(current_path).to eq path_to(page_name) }
 
-When(/^(?:|I )press "([^"]*)"$/) do |button|
-  click_button(button)
-end
+When(/^(?:|I )press "([^"]*)"$/) { |button| click_button(button) }
 
-When(/^(?:|I )follow "([^"]*)"$/) do |link|
-  click_link(link)
-end
+When(/^(?:|I )follow "([^"]*)"$/) { |link| click_link(link) }
 
-When(/^(?:|I )fill in "([^"]*)" with "([^"]*)"$/) do |field, value|
-  fill_in(field, with: value)
-end
+When(/^(?:|I )fill in "([^"]*)" with "([^"]*)"$/) { |field, value| fill_in(field, with: value) }
 
-When(/^(?:|I )fill in "([^"]*)" for "([^"]*)"$/) do |value, field|
-  fill_in(field, with: value)
-end
+When(/^(?:|I )fill in "([^"]*)" for "([^"]*)"$/) { |value, field| fill_in(field, with: value) }
 
-When(/^(?:|I )select "([^"]*)" from "([^"]*)"$/) do |value, field|
-  select(value, from: field)
-end
+When(/^(?:|I )select "([^"]*)" from "([^"]*)"$/) { |value, field| select(value, from: field) }
 
-When(/^(?:|I )choose "([^"]*)"$/) do |field|
-  choose(field)
-end
+When(/^(?:|I )choose "([^"]*)"$/) { |field| choose(field) }
 
-Then(/^(?:|I )should see "([^"]*)"$/) do |text|
-  page.has_content?(text)
-end
+Then(/^(?:|I )should see "([^"]*)"$/) { |text| page.has_content?(text) }
 
-Then(/^(?:|I )should see \/([^\/]*)\/$/) do |regexp|
+Then(%r{^(?:|I )should see \/([^\/]*)\/$}) do |regexp|
   regexp = Regexp.new(regexp)
 
   if page.respond_to? :should
@@ -90,7 +71,7 @@ Then(/^(?:|I )should not see "([^"]*)"$/) do |text|
   end
 end
 
-Then(/^(?:|I )should not see \/([^\/]*)\/$/) do |regexp|
+Then(%r{^(?:|I )should not see \/([^\/]*)\/$}) do |regexp|
   regexp = Regexp.new(regexp)
 
   if page.respond_to? :should
@@ -120,10 +101,6 @@ Then(/^(?:|I )should be on (.+)$/) do |page_name|
   end
 end
 
-Then(/^show me the page$/) do
-  save_and_open_page # rubocop:disable Lint/Debugger
-end
+Then(/^show me the page$/) { save_and_open_page } # rubocop:disable Lint/Debugger
 
-Then(/^I accept the flash message$/) do
-  find("#flash .fa-times-circle").click
-end
+Then(/^I accept the flash message$/) { find('#flash .fa-times-circle').click }

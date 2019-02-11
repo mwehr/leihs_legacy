@@ -18,9 +18,7 @@ end
 
 When /^I delete multiple reservations of this contract$/ do
   step 'I add a model that is not already part of that contract'
-  all('input[data-select-line]:checked').each do |checkbox|
-    checkbox.click
-  end
+  all('input[data-select-line]:checked').each(&:click)
   step 'I select two reservations'
   find('.multibutton [data-selection-enabled] + .dropdown-holder').click
   find('a', text: _('Delete Selection')).click
@@ -47,7 +45,11 @@ When /^I delete all reservations of this contract$/ do
 end
 
 Then /^I got an error message that not all reservations can be deleted$/ do
-  find('#flash .error', text: _('You cannot delete all reservations of an order. Perhaps you want to reject it instead?'))
+  find(
+    '#flash .error',
+    text:
+      _('You cannot delete all reservations of an order. Perhaps you want to reject it instead?')
+  )
 end
 
 Then /^none of the reservations are deleted$/ do
@@ -66,9 +68,7 @@ When(/^I delete a hand over$/) do
 end
 
 Then(/^all reservations of that hand over are deleted$/) do
-  within(".line[data-id='#{@visit.id}']") do
-    find('.line-actions', text: _('Deleted'))
-  end
+  within(".line[data-id='#{@visit.id}']") { find('.line-actions', text: _('Deleted')) }
   reloaded_visit = Visit.where(id: @visit.id).first
   expect(reloaded_visit).to be_nil
   @visit_line_ids.each do |line_id|

@@ -3,11 +3,8 @@ Then /^dump the response$/ do
 end
 
 Then /^dump the response to '([^']*)'$/ do |filename|
-  File.open(filename, File::CREAT|File::TRUNC|File::RDWR) do |f|
-    f.puts body
-  end
+  File.open(filename, File::CREAT | File::TRUNC | File::RDWR) { |f| f.puts body }
 end
-
 
 # rubocop:disable Lint/Debugger
 Then 'start the debugger' do
@@ -42,13 +39,9 @@ end
 
 # tag your scenarion with '@slowly' and then every step
 # will be executed with a default delay of 2 seconds
-Before('@slowly') do
-  step 'wait' unless @skip_wait
-end
+Before('@slowly') { step 'wait' unless @skip_wait }
 
-AfterStep('@slowly') do
-  step 'wait' unless @skip_wait
-end
+AfterStep('@slowly') { step 'wait' unless @skip_wait }
 
 # since only Scenarios and not single steps can be tagged with
 # '@slowly', you can switch on and off delaying between steps
@@ -63,4 +56,3 @@ end
 Then 'set the default delay to $delay' do |delay|
   @delay = delay.to_i
 end
-

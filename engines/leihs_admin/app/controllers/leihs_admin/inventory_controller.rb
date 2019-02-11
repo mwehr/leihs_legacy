@@ -1,7 +1,6 @@
 module LeihsAdmin
   # rubocop:disable Metrics/ClassLength
   class InventoryController < AdminController
-
     def csv_export
       send_data InventoryPool.csv_export(nil, params),
                 type: 'text/csv; charset=utf-8; header=present',
@@ -10,8 +9,7 @@ module LeihsAdmin
 
     def excel_export
       send_data InventoryPool.excel_export(nil, params),
-                type: 'application/xlsx',
-                disposition: "filename=#{_('Inventory')}.xlsx"
+                type: 'application/xlsx', disposition: "filename=#{_('Inventory')}.xlsx"
     end
 
     def quick_csv_export
@@ -29,17 +27,9 @@ module LeihsAdmin
     def quick_excel_export
       objects = objects_for_quick_export
       header = header_for_export(objects)
-      data = Export.excel_string(
-        header,
-        objects,
-        worksheet_name: _('Inventory')
-      )
+      data = Export.excel_string(header, objects, worksheet_name: _('Inventory'))
 
-      send_data(
-        data,
-        type: 'application/xlsx',
-        disposition: "filename=#{_('Inventory')}.xlsx"
-      )
+      send_data(data, type: 'application/xlsx', disposition: "filename=#{_('Inventory')}.xlsx")
     end
 
     private
@@ -66,25 +56,20 @@ module LeihsAdmin
     def compatibles_to_string(from_db)
       json = JSON.parse(from_db)
       json.map do |e|
-        if e['version']
-          e['product'].to_s + ' ' + e['version'].to_s
-        else
-          e['product'].to_s
-        end
-      end.join('; ')
+        e['version'] ? e['product'].to_s + ' ' + e['version'].to_s : e['product'].to_s
+      end
+        .join('; ')
     end
 
     def properties_to_string(from_db)
       json = JSON.parse(from_db)
-      json.map do |e|
-        e['key'].to_s + ': ' + e['value'].to_s
-      end.join('; ')
+      json.map { |e| e['key'].to_s + ': ' + e['value'].to_s }.join('; ')
     end
 
     # rubocop:disable Metrics/MethodLength
     def item_objects_for_quick_export
       query = <<-SQL
-
+      
         with
         	prop_fields
         as (
@@ -223,64 +208,66 @@ module LeihsAdmin
       SQL
       result = ActiveRecord::Base.connection.exec_query(query).to_hash
 
-      objects = result.map do |row|
+      objects =
+        result.map do |row|
+          object = {
+            _('Type') =>
+              if row['type'] == 'Model'
+                'Item'
+              elsif row['type'] == 'Software'
+                'License'
+              else
+                'Unknown'
+              end,
+            _('Product') => row['product'],
+            _('Version') => row['version'],
+            _('Inventory Code') => row['inventory_code'],
+            _('Created at') => row['created_at'],
+            _('Updated at') => row['updated_at'],
+            _('Manufacturer') => row['manufacturer'],
+            _('Building') => row['building_name'],
+            _('Room') => row['room_name'],
+            _('Shelf') => row['shelf'],
+            _('Description') => row['description'],
+            _('Technical Detail') => row['technical_detail'],
+            _('Internal Description') => row['internal_description'],
+            _('Important notes for hand over') => row['hand_over_note'],
+            _('Responsible department') => nil,
+            _('Initial Price') => nil,
+            _('Serial Number') => row['serial_number'],
+            _('Retired') => row['retired'],
+            _('Retired Reason') => row['retired_reason'],
+            _('Complete') => (row['is_incomplete'] ? false : true),
+            _('borrowable') => row['is_borrowable'],
+            _('Status note') => row['status_note'],
+            _('Relevant for inventory') => row['is_inventory_relevant'],
+            _('Owner') => row['owner_name'],
+            _('Last Checked') => row['last_check'],
+            _('Invoice Number') => row['invoice_number'],
+            _('Invoice Date') => row['invoice_date'],
+            _('Supplier') => row['supplier_name'],
+            _('Initial Price') => row['price'],
+            _(
+              # _('Additional Data') => \
+              #   if row['field_properties']
+              #     JSON.parse(row['field_properties']).map do |e|
+              #       e['label'].to_s + ': ' + e['value'].to_s
+              #     end.join('; ')
+              #   end,
+              'Categories'
+            ) =>
+              categories_to_string(row['categories']),
+            _('Accessories') => accessories_to_string(row['accessories']),
+            _('Compatibles') => compatibles_to_string(row['compatibles']),
+            _('Properties') => properties_to_string(row['properties'])
+          }
 
-        object = {
-          _('Type') => if row['type'] == 'Model'
-                         'Item'
-                       elsif row['type'] == 'Software'
-                         'License'
-                       else
-                         'Unknown'
-                       end,
-          _('Product') => row['product'],
-          _('Version') => row['version'],
-          _('Inventory Code') => row['inventory_code'],
-          _('Created at') => row['created_at'],
-          _('Updated at') => row['updated_at'],
-          _('Manufacturer') => row['manufacturer'],
-          _('Building') => row['building_name'],
-          _('Room') => row['room_name'],
-          _('Shelf') => row['shelf'],
-          _('Description') => row['description'],
-          _('Technical Detail') => row['technical_detail'],
-          _('Internal Description') => row['internal_description'],
-          _('Important notes for hand over') => row['hand_over_note'],
-          _('Responsible department') => nil,
-          _('Initial Price') => nil,
-          _('Serial Number') => row['serial_number'],
-          _('Retired') => row['retired'],
-          _('Retired Reason') => row['retired_reason'],
-          _('Complete') => (row['is_incomplete'] ? false : true),
-          _('borrowable') => row['is_borrowable'],
-          _('Status note') => row['status_note'],
-          _('Relevant for inventory') => row['is_inventory_relevant'],
-          _('Owner') => row['owner_name'],
-          _('Last Checked') => row['last_check'],
-          _('Invoice Number') => row['invoice_number'],
-          _('Invoice Date') => row['invoice_date'],
-          _('Supplier') => row['supplier_name'],
-          _('Initial Price') => row['price'],
-          # _('Additional Data') => \
-          #   if row['field_properties']
-          #     JSON.parse(row['field_properties']).map do |e|
-          #       e['label'].to_s + ': ' + e['value'].to_s
-          #     end.join('; ')
-          #   end,
-          _('Categories') => categories_to_string(row['categories']),
-          _('Accessories') => accessories_to_string(row['accessories']),
-          _('Compatibles') => compatibles_to_string(row['compatibles']),
-          _('Properties') => properties_to_string(row['properties'])
-        }
-
-        if row['field_properties']
-          JSON.parse(row['field_properties']).each do |p|
-            object[p['label']] = p['value']
+          if row['field_properties']
+            JSON.parse(row['field_properties']).each { |p| object[p['label']] = p['value'] }
           end
-        end
 
-        object
-      end
+          object
+        end
       objects
     end
     # rubocop:enable Metrics/MethodLength

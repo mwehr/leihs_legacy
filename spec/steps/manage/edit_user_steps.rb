@@ -12,8 +12,7 @@ module Manage
       include ::Spec::PersonasDumpSteps
 
       step 'there is a group in the current pool' do
-        @group = FactoryGirl.create(:group,
-                                    inventory_pool: @current_inventory_pool)
+        @group = FactoryGirl.create(:group, inventory_pool: @current_inventory_pool)
       end
 
       step 'the user belongs to this group' do
@@ -21,8 +20,7 @@ module Manage
       end
 
       step 'open the edit page of the user' do
-        visit manage_edit_inventory_pool_user_path(@current_inventory_pool,
-                                                   @user)
+        visit manage_edit_inventory_pool_user_path(@current_inventory_pool, @user)
       end
 
       step 'I remove the group' do
@@ -45,7 +43,4 @@ module Manage
   end
 end
 
-RSpec.configure do |config|
-  config.include Manage::Spec::EditUserSteps,
-                 manage_edit_user: true
-end
+RSpec.configure { |config| config.include Manage::Spec::EditUserSteps, manage_edit_user: true }

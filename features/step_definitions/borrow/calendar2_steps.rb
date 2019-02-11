@@ -32,24 +32,29 @@ When(/^I close the calendar$/) do
   end
 end
 
-Then(/^the dialog window closes$/) do
-  expect(has_no_selector?('#booking-calendar')).to be true
-end
+Then(/^the dialog window closes$/) { expect(has_no_selector?('#booking-calendar')).to be true }
 
 When(/^I try to add a model to the order that is not available$/) do
   start_date = Date.today
   end_date = Date.today + 14
   @quantity = 3
-  inventory_pool = @current_user.inventory_pools.detect do |ip|
-    @model = @current_user.models.borrowable.detect do |m|
-      m.availability_in(ip).maximum_available_in_period_summed_for_groups(start_date, end_date, @current_user.entitlement_group_ids) < @quantity and
-      m.total_borrowable_items_for_user_and_pool(@current_user, ip) >= @quantity
+  inventory_pool =
+    @current_user.inventory_pools.detect do |ip|
+      @model =
+        @current_user.models.borrowable.detect do |m|
+          m.availability_in(ip).maximum_available_in_period_summed_for_groups(
+            start_date, end_date, @current_user.entitlement_group_ids
+          ) <
+            @quantity and
+            m.total_borrowable_items_for_user_and_pool(@current_user, ip) >= @quantity
+        end
     end
-  end
   visit borrow_model_path(@model)
   find("[data-create-order-line][data-model-id='#{@model.id}']").click
-  step "I set the start date in the calendar to '%s'" % I18n.l(inventory_pool.next_open_date(start_date))
-  step "I set the end date in the calendar to '%s'" % I18n.l(inventory_pool.next_open_date(end_date))
+  step "I set the start date in the calendar to '%s'" %
+         I18n.l(inventory_pool.next_open_date(start_date))
+  step "I set the end date in the calendar to '%s'" %
+         I18n.l(inventory_pool.next_open_date(end_date))
   step "I set the quantity in the calendar to #{@quantity}"
 end
 
@@ -76,7 +81,6 @@ Then(/^my attempt to add it fails$/) do
   expect(models.include? @model).to be false
 end
 
-
 Then(/^the error lets me know that the chosen model is not available in that time range$/) do
   within '.modal' do
     find('#booking-calendar-errors', text: _('Item is not available in that time range'))
@@ -84,9 +88,9 @@ Then(/^the error lets me know that the chosen model is not available in that tim
 end
 
 When(/^I add an item from the model list$/) do
-  visit borrow_models_path(category_id: Category.find {|c| !c.models.active.blank?})
+  visit borrow_models_path(category_id: Category.find { |c| !c.models.active.blank? })
   @model_name = find('.line .line-col.col3of6', match: :first).text
-  @model = Model.find {|m| [m.name, m.product].include? @model_name}
+  @model = Model.find { |m| [m.name, m.product].include? @model_name }
   find('.line .button', match: :first).click
 end
 
@@ -107,9 +111,11 @@ end
 When(/^everything I input into the calendar is valid$/) do
   within '.modal #booking-calendar-inventory-pool' do
     find('option', match: :first)
-    @inventory_pool = InventoryPool.find all('option').detect{|o| o.selected?}['data-id']
+    @inventory_pool = InventoryPool.find all('option').detect(&:selected?)['data-id']
   end
-  @quantity = 1 + @current_user.reservations.unsubmitted.select{|line| line.model == @model}.sum(&:quantity)
+  @quantity =
+    1 +
+      @current_user.reservations.unsubmitted.select { |line| line.model == @model }.sum(&:quantity)
   #step "ich setze die Anzahl im Kalendar auf #{1}"
   step "I set the quantity in the calendar to #{1}"
 
@@ -119,12 +125,18 @@ When(/^everything I input into the calendar is valid$/) do
   #step "the booking calendar is closed"
 end
 
-Then(/^the model has been added to the order with the respective start and end date, quantity and inventory pool$/) do
+Then(
+  /
+    ^the model has been added to the order with the respective start and end date, quantity and inventory pool$
+  /
+) do
   sleep 2
   within '#current-order-lines' do
     find('.line', text: "#{@quantity}x #{@model.name}")
   end
-  expect(@current_user.reservations.unsubmitted.detect{|line| line.model == @model}).not_to be_nil
+  expect(
+    @current_user.reservations.unsubmitted.detect { |line| line.model == @model }
+  ).not_to be_nil
 end
 
 Then(/^the current start date is today$/) do
@@ -147,14 +159,17 @@ end
 
 Then(/^all inventory pools are shown that have items of this model$/) do
   within '.modal #booking-calendar-inventory-pool' do
-    ips = @current_user.inventory_pools.select do |ip|
-      @model.total_borrowable_items_for_user_and_pool(@current_user, ip)
-    end
+    ips =
+      @current_user.inventory_pools.select do |ip|
+        @model.total_borrowable_items_for_user_and_pool(@current_user, ip)
+      end
 
     ips_in_dropdown = all('option').map(&:text)
 
     ips.each do |ip|
-      ips_in_dropdown.include?(ip.name + " (#{@model.total_borrowable_items_for_user_and_pool(@current_user, ip)})")
+      ips_in_dropdown.include?(
+        ip.name + " (#{@model.total_borrowable_items_for_user_and_pool(@current_user, ip)})"
+      )
     end
   end
 end
@@ -163,13 +178,13 @@ Given(/^I have set a time span$/) do
   find('#start-date').click
   find('#start-date').set I18n.l(Date.today + 1)
   find('#end-date').click
-  find('#end-date').set I18n.l(Date.today + 2)
-  sleep 2 # needed because cider flappiness
+  find('#end-date').set I18n.l(Date.today + 2) # needed because cider flappiness
+  sleep 2
 end
 
 When(/^I add an item to my order that is available in the selected time span$/) do
   @model_name = find('.line:not(.grayed-out) .line-col.col3of6', match: :first).text
-  @model = Model.find {|m| [m.name, m.product].include? @model_name}
+  @model = Model.find { |m| [m.name, m.product].include? @model_name }
   find('.line .button', match: :first).click
 end
 
@@ -186,17 +201,18 @@ Then(/^the end date is equal to the preselected end date$/) do
 end
 
 Given(/^there is a model for which an order exists$/) do
-  @model = @current_user.inventory_pools.flat_map(&:reservations).select do |cl|
-    cl.is_a?(ItemLine) and cl.start_date > Date.today and cl.model.categories.exists? # NOTE cl.start_date.future? doesn't work properly because timezone
-  end.sample.model
+  @model =
+    @current_user.inventory_pools.flat_map(&:reservations).select do |cl|
+      cl.is_a?(ItemLine) and cl.start_date > Date.today and cl.model.categories.exists? # NOTE cl.start_date.future? doesn't work properly because timezone
+    end
+      .sample
+      .model
 end
 
 When(/^I add this model from the model list$/) do
   visit borrow_models_path(category_id: @model.categories.first)
   find('#model-list-search input').set @model.name
-  within('.line', match: :prefer_exact, text: @model.name) do
-    find('.button').click
-  end
+  within('.line', match: :prefer_exact, text: @model.name) { find('.button').click }
 end
 
 def get_selected_inventory_pool
@@ -209,35 +225,40 @@ Then(/^that model's availability is shown in the calendar$/) do
   changes = av.available_total_quantities
 
   changes.each_with_index do |change, i|
-    current_calendar_date = Date.parse(find('.fc-day:not(.fc-other-month)', match: :first)['data-date'])
+    current_calendar_date =
+      Date.parse(find('.fc-day:not(.fc-other-month)', match: :first)['data-date'])
     current_change_date = change[0]
-    while current_calendar_date.month != current_change_date.month do
+    while current_calendar_date.month != current_change_date.month
       find('.fc-button-next').click
-      current_calendar_date = Date.parse(find('.fc-day:not(.fc-other-month)', match: :first)['data-date'])
+      current_calendar_date =
+        Date.parse(find('.fc-day:not(.fc-other-month)', match: :first)['data-date'])
     end
 
     # iterate days between this change and the next one
-    next_change = changes[i+1]
+    next_change = changes[i + 1]
     if next_change
-      days_between_changes = (next_change[0]-change[0]).to_i
+      days_between_changes = (next_change[0] - change[0]).to_i
       next_date = change[0]
       last_month = next_date.month
       days_between_changes.times do
-        if next_date.month != last_month
-          find('.fc-button-next').click
-        end
+        find('.fc-button-next').click if next_date.month != last_month
         last_month = next_date.month
-        change_date_el = find('.fc-widget-content:not(.fc-other-month) .fc-day-number',
-                              match: :prefer_exact,
-                              text: /#{next_date.day}/).first(:xpath, '../..')
+        change_date_el =
+          find(
+            '.fc-widget-content:not(.fc-other-month) .fc-day-number',
+            match: :prefer_exact, text: /#{next_date.day}/
+          )
+            .first(:xpath, '../..')
         next unless @current_inventory_pool.open_on? change_date_el[:"data-date"].to_date
         # check borrower availability
-        quantity_for_borrower = av.maximum_available_in_period_summed_for_groups(next_date,
-                                                                                 next_date,
-                                                                                 @current_user.entitlement_group_ids)
+        quantity_for_borrower =
+          av.maximum_available_in_period_summed_for_groups(
+            next_date, next_date, @current_user.entitlement_group_ids
+          )
+
         begin
           change_date_el.find('.fc-day-content', text: quantity_for_borrower)
-        rescue
+        rescue StandardError
           binding.pry
         end
         next_date += 1.day
@@ -275,9 +296,7 @@ Then(/^the end date is shown in the calendar$/) do
   find(".fc-widget-content[data-date='#{end_date}']")
 end
 
-When(/^I jump back and forth between months$/) do
-  find('.fc-button-next').click
-end
+When(/^I jump back and forth between months$/) { find('.fc-button-next').click }
 
 Then(/^the calendar shows the currently selected month$/) do
   find('.fc-header-title', text: I18n.l(Date.today.next_month, format: '%B %Y'))
@@ -292,7 +311,7 @@ Then(/^any holidays of the selected inventory pool are shown$/) do
   @holiday = @inventory_pool.holidays.first
   find('.fc-day-content', match: :first)
   holiday_not_found = all('.fc-day-content', text: @holiday.name).empty?
-  while holiday_not_found do
+  while holiday_not_found
     find('.fc-button-next').click
     find('.fc-day-content', match: :first)
     holiday_not_found = all('.fc-day-content', text: @holiday.name).empty?
@@ -316,7 +335,10 @@ Then(/^the availability for that model is updated$/) do
 end
 
 Then(/^only those inventory pools are selectable that have capacities for the chosen model$/) do
-  @inventory_pools = @model.inventory_pools.reject {|ip| @model.total_borrowable_items_for_user_and_pool(@current_user, ip) <= 0 }
+  @inventory_pools =
+    @model.inventory_pools.reject do |ip|
+      @model.total_borrowable_items_for_user_and_pool(@current_user, ip) <= 0
+    end
   within '.modal #booking-calendar-inventory-pool' do
     all('option').each do |option|
       expect(@inventory_pools.include?(InventoryPool.find(option['data-id']))).to be true
@@ -336,7 +358,11 @@ Then(/^the maximum available quantity of the chosen model is displayed$/) do
   within '.modal #booking-calendar-inventory-pool' do
     all('option').each do |option|
       inventory_pool = InventoryPool.find(option['data-id'])
-      expect(option.text[/#{@model.total_borrowable_items_for_user_and_pool(@current_user, inventory_pool)}/]).to be
+      expect(
+        option.text[
+          /#{@model.total_borrowable_items_for_user_and_pool(@current_user, inventory_pool)}/
+        ]
+      ).to be
     end
   end
 end
@@ -345,7 +371,7 @@ Then(/^I enter a higher quantity than the total borrowable for the selected pool
   max_quantity = nil
   within '.modal #booking-calendar-inventory-pool' do
     expect(has_selector?('option')).to be true
-    inventory_pool = InventoryPool.find(all('option').detect{|o| o.selected?}['data-id'])
+    inventory_pool = InventoryPool.find(all('option').detect(&:selected?)['data-id'])
     max_quantity = @model.total_borrowable_items_for_user_and_pool(@current_user, inventory_pool)
   end
   find('#booking-calendar-quantity').set (max_quantity + 1).to_s
@@ -353,8 +379,7 @@ Then(/^I enter a higher quantity than the total borrowable for the selected pool
 end
 
 Then(/^the booking calendar shows an error message$/) do
-  find('.modal #booking-calendar-errors',
-       text: _('Item is not available in that time range.'))
+  find('.modal #booking-calendar-errors', text: _('Item is not available in that time range.'))
 end
 
 Then(/^the add button is disabled$/) do
@@ -368,22 +393,22 @@ end
 
 Given(/^I reduce the selected inventory pools$/) do
   el = find('#ip-selector')
-  inventory_pool_ids = el.all('.dropdown-item[data-id]', visible: false).map{|i| i[:"data-id"]}
+  inventory_pool_ids = el.all('.dropdown-item[data-id]', visible: false).map { |i| i[:"data-id"] }
   el.click
   el.find("input[type='checkbox']", match: :first).click
   inventory_pool_ids.shift
-  @inventory_pools = inventory_pool_ids.map{|id| InventoryPool.find id}
+  @inventory_pools = inventory_pool_ids.map { |id| InventoryPool.find id }
 end
 
-Given(/^I add a model to the order that is available across all the still remaining inventory pools$/) do
-  within "#model-list" do
+Given(
+  /^I add a model to the order that is available across all the still remaining inventory pools$/
+) do
+  within '#model-list' do
     expect(has_selector?('.line[data-id]', visible: true)).to be true
     all('.line[data-id]').each do |line|
       next if line['data-id'].blank?
       model = Model.find line['data-id']
-      if @inventory_pools.all?{|ip| ip.models.include?(model)}
-        @model = model
-      end
+      @model = model if @inventory_pools.all? { |ip| ip.models.include?(model) }
     end
     expect(@model).not_to be_nil
     find(:xpath, "(//*[@id='ip-selector']//input)[2]", visible: true).click
@@ -400,10 +425,11 @@ Then(/^that inventory pool which comes alphabetically first is selected$/) do
 end
 
 When(/^a model exists that is only available to a group$/) do
-  @model = Model.all.detect do |m|
-    partitions = Entitlement.with_generals(model_ids: [m.id])
-    partitions.count > 1 and partitions.find{|p| p.entitlement_group_id == nil}.quantity == 0
-  end
+  @model =
+    Model.all.detect do |m|
+      partitions = Entitlement.with_generals(model_ids: [m.id])
+      partitions.count > 1 and partitions.find { |p| p.entitlement_group_id == nil }.quantity == 0
+    end
   expect(@model.blank?).to be false
   @partition = @model.entitlements.first
 end

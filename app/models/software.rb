@@ -1,3 +1,1 @@
-class Software < Model
-
-end
+class Software < Model; end

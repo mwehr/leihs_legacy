@@ -11,6 +11,5 @@ module LeihsAdmin
         '/sign-out'
       end
     end
-
   end
 end

@@ -21,9 +21,7 @@ When(/^I pick a first-level category from the results of the explorative search$
 end
 
 When(/^I choose a subcategory$/) do
-  within('[data-category_id]', match: :first) do
-    find('.dropdown-holder').hover
-  end
+  within('[data-category_id]', match: :first) { find('.dropdown-holder').hover }
   @category_el = find('a.dropdown-item', match: :first)
   @category_name = @category_el.text
   @category = Category.find_by_name @category_name
@@ -31,7 +29,9 @@ When(/^I choose a subcategory$/) do
 end
 
 Then(/^that category opens$/) do
-  expect((Rack::Utils.parse_nested_query URI.parse(current_url).query)['category_id']).to eq @category.id
+  expect(
+    (Rack::Utils.parse_nested_query URI.parse(current_url).query)['category_id']
+  ).to eq @category.id
 end
 
 When(/^I pick a second-level category from the results of the explorative search$/) do
@@ -52,9 +52,7 @@ Then(/^that category is the second and last element of the breadcrumb navigation
   expect(tabs.length).to eq 2
 end
 
-When(/^I open a model$/) do
-  find('.line[data-id]', match: :first).click
-end
+When(/^I open a model$/) { find('.line[data-id]', match: :first).click }
 
 Then(/^I see the whole path I traversed to get to the model$/) do
   #step 'die Kategorie ist das zweite und letzte Element der Brotkrumennavigation'
@@ -71,12 +69,15 @@ When(/^I am listing models$/) do
 end
 
 When(/^I am listing some available models$/) do
-  @category = Category.find do |c|
-    c.models.any? do |m|
-      m.availability_in(@current_user.inventory_pools.first)
-        .maximum_available_in_period_summed_for_groups(
-          Date.today, Date.today, @current_user.entitlement_group_ids) >= 1
+  @category =
+    Category.find do |c|
+      c.models.any? do |m|
+        m.availability_in(@current_user.inventory_pools.first)
+          .maximum_available_in_period_summed_for_groups(
+          Date.today, Date.today, @current_user.entitlement_group_ids
+        ) >=
+          1
+      end
     end
-  end
   visit borrow_models_path(category_id: @category.id)
 end

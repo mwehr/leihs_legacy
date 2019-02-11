@@ -2,23 +2,31 @@
 
 def get_scope(item_type)
   case item_type
-  when 'item' then :items
-  when 'license' then :licenses
+  when 'item'
+    :items
+  when 'license'
+    :licenses
   end
 end
 
-
 Given(/^I pick a (license|item) that is in stock$/) do |item_type|
-  @item = Item.send(get_scope item_type).where(inventory_pool_id: @current_inventory_pool.id).detect {|i| not i.retired? and i.is_borrowable? and i.in_stock?}
+  @item =
+    Item.send(get_scope item_type).where(inventory_pool_id: @current_inventory_pool.id)
+      .detect { |i| not i.retired? and i.is_borrowable? and i.in_stock? }
   step "I go to this %s's edit page" % item_type
 end
 
-
-Given(/^I pick a (license|item) that is in stock and that the current inventory pool is the owner of$/) do |item_type|
-  @item = Item.send(get_scope item_type).where(inventory_pool_id: @current_inventory_pool.id).detect {|i| not i.retired? and i.is_borrowable? and i.in_stock? and i.owner_id == @current_inventory_pool.id}
+Given(
+  /^I pick a (license|item) that is in stock and that the current inventory pool is the owner of$/
+) do |item_type|
+  @item =
+    Item.send(get_scope item_type).where(inventory_pool_id: @current_inventory_pool.id)
+      .detect do |i|
+      not i.retired? and i.is_borrowable? and i.in_stock? and
+        i.owner_id == @current_inventory_pool.id
+    end
   step format("I go to this %s's edit page", item_type)
 end
-
 
 Then(/^I can retire this (?:.*) if I give a reason for retiring$/) do
   field = find("[data-type='field']", text: _('Retirement'))
@@ -31,7 +39,6 @@ Then(/^I can retire this (?:.*) if I give a reason for retiring$/) do
   expect(@item.retired).to eq Date.today
   expect(@item.retired_reason).to eq 'test'
 end
-
 
 Then(/^I cannot retire such a (?:item|license)$/) do
   field = find("[data-type='field']", text: _('Retirement'))
@@ -46,27 +53,23 @@ Then(/^I cannot retire such a (?:item|license)$/) do
   expect(@item.retired).to eq nil
 end
 
-
 Then(/^the newly retired (?:item|license) immediately disappears from the inventory list$/) do
   expect(has_no_content?(@item.inventory_code)).to be true
 end
 
-
 Given(/^I pick a (item|license) that is not in stock$/) do |item_type|
-  @item = Item.send(get_scope item_type)
-          .where(inventory_pool_id: @current_inventory_pool.id)
-          .detect { |i| !(i.retired? || i.in_stock?) }
+  @item =
+    Item.send(get_scope item_type).where(inventory_pool_id: @current_inventory_pool.id)
+      .detect { |i| !(i.retired? || i.in_stock?) }
   step format("I go to this %s's edit page", item_type)
 end
-
 
 Given(/^I pick a (.*) the current inventory pool is not the owner of$/) do |item_type|
-  @item = Item.send(get_scope item_type)
-          .where(inventory_pool_id: @current_inventory_pool.id)
-          .detect { |i| i.in_stock? && i.owner_id != @current_inventory_pool.id }
+  @item =
+    Item.send(get_scope item_type).where(inventory_pool_id: @current_inventory_pool.id)
+      .detect { |i| i.in_stock? && i.owner_id != @current_inventory_pool.id }
   step format("I go to this %s's edit page", item_type)
 end
-
 
 Given(/^I don't give any reason for retiring this item$/) do
   field = find("[data-type='field']", text: _('Retirement'))
@@ -77,24 +80,19 @@ Given(/^I don't give any reason for retiring this item$/) do
   step 'I see an error message'
 end
 
-
-Then(/^the (?:.*) is not retired$/) do
-  expect(@item.reload.retired).to eq nil
-end
-
-
+Then(/^the (?:.*) is not retired$/) { expect(@item.reload.retired).to eq nil }
 
 Given(/^I pick a retired (.*) that the current inventory pool is the owner of$/) do |item_type|
-  @item = Item.unscoped.send(get_scope item_type)
-          .find { |i| i.retired? && i.owner_id == @current_inventory_pool.id }
+  @item =
+    Item.unscoped.send(get_scope item_type).find do |i|
+      i.retired? && i.owner_id == @current_inventory_pool.id
+    end
 end
-
 
 When(/^I unretire this (?:.*)$/) do
   expect(has_content?(_('Retirement'))).to be true
   find("[name='item[retired]']").select _('No')
 end
-
 
 Then(/^I am redirected to the inventory list$/) do
   find('h1', text: _('List of Inventory'))
@@ -102,18 +100,23 @@ Then(/^I am redirected to the inventory list$/) do
   expect(current_path).to eq manage_inventory_path(@current_inventory_pool)
 end
 
-
-Then(/^this (?:.*) is not retired$/) do
-  expect(@item.reload.retired?).to be false
-end
-
+Then(/^this (?:.*) is not retired$/) { expect(@item.reload.retired?).to be false }
 
 And(/^I fill in the supply category$/) do
-  find('.row.emboss', match: :prefer_exact, text: 'Supply Category')
-    .find("select option:not([value=''])", match: :first)
-    .select_option if @item.type == 'Item'
+  if @item.type == 'Item'
+    find('.row.emboss', match: :prefer_exact, text: 'Supply Category').find(
+      "select option:not([value=''])", match: :first
+    )
+      .select_option
+  end
 end
 
-Given(/^I pick a retired (.*) that the current inventory pool is responsible for but not the owner of$/) do |item_type|
-  @item = Item.unscoped.send(get_scope item_type).find {|i| i.retired? and i.owner != @current_inventory_pool and i.inventory_pool == @current_inventory_pool}
+Given(
+  /^I pick a retired (.*) that the current inventory pool is responsible for but not the owner of$/
+) do |item_type|
+  @item =
+    Item.unscoped.send(get_scope item_type).find do |i|
+      i.retired? and i.owner != @current_inventory_pool and
+        i.inventory_pool == @current_inventory_pool
+    end
 end

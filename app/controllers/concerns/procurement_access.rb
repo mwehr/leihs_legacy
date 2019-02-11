@@ -4,8 +4,9 @@ module Concerns
 
     def procurement_access?
       uuid = UUIDTools::UUID.parse(id)
-      rows = ApplicationRecord.connection.exec_query <<-SQL
-        SELECT (
+      rows =
+        ApplicationRecord.connection.exec_query <<-SQL
+                SELECT (
           EXISTS (
             SELECT TRUE
             FROM procurement_requesters_organizations

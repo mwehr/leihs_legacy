@@ -3,12 +3,11 @@ module TimelineAvailability
   extend ActiveSupport::Concern
 
   included do
-
     private
 
     def running_reservations(inventory_pool_id, model_id)
       query = <<-SQL
-        select
+              select
         	reservations.*
         from
         	reservations
@@ -19,10 +18,15 @@ module TimelineAvailability
           and reservations.type = 'ItemLine'
           and not (
             status = 'unsubmitted' and
-            updated_at < '#{Time.now.utc - Setting.first.timeout_minutes.minutes}'
+            updated_at < '#{Time
+        .now
+        .utc -
+        Setting.first.timeout_minutes
+          .minutes}'
           )
           and not (
-            end_date < '#{Time.zone.today}' and
+            end_date < '#{Time.zone
+        .today}' and
             item_id is null
           )
       SQL
@@ -36,12 +40,14 @@ module TimelineAvailability
       return [] if user_ids.empty?
 
       query = <<-SQL
-        select
+              select
         	users.*
         from
         	users
         where
-        	users.id in (#{user_ids.map { |id| "'#{id}'" }.join(',')})
+        	users.id in (#{user_ids
+        .map { |id| "'#{id}'" }
+        .join(',')})
       SQL
 
       ActiveRecord::Base.connection.exec_query(query).to_hash
@@ -53,34 +59,37 @@ module TimelineAvailability
       return [] if user_ids.empty?
 
       query = <<-SQL
-        select
+              select
         	entitlement_groups_users.*
         from
         	entitlement_groups_users
         where
-        	user_id in (#{user_ids.map { |id| "'#{id}'" }.join(',')})
+        	user_id in (#{user_ids
+        .map { |id| "'#{id}'" }
+        .join(',')})
       SQL
 
       ActiveRecord::Base.connection.exec_query(query).to_hash
     end
 
-    def entitlement_groups(
-      entitlements,
-      entitlement_groups_users,
-      inventory_pool_id
-    )
-      group_ids = entitlements.map { |e| e['entitlement_group_id'] } \
-       + entitlement_groups_users.map { |r| r['entitlement_group_id'] }
+    def entitlement_groups(entitlements, entitlement_groups_users, inventory_pool_id)
+      group_ids =
+        entitlements.map { |e| e['entitlement_group_id'] } +
+          entitlement_groups_users.map { |r| r['entitlement_group_id'] }
 
       return [] if group_ids.empty?
 
       query = <<-SQL
-        select
+              select
         	entitlement_groups.*
         from
         	entitlement_groups
         where
-        	entitlement_groups.id in (#{group_ids.map { |id| "'#{id}'" }.join(',')})
+        	entitlement_groups.id in (#{group_ids
+        .map { |id| "'#{id}'" }
+        .join(
+        ','
+      )})
           and entitlement_groups.inventory_pool_id = '#{inventory_pool_id}'
       SQL
 
@@ -89,7 +98,7 @@ module TimelineAvailability
 
     def entitlements(model_id)
       query = <<-SQL
-        select
+              select
         	entitlements.*
         from
         	entitlements
@@ -102,7 +111,7 @@ module TimelineAvailability
 
     def items(inventory_pool_id, model_id)
       query = <<-SQL
-        select
+              select
         	items.*
         from
         	items
@@ -123,9 +132,8 @@ module TimelineAvailability
       entitlements = entitlements(model.id)
       reservation_users = reservation_users(running_reservations)
       entitlement_groups_users = entitlement_groups_users(reservation_users)
-      entitlement_groups = entitlement_groups(
-        entitlements, entitlement_groups_users, inventory_pool.id
-      )
+      entitlement_groups =
+        entitlement_groups(entitlements, entitlement_groups_users, inventory_pool.id)
       items = items(inventory_pool.id, model.id)
 
       {

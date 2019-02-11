@@ -12,11 +12,10 @@ module Manage
       include ::Spec::PersonasDumpSteps
 
       step 'there is an item the current pool is owner of ' \
-           'situated in room :room' do |room|
-        FactoryGirl.create(:item,
-                           owner: @current_inventory_pool,
-                           room: FactoryGirl.create(:room,
-                                                    name: room))
+             'situated in room :room' do |room|
+        FactoryGirl.create(
+          :item, owner: @current_inventory_pool, room: FactoryGirl.create(:room, name: room)
+        )
       end
 
       step 'I open the inventory list page' do
@@ -28,7 +27,7 @@ module Manage
       end
 
       step 'I see one model line corresponding to the item ' \
-           'situated in :room' do |room|
+             'situated in :room' do |room|
         items = Item.joins(:room).where(rooms: { name: room })
         expect(items.count).to be == 1
         item = Item.joins(:room).where(rooms: { name: room }).first
@@ -41,20 +40,22 @@ module Manage
 
       step 'there are :n items for the model in the current inventory pool' do |n|
         n.to_i.times do
-          FactoryGirl.create(:item,
-                             model: @model,
-                             owner: @current_inventory_pool,
-                             inventory_pool: @current_inventory_pool)
+          FactoryGirl.create(
+            :item,
+            model: @model, owner: @current_inventory_pool, inventory_pool: @current_inventory_pool
+          )
         end
       end
 
       step 'there are :n licenses for the software ' \
-           'in the current inventory pool' do |n|
+             'in the current inventory pool' do |n|
         n.to_i.times do
-          FactoryGirl.create(:license,
-                             model: @software,
-                             owner: @current_inventory_pool,
-                             inventory_pool: @current_inventory_pool)
+          FactoryGirl.create(
+            :license,
+            model: @software,
+            owner: @current_inventory_pool,
+            inventory_pool: @current_inventory_pool
+          )
         end
       end
 
@@ -83,9 +84,9 @@ module Manage
       end
 
       step 'I open the dropdown for the :model_type' do |model_type|
-        find('#inventory .line.row',
-             text: instance_variable_get("@#{model_type}").name)
-          .find("[data-type='inventory-expander']")
+        find('#inventory .line.row', text: instance_variable_get("@#{model_type}").name).find(
+          "[data-type='inventory-expander']"
+        )
           .click
       end
 
@@ -95,26 +96,23 @@ module Manage
       end
 
       step 'the :item_type lines are sorted alphabetically ' \
-           'by their inventory code' do |item_type|
-        model_type = case item_type
-                     when 'item'
-                       'model'
-                     when 'license'
-                       'software'
-                     end
-        expect(
-          @lines.map { |l| l.first('.col2of5 .row').text }
-        ).to eq(
-          instance_variable_get("@#{model_type}")
-          .items
-          .send(item_type.pluralize)
-          .order(:inventory_code).map(&:inventory_code)
+             'by their inventory code' do |item_type|
+        model_type =
+          case item_type
+          when 'item'
+            'model'
+          when 'license'
+            'software'
+          end
+        expect(@lines.map { |l| l.first('.col2of5 .row').text }).to eq(
+          instance_variable_get("@#{model_type}").items.send(item_type.pluralize).order(
+            :inventory_code
+          )
+            .map(&:inventory_code)
         )
       end
     end
   end
 end
 
-RSpec.configure do |config|
-  config.include Manage::Spec::InventorySteps, manage_inventory: true
-end
+RSpec.configure { |config| config.include Manage::Spec::InventorySteps, manage_inventory: true }

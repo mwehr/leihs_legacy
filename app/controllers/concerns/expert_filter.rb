@@ -4,13 +4,10 @@ module ExpertFilter
   include ExpertComparators
 
   included do
-
     private
 
     def reduce_items(items, field_id, filter_value, field_config)
-      if field_id == 'attachments'
-        throw 'Attachments are not allowed as filter.'
-      end
+      throw 'Attachments are not allowed as filter.' if field_id == 'attachments'
 
       case field_config['type']
       when 'select'
@@ -20,8 +17,7 @@ module ExpertFilter
       when 'autocomplete'
         reduce_for_autocomplete(items, field_id, filter_value, field_config)
       when 'autocomplete-search'
-        reduce_for_autocomplete_search(
-          items, field_id, filter_value, field_config)
+        reduce_for_autocomplete_search(items, field_id, filter_value, field_config)
       when 'date'
         reduce_for_date(items, filter_value, field_config)
       when 'text'
@@ -42,21 +38,18 @@ module ExpertFilter
         field_filters = JSON.parse(URI.decode(params[:field_filters]))
 
         if field_filters.length > 0
+          filter_values = field_filters.map { |ff| [ff['id'], ff['value']] }.to_h
 
-          filter_values = field_filters.map do |ff|
-            [ff['id'], ff['value']]
-          end.to_h
-
-          field_data = field_filters.map do |ff|
-            f = Field.find(ff['id'])
-            [ff['id'], f.data]
-          end.to_h
+          field_data =
+            field_filters.map do |ff|
+              f = Field.find(ff['id'])
+              [ff['id'], f.data]
+            end
+              .to_h
 
           field_data.each do |field_id, fd|
-
             items = reduce_items(items, field_id, filter_values[field_id], fd)
           end
-
         end
       end
 

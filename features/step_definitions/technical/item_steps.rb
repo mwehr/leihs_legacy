@@ -1,7 +1,5 @@
 Given /^there are some items$/ do
-  3.times do
-    FactoryGirl.create :item
-  end
+  3.times { FactoryGirl.create :item }
 end
 
 When /^I search for a text not present anywhere$/ do

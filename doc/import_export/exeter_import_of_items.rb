@@ -11,16 +11,18 @@ import_file = '/tmp/items.csv'
 @errorlog = File.open('/tmp/import_errors.txt', 'w+')
 @itemlog = File.open('/tmp/import_items.txt', 'w+')
 
-items_to_import = CSV.open(import_file, col_sep: "\t", headers: true)
+items_to_import = CSV.open(import_file, col_sep: 'undefined', headers: true)
 
 def log_error(error, item)
   @errorlog.puts "ERROR: #{error}. --- Item: #{item}"
 end
 
 def create_model(item)
-  m = Model.where(:product => item['Product'], 
-                  :version => item['Version'],
-                  :manufacturer => item['Manufacturer']).first_or_create
+  m =
+    Model.where(
+      product: item['Product'], version: item['Version'], manufacturer: item['Manufacturer']
+    )
+      .first_or_create
   m.description = item['Description'] if item['Description']
   if m.save
     return m
@@ -30,9 +32,8 @@ def create_model(item)
 end
 
 def create_location(item)
-  b = Building.where(:name => item['Building']).first_or_create
-  Location.where(:building => b,
-                 :room => item['Room']).first_or_create
+  b = Building.where(name: item['Building']).first_or_create
+  Location.where(building: b, room: item['Room']).first_or_create
 end
 
 items_to_import.each do |item|
@@ -44,11 +45,9 @@ items_to_import.each do |item|
     next
   end
   i.model = create_model(item)
-  
-  category = Category.where(:name => item['Categories']).first_or_create
-  unless i.model.categories.include?(category)
-    i.model.categories << category
-  end
+
+  category = Category.where(name: item['Categories']).first_or_create
+  i.model.categories << category unless i.model.categories.include?(category)
 
   i.inventory_code = item['Inventory Code']
   i.name = item['Name']
@@ -66,10 +65,9 @@ items_to_import.each do |item|
   i.is_incomplete = false if item['Completeness'] == '1'
 
   # Ownership
-  owner_ip = InventoryPool.where(:name => 'Guild Music').first
+  owner_ip = InventoryPool.where(name: 'Guild Music').first
   i.owner = owner_ip
   i.inventory_pool = owner_ip
-
 
   # Responsible department
   #unless item['Verantwortliche Abteilung'] == 'frei'
@@ -78,21 +76,19 @@ items_to_import.each do |item|
   #end
 
   if i.save
-  #  puts "Item imported correctly:"
+    #  puts "Item imported correctly:"
     @successes += 1
     @itemlog.puts(i.inspect)
   else
     @failures += 1
     @errorlog.puts "Could not import item #{i.inventory_code}. Errors: #{i.errors.full_messages}"
   end
-
 end
 
 puts '-----------------------------------------'
 puts 'DONE'
 puts "#{@successes} successes, #{@failures} failures"
 puts '-----------------------------------------'
-
 
 @errorlog.close
 @itemlog.close

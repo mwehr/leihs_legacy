@@ -3,9 +3,8 @@ class BookingCalendarVisitsQuery
 
   def initialize(inventory_pool_id:, start_date:, end_date:)
     # TODO: UUID check!!!
-    @query = \
-      <<-SQL
-        WITH dates AS
+    @query = <<-SQL
+            WITH dates AS
           (SELECT d::date
            FROM generate_series('#{start_date}'::date,
                                 '#{end_date}'::date,

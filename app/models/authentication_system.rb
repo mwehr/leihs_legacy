@@ -1,2 +1,1 @@
-class AuthenticationSystem < ApplicationRecord
-end
+class AuthenticationSystem < ApplicationRecord; end

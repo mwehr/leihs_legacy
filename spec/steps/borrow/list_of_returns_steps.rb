@@ -10,16 +10,13 @@ module Borrow
       include ::Spec::PersonasDumpSteps
 
       step 'I have an open contract' do
-        FactoryGirl.create(:open_contract,
-                           user: @current_user,
-                           inventory_pool: @inventory_pool)
+        FactoryGirl.create(:open_contract, user: @current_user, inventory_pool: @inventory_pool)
       end
 
       step 'each reservation line displays start and end date' do
         @current_user.reservations.signed.each do |r|
           within ".line[data-line-id='#{r.id}']" do
-            expect(page).to have_content \
-              "#{I18n.l r.start_date} - #{I18n.l r.end_date}"
+            expect(page).to have_content "#{I18n.l r.start_date} - #{I18n.l r.end_date}"
           end
         end
       end

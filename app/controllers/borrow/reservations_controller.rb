@@ -10,11 +10,8 @@ class Borrow::ReservationsController < Borrow::ApplicationController
     unless @inventory_pool.open_on?(@start_date)
       @errors << _('Inventory pool is closed on start date')
     end
-    unless @inventory_pool.open_on?(@end_date)
-      @errors << _('Inventory pool is closed on end date')
-    end
-    if @start_date < \
-      Time.zone.today + @inventory_pool.workday.reservation_advance_days.days
+    @errors << _('Inventory pool is closed on end date') unless @inventory_pool.open_on?(@end_date)
+    if @start_date < Time.zone.today + @inventory_pool.workday.reservation_advance_days.days
       @errors << _('No orders are possible on this start date')
     end
     if @inventory_pool.workday.reached_max_visits.include? @start_date
@@ -35,15 +32,16 @@ class Borrow::ReservationsController < Borrow::ApplicationController
     if @errors.empty?
       begin
         ApplicationRecord.transaction do
-          reservations = create_lines(
-            model: model,
-            quantity: quantity_param,
-            status: :unsubmitted,
-            inventory_pool: @inventory_pool,
-            start_date: @start_date,
-            end_date: @end_date,
-            delegated_user_id: session[:delegated_user_id]
-          )
+          reservations =
+            create_lines(
+              model: model,
+              quantity: quantity_param,
+              status: :unsubmitted,
+              inventory_pool: @inventory_pool,
+              start_date: @start_date,
+              end_date: @end_date,
+              delegated_user_id: session[:delegated_user_id]
+            )
           if reservations and reservations.all?(&:valid?)
             render status: :ok, json: reservations
             return
@@ -62,11 +60,7 @@ class Borrow::ReservationsController < Borrow::ApplicationController
   def destroy
     begin
       ApplicationRecord.transaction do
-        current_user
-          .reservations
-          .unsubmitted
-          .find(params[:line_ids])
-          .map(&:destroy!)
+        current_user.reservations.unsubmitted.find(params[:line_ids]).map(&:destroy!)
       end
       render status: :ok, json: {}
     rescue => e
@@ -98,12 +92,9 @@ class Borrow::ReservationsController < Borrow::ApplicationController
   end
 
   def quantity_available?(model, quantity)
-    model
-      .availability_in(@inventory_pool)
-      .maximum_available_in_period_summed_for_groups(
-        @start_date,
-        @end_date,
-        current_user.entitlement_group_ids) \
-   >= quantity
+    model.availability_in(@inventory_pool).maximum_available_in_period_summed_for_groups(
+      @start_date, @end_date, current_user.entitlement_group_ids
+    ) >=
+      quantity
   end
 end

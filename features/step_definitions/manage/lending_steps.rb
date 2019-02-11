@@ -1,8 +1,8 @@
 # -*- encoding : utf-8 -*-
 
-
 Then /^I see those items that are part of this take back$/ do
-  @customer.visits.take_back.where(inventory_pool_id: @current_inventory_pool).first.reservations.each do |line|
+  @customer.visits.take_back.where(inventory_pool_id: @current_inventory_pool).first.reservations
+    .each do |line|
     expect(find('.ui-autocomplete', match: :first).has_content? line.item.inventory_code).to be true
   end
 end
@@ -18,7 +18,9 @@ def check_printed_contract(window_handles, ip = nil, reservation = nil)
   page.driver.browser.switch_to.window new_window
   within_window new_window do
     find('.contract')
-    expect(current_path).to eq manage_contract_path(ip, reservation.reload.contract) if ip and reservation
+    if ip and reservation
+      expect(current_path).to eq manage_contract_path(ip, reservation.reload.contract)
+    end
     expect(page.evaluate_script('window.printed')).to eq 1
   end
 end

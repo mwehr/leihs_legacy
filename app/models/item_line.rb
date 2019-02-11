@@ -19,8 +19,7 @@ class ItemLine < Reservation
   validates_numericality_of :quantity, equal_to: 1
   validate :validate_item
   validates_presence_of :model_id
-  validates_presence_of(:item,
-                        if: proc { |r| [:signed, :closed].include?(r.status) })
+  validates_presence_of(:item, if: proc { |r| [:signed, :closed].include?(r.status) })
 
   # TODO: 1301  default_scope -> {includes(:model).order("models.product")}
 
@@ -66,36 +65,31 @@ class ItemLine < Reservation
         errors.add(:base, _("The item doesn't match with the reserved model"))
       end
 
-      if item \
-        .reservations
-        .handed_over_or_assigned_but_not_returned
-        .where(['id != ? AND user_id = ? AND status = ?', id, user_id, status])
+      if item.reservations.handed_over_or_assigned_but_not_returned.where(
+        ['id != ? AND user_id = ? AND status = ?', id, user_id, status]
+      )
         .exists?
         # check if already assigned to the same contract
-        errors.add(:base,
-                   _('%s is already assigned to this contract') % \
-                   item.inventory_code)
-      elsif item \
-        .reservations
-        .handed_over_or_assigned_but_not_returned
-        .where.not(id: id)
-        .exists?
+        errors.add(:base, _('%s is already assigned to this contract') % item.inventory_code)
+
         # check if available
-        errors.add(:base,
-                   _('%s is already assigned to a different contract') % \
-                   item.inventory_code)
+      elsif item.reservations.handed_over_or_assigned_but_not_returned.where.not(id: id).exists?
+        errors.add(:base, _('%s is already assigned to a different contract') % item.inventory_code)
       end
 
       # inventory_pool matching
       unless item.inventory_pool_id == inventory_pool_id
-        errors.add(:base,
-                   _("The item doesn't belong to the inventory pool " \
-                     'related to this contract'))
+        errors.add(
+          :base,
+          _(
+            "The item doesn't belong to the inventory pool " \
+              'related to this contract'
+          )
+        )
       end
 
       # package check
       errors.add(:base, _('The item belongs to a package')) if item.parent_id
     end
   end
-
 end

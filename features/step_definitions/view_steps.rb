@@ -6,7 +6,7 @@
 #  response.should render_template("backend/#{title}/index")
 #end
 
-Then "I see the '$title' list" do | title |
+Then "I see the '$title' list" do |title|
   expect(has_selector?('.buttons .activated', text: title)).to be true
   expect(has_selector?('.table-overview .fresh')).to be true
 

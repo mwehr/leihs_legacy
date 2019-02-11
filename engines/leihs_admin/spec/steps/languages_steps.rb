@@ -12,12 +12,11 @@ module LeihsAdmin
       include ::Spec::LoginSteps
 
       step 'I see a table of configured languages as follows' do |table|
-        displayed_table = find('.container table.table')
-          .all('tr').map { |tr| tr.all('th, td').map(&:text) }
+        displayed_table =
+          find('.container table.table').all('tr').map { |tr| tr.all('th, td').map(&:text) }
 
         expect(displayed_table).to eq table.raw
       end
-
     end
   end
 end

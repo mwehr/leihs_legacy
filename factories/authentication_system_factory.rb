@@ -1,5 +1,4 @@
 FactoryGirl.define do
-
   factory :authentication_system do
     name Faker::Lorem.words(1).join.capitalize
     class_name { name }

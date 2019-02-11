@@ -17,9 +17,7 @@ class Visit < ApplicationRecord
   self.primary_key = 'id'
   self.inheritance_column = nil
 
-  default_scope do
-    order(:date, :id)
-  end
+  default_scope { order(:date, :id) }
 
   belongs_to :user
   belongs_to :inventory_pool
@@ -30,84 +28,81 @@ class Visit < ApplicationRecord
   end
   #################################################################################
 
-  scope :potential_hand_over, (lambda do
-    where(type: :hand_over).where(is_approved: false)
-  end)
+  scope :potential_hand_over, (lambda { where(type: :hand_over).where(is_approved: false) })
   scope :hand_over, -> { where(type: :hand_over).where(is_approved: true) }
   scope :take_back, -> { where(type: :take_back) }
   scope :take_back_overdue, -> { take_back.where('date < ?', Time.zone.today) }
 
-  scope :search, lambda { |query|
-    sql = where(is_approved: true)
-    return sql if query.blank?
+  scope :search,
+        lambda do |query|
+          sql = where(is_approved: true)
+          return sql if query.blank?
 
-    # TODO: search on reservations' models and items
-    query.split.each do |q|
-      q = "%#{q}%"
-      sql = sql.where(User.arel_table[:login].matches(q)
-                      .or(User.arel_table[:firstname].matches(q))
-                      .or(User.arel_table[:lastname].matches(q))
-                      .or(User.arel_table[:badge_id].matches(q)))
-    end
+          # TODO: search on reservations' models and items
+          query.split.each do |q|
+            q = "%#{q}%"
+            sql =
+              sql.where(
+                User.arel_table[:login].matches(q).or(User.arel_table[:firstname].matches(q)).or(
+                  User.arel_table[:lastname].matches(q)
+                )
+                  .or(User.arel_table[:badge_id].matches(q))
+              )
+          end
 
-    sql.joins(:user)
-  }
+          sql.joins(:user)
+        end
 
-  scope :filter2, (lambda do |params, inventory_pool = nil|
+  scope :filter2,
+        (lambda do |params, inventory_pool = nil|
+          visits = inventory_pool.nil? ? all : inventory_pool.visits.where(is_approved: true)
 
-    visits = if inventory_pool.nil?
-               all
-             else
-               inventory_pool.visits
-             end.where(is_approved: true)
+          if params[:status]
+            visits =
+              visits.where(
+                type:
+                  case params[:status]
+                  when ['approved', 'signed']
+                    ['hand_over', 'take_back']
+                  when 'approved'
+                    'hand_over'
+                  when 'signed'
+                    'take_back'
+                  end
+              )
+          end
 
-    if params[:status]
-      visits = visits.where(
-        type: case params[:status]
-              when ['approved', 'signed'] then ['hand_over', 'take_back']
-              when 'approved' then 'hand_over'
-              when 'signed' then 'take_back'
+          if params[:verification].presence
+            visits =
+              case params[:verification]
+              when 'with_user_to_verify'
+                visits.where(with_user_to_verify: true)
+              when 'with_user_and_model_to_verify'
+                visits.where(with_user_and_model_to_verify: true)
+              when 'no_verification'
+                visits.where(with_user_to_verify: false, with_user_and_model_to_verify: false)
+              else
+                visits
               end
-      )
-    end
+          end
 
-    if params[:verification].presence
-      visits = case params[:verification]
-               when 'with_user_to_verify'
-                 visits.where(with_user_to_verify: true)
-               when 'with_user_and_model_to_verify'
-                 visits.where(with_user_and_model_to_verify: true)
-               when 'no_verification'
-                 visits.where(with_user_to_verify: false,
-                              with_user_and_model_to_verify: false)
-               else
-                 visits
-               end
-    end
+          visits = visits.search(params[:search_term]) unless params[:search_term].blank?
 
-    unless params[:search_term].blank?
-      visits = visits.search(params[:search_term])
-    end
+          if params[:date] and params[:date_comparison] == 'lteq'
+            visits = visits.where arel_table[:date].lteq(params[:date])
+          end
 
-    if params[:date] and params[:date_comparison] == 'lteq'
-      visits = visits.where arel_table[:date].lteq(params[:date])
-    end
+          if params[:date] and params[:date_comparison] == 'eq'
+            visits = visits.where arel_table[:date].eq(params[:date])
+          end
 
-    if params[:date] and params[:date_comparison] == 'eq'
-      visits = visits.where arel_table[:date].eq(params[:date])
-    end
+          if r = params[:range]
+            visits = visits.where(arel_table[:date].gteq(r[:start_date])) if r[:start_date].presence
+            visits = visits.where(arel_table[:date].lteq(r[:end_date])) if r[:end_date].presence
+          end
 
-    if r = params[:range]
-      if r[:start_date].presence
-        visits = visits.where(arel_table[:date].gteq(r[:start_date]))
-      end
-      if r[:end_date].presence
-        visits = visits.where(arel_table[:date].lteq(r[:end_date]))
-      end
-    end
-
-    visits
-  end)
+          visits
+        end)
 
   def self.total_count_for_paginate
     scope_sql = Visit.all.reorder(nil).to_sql
@@ -124,9 +119,12 @@ class Visit < ApplicationRecord
 
   def status
     case [self.type.to_sym, self.is_approved?]
-    when [:hand_over, false] then :submitted
-    when [:hand_over, true] then :approved
-    when [:take_back, true] then :signed
+    when [:hand_over, false]
+      :submitted
+    when [:hand_over, true]
+      :approved
+    when [:take_back, true]
+      :signed
     end
   end
 
@@ -137,5 +135,4 @@ class Visit < ApplicationRecord
   #################################################################################
   #################################################################################
   #################################################################################
-
 end

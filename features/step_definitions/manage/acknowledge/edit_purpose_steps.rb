@@ -14,6 +14,5 @@ end
 Then /^the contract's purpose is changed$/ do
   find('#purpose', text: @new_purpose)
   visit current_path
-  expect(@contract.reload.purpose.split(';').any? {|str| str == @new_purpose })
-    .to be true
+  expect(@contract.reload.purpose.split(';').any? { |str| str == @new_purpose }).to be true
 end

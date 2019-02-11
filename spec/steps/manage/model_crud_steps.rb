@@ -62,7 +62,4 @@ module Manage
   end
 end
 
-RSpec.configure do |config|
-  config.include Manage::Spec::ModelCrudSteps,
-                 manage_model_crud: true
-end
+RSpec.configure { |config| config.include Manage::Spec::ModelCrudSteps, manage_model_crud: true }

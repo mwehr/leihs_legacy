@@ -10,29 +10,32 @@ module Manage
       include ::Spec::PersonasDumpSteps
 
       step 'there exists an open contract' do
-        user = FactoryGirl.create(:customer,
-                                  inventory_pool: @current_inventory_pool)
-        @contract = FactoryGirl.create(:open_contract,
-                                       inventory_pool: @current_inventory_pool,
-                                       user: user)
+        user = FactoryGirl.create(:customer, inventory_pool: @current_inventory_pool)
+        @contract =
+          FactoryGirl.create(:open_contract, inventory_pool: @current_inventory_pool, user: user)
       end
 
       step 'the contract has an item line' do
-        @option_line = \
-          FactoryGirl.create(:option_line,
-                             user: @contract.user,
-                             inventory_pool: @contract.inventory_pool,
-                             contract: @contract,
-                             status: :signed)
+        @option_line =
+          FactoryGirl.create(
+            :option_line,
+            user: @contract.user,
+            inventory_pool: @contract.inventory_pool,
+            contract: @contract,
+            status: :signed
+          )
       end
 
       step 'the contract has an option line' do
-        @item_line = \
-          FactoryGirl.create(:item_line, :with_assigned_item,
-                             user: @contract.user,
-                             inventory_pool: @contract.inventory_pool,
-                             contract: @contract,
-                             status: :signed)
+        @item_line =
+          FactoryGirl.create(
+            :item_line,
+            :with_assigned_item,
+            user: @contract.user,
+            inventory_pool: @contract.inventory_pool,
+            contract: @contract,
+            status: :signed
+          )
       end
 
       step 'I open the take back page for the user of this contract' do
@@ -63,9 +66,7 @@ module Manage
       end
 
       step 'all the reservations of the contract are :state' do |state|
-        @contract.reload.reservations.each do |r|
-          expect(r.status).to be == state.to_sym
-        end
+        @contract.reload.reservations.each { |r| expect(r.status).to be == state.to_sym }
       end
 
       step 'I hover over the purpose icon of the item line' do
@@ -76,7 +77,7 @@ module Manage
         find(".line[data-id='#{@option_line.id}'] .fa-comment").hover
       end
 
-      step 'I see the contract\'s purpose in the shown tooltip' do
+      step "I see the contract's purpose in the shown tooltip" do
         within '.tooltipster-base' do
           expect(current_scope).to have_content @contract.purpose
         end
@@ -85,7 +86,4 @@ module Manage
   end
 end
 
-RSpec.configure do |config|
-  config.include Manage::Spec::TakeBackSteps,
-                 manage_take_back: true
-end
+RSpec.configure { |config| config.include Manage::Spec::TakeBackSteps, manage_take_back: true }

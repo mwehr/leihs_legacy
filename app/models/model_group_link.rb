@@ -7,8 +7,8 @@ class ModelGroupLink < ApplicationRecord
   belongs_to :parent, class_name: 'ModelGroup'
 
   def self.find_edge(mg1, mg2)
-    where(parent_id: mg1.id, child_id: mg2.id).first \
-    || where(child_id: mg1.id, parent_id: mg2.id).first
+    where(parent_id: mg1.id, child_id: mg2.id).first ||
+      where(child_id: mg1.id, parent_id: mg2.id).first
   end
 
   def self.create_edge(parent, child)
@@ -18,5 +18,4 @@ class ModelGroupLink < ApplicationRecord
   def label_for_audits
     "#{model_group.try(&:name)} - #{model.try(&:name)}"
   end
-
 end

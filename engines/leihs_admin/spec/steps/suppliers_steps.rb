@@ -20,7 +20,7 @@ module LeihsAdmin
       end
 
       step 'I create a new supplier :whether_providing ' \
-           'all required values' do |whether_providing|
+             'all required values' do |whether_providing|
         find('.btn', text: _('Create %s') % _('Supplier')).click
         unless whether_providing
           # not providing supplier[name]        9
@@ -63,8 +63,8 @@ module LeihsAdmin
         # NOTE: removing header and footer
         # they are causing problems on Cider => covering the element
         # we want to click on
-        page.execute_script %($('header').remove();)
-        page.execute_script %($('footer').remove();)
+        page.execute_script "$('header').remove();"
+        page.execute_script "$('footer').remove();"
         ############################################################
 
         within '.list-of-lines' do
@@ -80,8 +80,7 @@ module LeihsAdmin
 
       step "I don't see the deleted supplier" do
         within '.list-of-lines' do
-          expect(has_no_selector?('.row > .col-sm-6', text: @supplier.name))
-            .to be true
+          expect(has_no_selector?('.row > .col-sm-6', text: @supplier.name)).to be true
         end
       end
     end

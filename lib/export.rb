@@ -2,14 +2,9 @@ module Export
   def self.csv_string(header, objects)
     require 'csv'
 
-    CSV.generate(col_sep: ';',
-                 quote_char: "\"",
-                 force_quotes: true,
-                 headers: :first_row) do |csv|
+    CSV.generate(col_sep: ';', quote_char: '"', force_quotes: true, headers: :first_row) do |csv|
       csv << header
-      objects.each do |object|
-        csv << header.map { |h| object[h] }
-      end
+      objects.each { |object| csv << header.map { |h| object[h] } }
     end
   end
 
@@ -22,9 +17,7 @@ module Export
     wb = p.workbook
     wb.add_worksheet(name: worksheet_name) do |sheet|
       sheet.add_row header
-      objects.each do |object|
-        sheet.add_row header.map { |h| object[h] }, style: wrap
-      end
+      objects.each { |object| sheet.add_row header.map { |h| object[h] }, style: wrap }
     end
     p.to_stream.read
   end

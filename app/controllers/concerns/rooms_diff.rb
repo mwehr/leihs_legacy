@@ -1,5 +1,4 @@
 module RoomsDiff
-
   def get_rooms_diff
     # get_rooms_diff.html.haml
   end
@@ -9,11 +8,8 @@ module RoomsDiff
 
     values = []
     CSV.foreach(
-      params[:csv_file].tempfile,
-      col_sep: ',',
-      quote_char: "\"",
-      headers: :first_row) do |row|
-
+      params[:csv_file].tempfile, col_sep: ',', quote_char: '"', headers: :first_row
+    ) do |row|
       value = handle_row(row)
       values << value
     end
@@ -22,16 +18,15 @@ module RoomsDiff
 
     items_with_rooms = Item.connection.exec_query(items_with_rooms_query).to_a
 
-    invalid_items_with_rooms = items_with_rooms.select do |i|
-      building = i['building_name']
-      room = i['room_name']
+    invalid_items_with_rooms =
+      items_with_rooms.select do |i|
+        building = i['building_name']
+        room = i['room_name']
 
-      matches = values.select do |v|
-        v[:liegenschaft] == building && v[:raumnummer] == room
+        matches = values.select { |v| v[:liegenschaft] == building && v[:raumnummer] == room }
+
+        matches.empty?
       end
-
-      matches.empty?
-    end
 
     # invalid_items = Item.find(
     #   invalid_items_with_rooms.map { |i| i['item_id'] }
@@ -49,33 +44,28 @@ module RoomsDiff
     #   disposition: \
     #     'filename=room_diff.xlsx'
 
-    problematic_rooms = invalid_items_with_rooms.group_by do |i|
-      [i['building_name'], i['room_name']]
-    end.map do |k, v|
-      {
-        building_name: k[0],
-        room_name: k[1],
-        item_count: v.count,
-        inventory_codes: v.map { |v| v['item_inventory_code'] }
-      }
-    end
+    problematic_rooms =
+      invalid_items_with_rooms.group_by { |i| [i['building_name'], i['room_name']] }.map do |k, v|
+        {
+          building_name: k[0],
+          room_name: k[1],
+          item_count: v.count,
+          inventory_codes: v.map { |v| v['item_inventory_code'] }
+        }
+      end
 
-    header = ["building_name", "room_name", "item_count", "inventory_codes"]
-                .join(',')
+    header = ['building_name', 'room_name', 'item_count', 'inventory_codes'].join(',')
 
-    data = problematic_rooms.map do |v|
-      inventory_codes = if v[:inventory_codes].count > 100
-                          'more than 100'
-                        else
-                          v[:inventory_codes].join(',')
-                        end
-      [
-        v[:building_name],
-        v[:room_name],
-        v[:item_count],
-        inventory_codes
-      ].map { |w| "\"#{w}\"" }.join(',')
-    end
+    data =
+      problematic_rooms.map do |v|
+        inventory_codes =
+          v[:inventory_codes].count > 100 ? 'more than 100' : v[:inventory_codes].join(',')
+
+        [v[:building_name], v[:room_name], v[:item_count], inventory_codes].map do |w|
+          "undefined#{w}undefined"
+        end
+          .join(',')
+      end
 
     csv_lines = [header].concat(data)
 
@@ -93,11 +83,8 @@ module RoomsDiff
     # export = Export.excel_string(
     #   header, problematic_rooms_csv, worksheet_name: 'Problematic Rooms')
 
-    send_data \
-      csv_lines.join("\n"),
-      type: 'application/csv',
-      disposition: \
-        'filename=problematic_rooms.csv'
+    send_data csv_lines.join('undefined'),
+              type: 'application/csv', disposition: 'filename=problematic_rooms.csv'
 
     # post_rooms_diff.html.haml
   end
@@ -114,7 +101,7 @@ module RoomsDiff
 
   def items_with_rooms_query
     <<-SQL
-      select
+          select
         items.id as item_id,
         items.inventory_code as item_inventory_code,
         buildings.name as building_name,
@@ -136,9 +123,6 @@ module RoomsDiff
     return nil if liegenschaft.blank?
     return nil if raumnummer.blank?
 
-    {
-      liegenschaft: liegenschaft,
-      raumnummer: raumnummer
-    }
+    { liegenschaft: liegenschaft, raumnummer: raumnummer }
   end
 end

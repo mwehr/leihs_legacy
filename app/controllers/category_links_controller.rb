@@ -1,5 +1,4 @@
 class CategoryLinksController < ApplicationController
-
   def index
     @links =
       if params[:parent_id].presence
@@ -8,5 +7,4 @@ class CategoryLinksController < ApplicationController
         ModelGroupLink.all
       end
   end
-
 end

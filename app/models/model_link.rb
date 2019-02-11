@@ -4,9 +4,7 @@ class ModelLink < ApplicationRecord
   belongs_to :model_group, inverse_of: :model_links
   belongs_to :model, inverse_of: :model_links
 
-  before_validation do
-    self.quantity ||= 1
-  end
+  before_validation { self.quantity ||= 1 }
 
   # prevent duplicated model in Category, but allow for Template
   validates_uniqueness_of :model_id,
@@ -19,5 +17,4 @@ class ModelLink < ApplicationRecord
   def label_for_audits
     "#{model_group.name} - #{model.name}"
   end
-
 end

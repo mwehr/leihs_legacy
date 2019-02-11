@@ -52,7 +52,10 @@ def create_reservation(login, ip_name, product_name)
   u = user_by_login(login)
   ip = inventory_pool_by_name(ip_name)
   m = model_by_product_name(product_name)
-  FactoryGirl.create(:reservation, user: u, start_date: Date.today, end_date: Date.tomorrow, inventory_pool: ip, model: m)
+  FactoryGirl.create(
+    :reservation,
+    user: u, start_date: Date.today, end_date: Date.tomorrow, inventory_pool: ip, model: m
+  )
 end
 
 def create_overdue_reservation(login, ip_name, product_name, inventory_code)
@@ -60,14 +63,19 @@ def create_overdue_reservation(login, ip_name, product_name, inventory_code)
   ip = inventory_pool_by_name(ip_name)
   m = model_by_product_name(product_name)
   i = Item.find_by(inventory_code: inventory_code)
-  r = FactoryGirl.create(:reservation, user: u, start_date: Date.yesterday - 1.day, end_date: Date.yesterday, inventory_pool: ip, model: m, returned_date: nil, item: i)
+  r =
+    FactoryGirl.create(
+      :reservation,
+      user: u,
+      start_date: Date.yesterday - 1.day,
+      end_date: Date.yesterday,
+      inventory_pool: ip,
+      model: m,
+      returned_date: nil,
+      item: i
+    )
 
-  contract = Contract.new(
-    state: :open,
-    purpose: 'Any Purpose',
-    user: u,
-    inventory_pool: ip
-  )
+  contract = Contract.new(state: :open, purpose: 'Any Purpose', user: u, inventory_pool: ip)
 
   r.status = :signed
   r.contract = contract
@@ -83,7 +91,10 @@ def create_reservation_with_item(login, ip_name, product_name, inventory_code)
   ip = inventory_pool_by_name(ip_name)
   m = model_by_product_name(product_name)
   i = Item.find_by(inventory_code: inventory_code)
-  FactoryGirl.create(:reservation, user: u, start_date: Date.today, end_date: Date.tomorrow, inventory_pool: ip, model: m, item: i)
+  FactoryGirl.create(
+    :reservation,
+    user: u, start_date: Date.today, end_date: Date.tomorrow, inventory_pool: ip, model: m, item: i
+  )
 end
 
 def create_future_reservation(login, ip_name, product_name, inventory_code)
@@ -91,7 +102,15 @@ def create_future_reservation(login, ip_name, product_name, inventory_code)
   ip = inventory_pool_by_name(ip_name)
   m = model_by_product_name(product_name)
   i = Item.find_by(inventory_code: inventory_code)
-  FactoryGirl.create(:reservation, user: u, start_date: Date.today + 10.day, end_date: Date.tomorrow + 12.day, inventory_pool: ip, model: m, item: i)
+  FactoryGirl.create(
+    :reservation,
+    user: u,
+    start_date: Date.today + 10.day,
+    end_date: Date.tomorrow + 12.day,
+    inventory_pool: ip,
+    model: m,
+    item: i
+  )
 end
 
 def add_ip_manager(ip_name, login)

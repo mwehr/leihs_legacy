@@ -6,5 +6,4 @@ class ReleaseInfoController < ActionController::Base
   def index
     @get = RELEASE_INFO
   end
-
 end

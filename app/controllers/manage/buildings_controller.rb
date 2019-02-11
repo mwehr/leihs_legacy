@@ -1,5 +1,4 @@
 class Manage::BuildingsController < Manage::ApplicationController
-
   before_action only: [:edit, :update, :destroy] do
     @building = Building.find(params[:id])
   end
@@ -13,8 +12,7 @@ class Manage::BuildingsController < Manage::ApplicationController
     end
   end
 
-  def edit
-  end
+  def edit; end
 
   def destroy
     begin
@@ -25,5 +23,4 @@ class Manage::BuildingsController < Manage::ApplicationController
     end
     redirect_to action: :index
   end
-
 end

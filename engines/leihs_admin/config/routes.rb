@@ -1,28 +1,27 @@
 LeihsAdmin::Engine.routes.draw do
-
   root to: redirect('/admin/inventory_pools')
-  
-  unless Rails.env.production?
-    get 'top', to: 'admin#top'
-  end
 
-  resources :buildings,       except: :show
+  get 'top', to: 'admin#top' unless Rails.env.production?
+
+  resources :buildings, except: :show
   resources :inventory_pools, except: :show
-  resources :locations,       only: :destroy
-  resources :rooms,           except: :show
-  resources :statistics,      only: [:index, :show]
-  resources :suppliers,       except: []
-  resources :users,           only: :index
+  resources :locations, only: :destroy
+  resources :rooms, except: :show
+  resources :statistics, only: [:index, :show]
+  resources :suppliers, except: []
+  resources :users, only: :index
 
   # Audits
-  get 'audits',           to: 'audits#index'
+  get 'audits', to: 'audits#index'
   get ':type/:id/audits', to: 'audits#index', as: 'individual_audits'
 
   # Export inventory of all inventory pools
-  get 'inventory/csv',              :to => 'inventory#csv_export',  :as => 'global_inventory_csv_export'
-  get 'inventory/excel',            :to => 'inventory#excel_export',  :as => 'global_inventory_excel_export'
-  get 'inventory/quick_csv',              :to => 'inventory#quick_csv_export',  :as => 'global_inventory_quick_csv_export'
-  get 'inventory/quick_excel',            :to => 'inventory#quick_excel_export',  :as => 'global_inventory_quick_excel_export'
+  get 'inventory/csv', to: 'inventory#csv_export', as: 'global_inventory_csv_export'
+  get 'inventory/excel', to: 'inventory#excel_export', as: 'global_inventory_excel_export'
+  get 'inventory/quick_csv',
+      to: 'inventory#quick_csv_export', as: 'global_inventory_quick_csv_export'
+  get 'inventory/quick_excel',
+      to: 'inventory#quick_excel_export', as: 'global_inventory_quick_excel_export'
 
   # Fields
   get 'fields', to: 'fields#index'
@@ -32,7 +31,8 @@ LeihsAdmin::Engine.routes.draw do
   delete 'fields_editor/:id', to: 'fields_editor#destroy'
   get 'fields_editor/all_fields', to: 'fields_editor#all_fields'
   get 'fields_editor/groups', to: 'fields_editor#groups'
-  get 'fields_editor/single_field/(:id)', to: 'fields_editor#single_field', :as => 'fields_editor_single_field'
+  get 'fields_editor/single_field/(:id)',
+      to: 'fields_editor#single_field', as: 'fields_editor_single_field'
   get 'fields_editor/edit_react', to: 'fields_editor#edit_react'
   put 'fields_editor/new_react', to: 'fields_editor#new_react'
   post 'fields_editor/update_react', to: 'fields_editor#update_react'
@@ -47,5 +47,5 @@ LeihsAdmin::Engine.routes.draw do
   put 'mail_templates/:dir/:name', to: 'mail_templates#update'
 
   # Languages
-  get 'languages',           to: 'languages#index'
+  get 'languages', to: 'languages#index'
 end

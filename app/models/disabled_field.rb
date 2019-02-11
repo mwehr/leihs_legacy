@@ -7,5 +7,4 @@ class DisabledField < ApplicationRecord
   def label_for_audits
     "#{field_id} - #{inventory_pool_id}"
   end
-
 end

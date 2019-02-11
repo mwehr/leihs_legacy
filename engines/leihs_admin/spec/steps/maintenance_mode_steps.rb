@@ -24,15 +24,15 @@ module LeihsAdmin
         selector = @current_inventory_pool ? '.row.emboss' : '.form-group'
         case function_name
         when 'Disable manage section'
-          input_field = \
-            find(selector, text: :disable_manage_section, match: :first)
-            .find("input[name='setting[#{:disable_manage_section}]']",
-                  match: :first)
+          input_field =
+            find(selector, text: :disable_manage_section, match: :first).find(
+              "input[name='setting[#{:disable_manage_section}]']", match: :first
+            )
         when 'Disable borrow section'
-          input_field = \
-            find(selector, text: :disable_borrow_section, match: :first)
-            .find("input[name='setting[#{:disable_borrow_section}]']",
-                  match: :first)
+          input_field =
+            find(selector, text: :disable_borrow_section, match: :first).find(
+              "input[name='setting[#{:disable_borrow_section}]']", match: :first
+            )
         else
           raise
         end
@@ -53,12 +53,11 @@ module LeihsAdmin
         step 'I log out'
         case section_name
         when 'manage section'
-          step %(I am Mike)
-          expect(current_path)
-            .to eq manage_maintenance_path(@current_inventory_pool)
+          step 'I am Mike'
+          expect(current_path).to eq manage_maintenance_path(@current_inventory_pool)
           @section = _('Manage section')
         when 'borrow section'
-          step %(I am Normin)
+          step 'I am Normin'
           expect(current_path).to eq borrow_maintenance_path
           @section = _('Borrow section')
         else
@@ -67,8 +66,7 @@ module LeihsAdmin
       end
 
       step 'users see the note that was defined' do
-        expect(has_selector?('h1', text: _('%s not available') % @section))
-          .to be true
+        expect(has_selector?('h1', text: _('%s not available') % @section)).to be true
         expect(has_content?(@disable_message)).to be true
       end
 
@@ -77,15 +75,13 @@ module LeihsAdmin
         selector = @current_inventory_pool ? '.row.emboss' : '.form-group'
         case section_name
         when 'manage section'
-          find(selector, text: :disable_manage_section_message, match: :first)
-            .find("textarea[name='setting[#{:disable_manage_section_message}]']",
-                  match: :first)
-            .set @disable_message
+          find(selector, text: :disable_manage_section_message, match: :first).find(
+            "textarea[name='setting[#{:disable_manage_section_message}]']", match: :first
+          ).set @disable_message
         when 'borrow section'
-          find(selector, text: :disable_borrow_section_message, match: :first)
-            .find("textarea[name='setting[#{:disable_borrow_section_message}]']",
-                  match: :first)
-            .set @disable_message
+          find(selector, text: :disable_borrow_section_message, match: :first).find(
+            "textarea[name='setting[#{:disable_borrow_section_message}]']", match: :first
+          ).set @disable_message
         else
           raise
         end
@@ -95,12 +91,10 @@ module LeihsAdmin
         case section_name
         when 'manage section'
           expect(Setting.first.disable_manage_section).to eq @disable
-          expect(Setting.first.disable_manage_section_message.to_s)
-            .to eq @disable_message
+          expect(Setting.first.disable_manage_section_message.to_s).to eq @disable_message
         when 'borrow section'
           expect(Setting.first.disable_borrow_section).to eq @disable
-          expect(Setting.first.disable_borrow_section_message.to_s)
-            .to eq @disable_message
+          expect(Setting.first.disable_borrow_section_message.to_s).to eq @disable_message
         else
           raise
         end
@@ -111,13 +105,11 @@ module LeihsAdmin
 
         case section_name
         when 'manage section'
-          Setting.first.update_attributes \
-            disable_manage_section: true,
-            disable_manage_section_message: @disable_message
+          Setting.first.update_attributes disable_manage_section: true,
+          disable_manage_section_message: @disable_message
         when 'borrow section'
-          Setting.first.update_attributes \
-            disable_borrow_section: true,
-            disable_borrow_section_message: @disable_message
+          Setting.first.update_attributes disable_borrow_section: true,
+          disable_borrow_section_message: @disable_message
         else
           raise
         end
@@ -128,15 +120,15 @@ module LeihsAdmin
         selector = @current_inventory_pool ? '.row.emboss' : '.form-group'
         case function_name
         when 'disable manage section'
-          input_field = \
-            find(selector, text: :disable_manage_section, match: :first)
-            .find("input[name='setting[#{:disable_manage_section}]']",
-                  match: :first)
+          input_field =
+            find(selector, text: :disable_manage_section, match: :first).find(
+              "input[name='setting[#{:disable_manage_section}]']", match: :first
+            )
         when 'disable borrow section'
-          input_field = \
-            find(selector, text: :disable_borrow_section, match: :first)
-            .find("input[name='setting[#{:disable_borrow_section}]']",
-                  match: :first)
+          input_field =
+            find(selector, text: :disable_borrow_section, match: :first).find(
+              "input[name='setting[#{:disable_borrow_section}]']", match: :first
+            )
         else
           raise
         end
@@ -150,10 +142,10 @@ module LeihsAdmin
         step 'I log out'
         case section_name
         when 'manage section'
-          step %(I am Mike)
+          step 'I am Mike'
           expect(current_path).to eq manage_inventory_path(@current_inventory_pool)
         when 'borrow section'
-          step %(I am Normin)
+          step 'I am Normin'
           expect(current_path).to eq borrow_root_path
         else
           raise
@@ -161,14 +153,12 @@ module LeihsAdmin
       end
 
       step 'the note entered for the ":section_name" ' \
-           'is still saved' do |section_name|
+             'is still saved' do |section_name|
         case section_name
         when 'manage section'
-          expect(Setting.first.reload.disable_manage_section_message)
-            .to eq @disable_message
+          expect(Setting.first.reload.disable_manage_section_message).to eq @disable_message
         when 'borrow section'
-          expect(Setting.first.reload.disable_borrow_section_message)
-            .to eq @disable_message
+          expect(Setting.first.reload.disable_borrow_section_message).to eq @disable_message
         else
           raise
         end
@@ -184,8 +174,7 @@ module LeihsAdmin
         toggle = first('.topbar .dropdown', text: @current_user.try(:lastname))
         if toggle
           toggle.click
-          sign_out_button = first(".topbar form[action='/sign-out'] button",
-                                  visible: :all)
+          sign_out_button = first(".topbar form[action='/sign-out'] button", visible: :all)
           sign_out_button.click
         else
           visit root_path
@@ -196,6 +185,5 @@ module LeihsAdmin
 end
 
 RSpec.configure do |config|
-  config.include(LeihsAdmin::Spec::MaintenanceModeSteps,
-                 leihs_admin_maintenance_mode: true)
+  config.include(LeihsAdmin::Spec::MaintenanceModeSteps, leihs_admin_maintenance_mode: true)
 end

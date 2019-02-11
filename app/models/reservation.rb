@@ -33,34 +33,27 @@ class Reservation < ApplicationRecord
     read_attribute(:status).to_sym
   end
 
-  STATUSES.each do |status|
-    scope status, -> { where(status: status) }
-  end
+  STATUSES.each { |status| scope status, -> { where(status: status) } }
 
   #########################################################################
 
   default_scope { order(:start_date, :end_date, :created_at) }
 
-  scope(:handed_over_or_assigned_but_not_returned,
-        (lambda do
-          where(returned_date: nil)
-            .where('NOT (end_date < ? AND item_id IS NULL)',
-                   Time.zone.today)
-        end))
+  scope(
+    :handed_over_or_assigned_but_not_returned,
+    (lambda do
+      where(returned_date: nil).where('NOT (end_date < ? AND item_id IS NULL)', Time.zone.today)
+    end)
+  )
 
   def self.filter(params, inventory_pool)
     reservations = inventory_pool.reservations
 
-    reservations
-      .scope_if_presence(params[:contract_ids]) do |rs, ids|
-        reservations.where(contract_id: ids)
-      end
-      .scope_if_presence(params[:order_ids]) do |rs, ids|
-        reservations.where(order_id: ids)
-      end
-      .scope_if_presence(params[:ids]) do |rs, ids|
-        reservations.where(id: ids)
-      end
+    reservations.scope_if_presence(params[:contract_ids]) do |rs, ids|
+      reservations.where(contract_id: ids)
+    end
+      .scope_if_presence(params[:order_ids]) { |rs, ids| reservations.where(order_id: ids) }
+      .scope_if_presence(params[:ids]) { |rs, ids| reservations.where(id: ids) }
   end
 
   #####################################################
@@ -75,26 +68,30 @@ class Reservation < ApplicationRecord
 
   validates_numericality_of :quantity, greater_than: 0, only_integer: true
   validates_presence_of :user, :inventory_pool, :status
-  validates_presence_of(:contract,
-                        if: proc { |r| [:signed, :closed].include?(r.status) })
+  validates_presence_of(:contract, if: proc { |r| [:signed, :closed].include?(r.status) })
   validate :date_sequence
   validate do
     errors.add(:base, _('No access')) unless user.access_right_for(inventory_pool)
     if changed_attributes.keys.count == 1 and end_date_changed?
       # we skip delegation validation on end_date extension
-    elsif returned_date
+
       # we skip delegation validation on returning (or returned) reservations
+    elsif returned_date
+
     else
       if user.delegation?
         unless user.delegated_users.include?(delegated_user)
-          errors.add(:base,
-                     _("Delegated user is not member of the contract's " \
-                       'delegation or is empty'))
+          errors.add(
+            :base,
+            _(
+              "Delegated user is not member of the contract's " \
+                'delegation or is empty'
+            )
+          )
         end
       else
         if delegated_user
-          errors.add(:base,
-                     _("Delegated user must be empty for contract's normal user"))
+          errors.add(:base, _("Delegated user must be empty for contract's normal user"))
         end
       end
     end
@@ -102,16 +99,14 @@ class Reservation < ApplicationRecord
 
   # only apply if self.class == Reservation, as ItemLine (< Reservation) defines
   # own specific validations for uniqueness of item_id
-  validates_uniqueness_of \
-    :item_id,
-    scope: :returned_date,
-    if: proc { |r| r.class == Reservation and r.item_id and r.returned_date.nil? }
+  validates_uniqueness_of :item_id,
+                          scope: :returned_date,
+                          if:
+                            proc do |r|
+                              r.class == Reservation and r.item_id and r.returned_date.nil?
+                            end
 
-  before_save do
-    if returned_date and returned_date_changed?
-      self.status = :closed
-    end
-  end
+  before_save { self.status = :closed if returned_date and returned_date_changed? }
 
   before_destroy do
     if [:rejected, :signed, :closed].include? status
@@ -125,8 +120,7 @@ class Reservation < ApplicationRecord
   def <=>(other)
     # TODO: prevent name with leading and trailing whitespaces
     # directly on model and option save
-    [self.start_date, self.model.name.strip] \
-      <=> [other.start_date, other.model.name.strip]
+    [self.start_date, self.model.name.strip] <=> [other.start_date, other.model.name.strip]
   end
 
   def late?(current_date = Time.zone.today)
@@ -158,40 +152,39 @@ class Reservation < ApplicationRecord
     if item
       (item.price || 0) * quantity
     else
-      (model
-        .borrowable_items
-        .where(inventory_pool_id: inventory_pool)
-        .map(&:price)
-        .compact
-        .max || 0) \
-      * quantity
+      (model.borrowable_items.where(inventory_pool_id: inventory_pool).map(&:price).compact.max ||
+        0) *
+        quantity
     end
   end
 
   def target_user
-    if user.delegation? and delegated_user
-      delegated_user
-    else
-      user
-    end
+    user.delegation? and delegated_user ? delegated_user : user
   end
 
   ############################################
 
   def approvable?
     if delegated_user.try :suspended?, inventory_pool
-      errors.add(:base,
-                 _('The delegated user %s is suspended.') % delegated_user)
+      errors.add(:base, _('The delegated user %s is suspended.') % delegated_user)
     end
     unless visits_on_open_date?
-      errors.add(:base,
-                 _('This order is not approvable because the inventory pool ' \
-                   'is closed on either the start or enddate.'))
+      errors.add(
+        :base,
+        _(
+          'This order is not approvable because the inventory pool ' \
+            'is closed on either the start or enddate.'
+        )
+      )
     end
     unless available?
-      errors.add(:base,
-                 _('This order is not approvable because some reserved ' \
-                   'models are not available.'))
+      errors.add(
+        :base,
+        _(
+          'This order is not approvable because some reserved ' \
+            'models are not available.'
+        )
+      )
     end
     errors.empty?
   end
@@ -200,12 +193,10 @@ class Reservation < ApplicationRecord
     Reservation.transaction do
       start_date ||= self.start_date
       end_date ||= self.end_date
-      unless update_attributes(start_date: start_date,
-                               end_date: [start_date, end_date].max)
+      unless update_attributes(start_date: start_date, end_date: [start_date, end_date].max)
         raise errors.full_messages.uniq.join(', ')
       end
-      if user.access_right_for(inventory_pool).role == :group_manager \
-        and not available?
+      if user.access_right_for(inventory_pool).role == :group_manager and not available?
         raise _('Not available')
       end
     end
@@ -221,9 +212,7 @@ class Reservation < ApplicationRecord
 
   def date_sequence
     # OPTIMIZE: strange behavior: in some cases, this error raises when shouldn't
-    if end_date < start_date
-      errors.add(:base, _('Start Date must be before End Date'))
-    end
+    errors.add(:base, _('Start Date must be before End Date')) if end_date < start_date
     # TODO: Think about this a little bit more....
     # errors.add(:base, _("Start Date cannot be a past date"))
     # if start_date < Date.today

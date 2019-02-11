@@ -18,7 +18,7 @@ Then(/^I can not edit models, items, options, software or licenses$/) do
     find('.line', match: :first)
 
     # clicking on all togglers via javascript is significantly faster than doing it with capybara in this case
-    page.execute_script %Q( $(".button[data-type='inventory-expander']").click() )
+    page.execute_script " $(\".button[data-type='inventory-expander']\").click() "
     sleep 2
 
     all('.line', visible: true)[0..5].each do |line|
@@ -44,9 +44,7 @@ When(/^I enter the timeline of a model with hand overs, take backs or pending or
   within '#inventory' do
     all(".line[data-type='model']", minimum: 1).each do |line|
       if @current_inventory_pool.running_reservations.detect { |rl| rl.model_id == line['data-id'] }
-        @new_window = window_opened_by do
-          line.find('.line-actions > a', text: _('Timeline')).click
-        end
+        @new_window = window_opened_by { line.find('.line-actions > a', text: _('Timeline')).click }
         break
       end
     end
@@ -66,16 +64,17 @@ Then(/^there is no link to:$/) do |table|
   within_window @new_window do
     within '.timeline-event-bubble-body' do
       table.raw.flatten.each do |s1|
-        s2 = case s1
-               when 'acknowledge'
-                 _('Acknowledge')
-               when 'hand over'
-                 _('Hand Over')
-               when 'take back'
-                 _('Take Back')
-               else
-                 raise
-             end
+        s2 =
+          case s1
+          when 'acknowledge'
+            _('Acknowledge')
+          when 'hand over'
+            _('Hand Over')
+          when 'take back'
+            _('Take Back')
+          else
+            raise
+          end
         expect(has_no_selector?('a', text: s2)).to be true
       end
     end
@@ -83,7 +82,9 @@ Then(/^there is no link to:$/) do |table|
 end
 
 When(/^I open a submitted order to be verified by a Group Manager$/) do
-  @contract = @current_inventory_pool.orders.submitted.joins(:reservations).with_verifiable_user_and_model.first
+  @contract =
+    @current_inventory_pool.orders.submitted.joins(:reservations).with_verifiable_user_and_model
+      .first
   step 'I edit this submitted contract'
 end
 
@@ -98,7 +99,9 @@ When(/^I add a model which leads to an overbooking$/) do
 end
 
 When(/^I open a hand over editable by the Group Manager$/) do
-  @contract = @current_inventory_pool.orders.approved.joins(:reservations).with_verifiable_user_and_model.first
+  @contract =
+    @current_inventory_pool.orders.approved.joins(:reservations).with_verifiable_user_and_model
+      .first
   visit manage_hand_over_path(@current_inventory_pool, @contract.user)
   expect(has_selector?('#hand-over-view')).to be true
   step 'the availability is loaded'

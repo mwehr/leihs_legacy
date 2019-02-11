@@ -19,7 +19,8 @@ Then(/^this line is deleted$/) do
 end
 
 When(/^I select multiple reservations$/) do
-  @selected_line_ids = @hand_over.reservations.limit(rand(1..@hand_over.reservations.count)).map &:id
+  @selected_line_ids =
+    @hand_over.reservations.limit(rand(1..@hand_over.reservations.count)).map &:id
   expect(has_selector?('.line[data-id]', match: :first)).to be true
   @selected_line_ids.each do |id|
     cb = find(".line[data-id='#{id}'] input[type='checkbox'][data-select-line]")
@@ -38,23 +39,39 @@ Then(/^these seleted reservations are deleted$/) do
   @selected_line_ids.each do |line_id|
     expect(has_no_selector?(".line[data-id='#{line_id}']")).to be true
   end
-  @selected_line_ids.each {|id| expect { Reservation.find(id) }.to raise_error(ActiveRecord::RecordNotFound)}
+  @selected_line_ids.each do |id|
+    expect { Reservation.find(id) }.to raise_error(ActiveRecord::RecordNotFound)
+  end
 end
 
-When(/^I delete all reservations of a model thats availability is blocked by these reservations$/) do
-  unless @customer.orders.approved.find_by(inventory_pool_id: @current_inventory_pool).reservations.first.available?
+When(
+  /^I delete all reservations of a model thats availability is blocked by these reservations$/
+) do
+  unless @customer.orders.approved.find_by(inventory_pool_id: @current_inventory_pool).reservations
+    .first
+    .available?
     step 'I add an item to the hand over by providing an inventory code'
     @model = Item.find_by_inventory_code(@inventory_code).model
-    find('.line', match: :prefer_exact, text: @model.name).find("input[type='checkbox'][data-select-line]").click
+    find('.line', match: :prefer_exact, text: @model.name).find(
+      "input[type='checkbox'][data-select-line]"
+    )
+      .click
   end
   step 'I add so many reservations that I break the maximal quantity of a model'
   step 'the availability is loaded'
-  target_linegroup = find('[data-selected-lines-container]', text: /#{find("#add-start-date").value}.*#{find("#add-end-date").value}/)
+  target_linegroup =
+    find(
+      '[data-selected-lines-container]',
+      text: /#{find('#add-start-date').value}.*#{find('#add-end-date').value}/
+    )
 
-  reference_line = target_linegroup.all('.line', text: @model.name).detect{|line| line.find('.line-info.red')}
+  reference_line =
+    target_linegroup.all('.line', text: @model.name).detect { |line| line.find('.line-info.red') }
   @reference_id = reference_line['data-id']
 
-  line_ids = target_linegroup.all('.line', text: @model.name).select{|line| line.find('.line-info.red')}.map{|line| line['data-id']}
+  line_ids =
+    target_linegroup.all('.line', text: @model.name).select { |line| line.find('.line-info.red') }
+      .map { |line| line['data-id'] }
   line_ids.each do |id|
     if id != @reference_id
       rescue_displaced_flash do

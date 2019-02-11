@@ -6,5 +6,4 @@ class HiddenField < ApplicationRecord
   def label_for_audits
     field_id
   end
-
 end

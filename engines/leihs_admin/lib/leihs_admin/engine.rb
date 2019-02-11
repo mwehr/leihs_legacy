@@ -7,9 +7,7 @@ module LeihsAdmin
     isolate_namespace LeihsAdmin
 
     initializer 'engine.assets.precompile' do |app|
-      app.config.assets.precompile += %w(leihs_admin/admin.css
-                                         leihs_admin/admin.js)
+      app.config.assets.precompile += %w[leihs_admin/admin.css leihs_admin/admin.js]
     end
-
   end
 end

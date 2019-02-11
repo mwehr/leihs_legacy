@@ -26,40 +26,38 @@ module LeihsAdmin
       end
 
       step 'there is an item whose inventory code contains :term' do |term|
-        @item = FactoryGirl.create(:item,
-                                   inventory_code: term,
-                                   shelf: Faker::Lorem.word)
+        @item = FactoryGirl.create(:item, inventory_code: term, shelf: Faker::Lorem.word)
       end
 
       step "there is a 'create' audit which contains :term " \
-           "in column 'audited_changes'" do |term|
+             "in column 'audited_changes'" do |term|
         FactoryGirl.create(:item, shelf: term)
       end
 
       step "there is a 'create' audit for a user " \
-           'whose name contains :term' do |term|
+             'whose name contains :term' do |term|
         expect(Audit.find_by(action: 'create', auditable_id: @user.id)).to be
       end
 
       step "there is a 'create' audit performed by a user " \
-           'whose name contains :term' do |term|
+             'whose name contains :term' do |term|
         item = FactoryGirl.create(:item)
         item.audits.first.update_attributes(user: @user)
       end
 
       step "there is a 'create' audit for an item " \
-           'whose inventory code contains :term' do |term|
+             'whose inventory code contains :term' do |term|
         @audit = Audit.find_by(action: 'create', auditable_id: @item.id)
         expect(@audit).to be
       end
 
       step "there is an 'update' audit for an item whose " \
-           'inventory code contains :term' do |term|
+             'inventory code contains :term' do |term|
         @item.update_attributes(shelf: Faker::Lorem.word)
       end
 
       step "there is a 'create' audit for a model " \
-           'whose name contains :term' do |term|
+             'whose name contains :term' do |term|
         FactoryGirl.create(:model, product: term)
       end
 
@@ -77,10 +75,13 @@ module LeihsAdmin
 
       step 'I scroll down until I see all audits' do
         # rubocop:disable Lint/Loop
-        begin
-          counter = all('.panel').count
-          scroll_down 10000
-        end until all('.panel').count == counter
+
+        until all('.panel').count == counter
+          begin
+            counter = all('.panel').count
+            scroll_down 10000
+          end
+        end
         # rubocop:enable Lint/Loop
       end
 
@@ -95,8 +96,7 @@ module LeihsAdmin
       end
 
       step 'the start date is set to one month ago' do
-        expect(find("input[name='start_date']").value)
-          .to be == I18n.l(30.days.ago.to_date)
+        expect(find("input[name='start_date']").value).to be == I18n.l(30.days.ago.to_date)
       end
 
       step 'I see the request with the new audit at the top' do
@@ -118,8 +118,7 @@ module LeihsAdmin
       end
 
       step 'I see the inventory code of the item on its audit entry' do
-        expect(find(".row[data-id='#{@audit.id}']"))
-          .to have_content @item.inventory_code
+        expect(find(".row[data-id='#{@audit.id}']")).to have_content @item.inventory_code
       end
 
       step 'there exists a new audit for a model' do
@@ -128,8 +127,7 @@ module LeihsAdmin
       end
 
       step 'I see the model name of the model on its audit entry' do
-        expect(find(".row[data-id='#{@audit.id}']"))
-          .to have_content @model.name
+        expect(find(".row[data-id='#{@audit.id}']")).to have_content @model.name
       end
 
       step 'there exists a new audit for a user' do
@@ -138,8 +136,7 @@ module LeihsAdmin
       end
 
       step 'I see the user name of the user on its audit entry' do
-        expect(find(".row[data-id='#{@audit.id}']"))
-          .to have_content @user.name
+        expect(find(".row[data-id='#{@audit.id}']")).to have_content @user.name
       end
 
       step 'there is a label method defined for every audited entity' do
@@ -149,16 +146,15 @@ module LeihsAdmin
       end
 
       step 'I see 1 audit for the item' do
+
       end
 
       step 'I click on the label link of the item' do
-        within(".row[data-id='#{@audit.id}']") do
-          find('a').click
-        end
+        within(".row[data-id='#{@audit.id}']") { find('a').click }
       end
 
       step 'an individual audits page opens for the audits of this item' do
-        expect(current_path).to be == \
+        expect(current_path).to be ==
           admin.individual_audits_path(@item.model_name.singular, @item.id)
       end
 
@@ -178,6 +174,4 @@ module LeihsAdmin
   end
 end
 
-RSpec.configure do |config|
-  config.include LeihsAdmin::Spec::AuditsSteps, leihs_admin_audits: true
-end
+RSpec.configure { |config| config.include LeihsAdmin::Spec::AuditsSteps, leihs_admin_audits: true }

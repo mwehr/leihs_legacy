@@ -1,16 +1,16 @@
 module LeihsAdmin
   class InventoryPoolsController < AdminController
-
     def index
       @inventory_pools = InventoryPool.unscoped.search(params[:search_term])
-      @inventory_pools = case params[:activity]
-                         when nil, 'active'
-                           @inventory_pools.where(is_active: true)
-                         when 'inactive'
-                           @inventory_pools.where(is_active: false)
-                         else
-                           @inventory_pools
-                         end
+      @inventory_pools =
+        case params[:activity]
+        when nil, 'active'
+          @inventory_pools.where(is_active: true)
+        when 'inactive'
+          @inventory_pools.where(is_active: false)
+        else
+          @inventory_pools
+        end
       @inventory_pools = @inventory_pools.sort
     end
 
@@ -79,11 +79,9 @@ module LeihsAdmin
 
     def create_mail_templates!(inventory_pool)
       MailTemplate.where(is_template_template: true).each do |mt|
-        MailTemplate.create! \
-          mt.attributes
-          .reject { |k, _| k == 'id' }
-          .merge(is_template_template: false,
-                 inventory_pool_id: inventory_pool.id)
+        MailTemplate.create! mt.attributes.reject { |k, _| k == 'id' }.merge(
+          is_template_template: false, inventory_pool_id: inventory_pool.id
+        )
       end
     end
 
@@ -101,25 +99,17 @@ module LeihsAdmin
       to_add = submitted_inventory_manager_ids - existing_inventory_manager_ids
       to_add.each do |id|
         user = User.find id
-        ar = \
-          user
-          .access_rights
-          .find_or_initialize_by(inventory_pool: @inventory_pool)
+        ar = user.access_rights.find_or_initialize_by(inventory_pool: @inventory_pool)
         ar.update_attributes!(role: :inventory_manager, deleted_at: nil)
       end
     end
 
     def existing_inventory_manager_ids
-      @existing_inventory_manager_ids ||= \
-        @inventory_pool \
-          .users
-          .inventory_managers
-          .pluck(:id)
-          .sort
+      @existing_inventory_manager_ids ||= @inventory_pool.users.inventory_managers.pluck(:id).sort
     end
 
     def submitted_inventory_manager_ids
-      @submitted_inventory_manager_ids ||= \
+      @submitted_inventory_manager_ids ||=
         if params[:inventory_managers] and params[:inventory_managers][:user_ids]
           params[:inventory_managers][:user_ids].sort
         else

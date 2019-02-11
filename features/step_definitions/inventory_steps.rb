@@ -17,9 +17,7 @@ end
 
 Given(/^(\d+) inventory pool(s?)$/) do |size, plural|
   InventoryPool.delete_all
-  size.to_i.times do |i|
-    LeihsFactory.create_inventory_pool(name: (i + 1))
-  end
+  size.to_i.times { |i| LeihsFactory.create_inventory_pool(name: (i + 1)) }
   @inventory_pools = InventoryPool.all
   expect(@inventory_pools.size).to eq size.to_i
   # default inventory pool
@@ -58,9 +56,7 @@ end
 
 Then "the label of the direct children are '$labels'" do |labels|
   @category_labels = @category.children.map { |c| c.label(@category.id) }
-  labels.split(',').each do |l|
-    expect(@category_labels.include?(l)).to be true
-  end
+  labels.split(',').each { |l| expect(@category_labels.include?(l)).to be true }
 end
 
 ###############################################
@@ -70,9 +66,7 @@ Given "a model '$model' exists" do |model|
   @model = LeihsFactory.create_model(product: model)
 end
 
-When(/^I register a new model '([^']*)'$/) do |model|
-  step "a model '#{model}' exists"
-end
+When(/^I register a new model '([^']*)'$/) { |model| step "a model '#{model}' exists" }
 
 Given "the model '$model' belongs to the category '$category'" do |model, category|
   @model = Model.find_by_name(model)
@@ -93,14 +87,13 @@ end
 # Given "$number items of model '$model' exist" do |number, model|
 Given(/(\d+) item(s?) of model '(.+)' exist(s?)/) do |number, plural1, model, plural2|
   @model = LeihsFactory.create_model(product: model)
-  number.to_i.times do |i|
-    FactoryGirl.create(:item, owner: @inventory_pool, model: @model)
-  end
+  number.to_i.times { |i| FactoryGirl.create(:item, owner: @inventory_pool, model: @model) }
 end
 
 # rubocop:disable Metrics/ParameterLists
-Given(/^(a?n? ?)item(s?) '([^']*)' of model '([^']*)' exist(s?)( only)?$/)\
-  do |particle, plural, inventory_codes, model, plural2, only|
+Given(
+  /^(a?n? ?)item(s?) '([^']*)' of model '([^']*)' exist(s?)( only)?$/
+) do |particle, plural, inventory_codes, model, plural2, only|
   Item.delete_all if only
 
   @model = LeihsFactory.create_model(product: model)
@@ -120,21 +113,20 @@ Given "at that location resides an item '$item' of model '$model'" do |item, mod
 end
 
 Given '$number items of this model exist' do |number|
-  number.to_i.times do |i|
-    FactoryGirl.create(:item, owner: @inventory_pool, model: @model)
-  end
+  number.to_i.times { |i| FactoryGirl.create(:item, owner: @inventory_pool, model: @model) }
   @model = Model.find(@model.id)
 end
 
-Given(/^(\w+) item(s?) of that model exist(s?)/) \
-do |number, plural, plural2|
+Given(/^(\w+) item(s?) of that model exist(s?)/) do |number, plural, plural2|
   number = to_number(number)
   step "#{number} items of this model exist"
 end
 
 Given 'we have items with the following inventory_codes:' do |inventory_codes_table|
   inventory_codes_table.hashes.each do |hash|
-    FactoryGirl.create(:item, owner: @inventory_pool, model: @model, inventory_code: hash[:inventory_code])
+    FactoryGirl.create(
+      :item, owner: @inventory_pool, model: @model, inventory_code: hash[:inventory_code]
+    )
   end
 end
 

@@ -14,24 +14,22 @@ module LeihsAdmin
       end
 
       step 'I select the statistics subsection ' \
-           ':subsection_title' do |subsection_title|
+             ':subsection_title' do |subsection_title|
         click_link(subsection_title)
       end
 
       step 'I see by default the last ' \
-           ':number_of_days days\' statistics' do |number_of_days|
+             ":number_of_days days' statistics" do |number_of_days|
         from_date = Date.parse(all('input.datepicker').first.value)
         to_date = Date.parse(all('input.datepicker')[1].value)
         expect((to_date - from_date).days).to eq(Integer(number_of_days).days)
       end
 
       step 'I set the time frame to ' \
-           ':from_day/:from_month - :to_day/:to_month ' \
-           'of the current year' do |from_day, from_month, to_day, to_month|
-        start_date = \
-          Date.parse("#{from_day}/#{from_month}/#{Date.today.strftime('%Y')}")
-        end_date = \
-          Date.parse("#{to_day}/#{to_month}/#{Date.today.strftime('%Y')}")
+             ':from_day/:from_month - :to_day/:to_month ' \
+             'of the current year' do |from_day, from_month, to_day, to_month|
+        start_date = Date.parse("#{from_day}/#{from_month}/#{Date.today.strftime('%Y')}")
+        end_date = Date.parse("#{to_day}/#{to_month}/#{Date.today.strftime('%Y')}")
         all('input.datepicker').first.set start_date
         all('input.datepicker')[1].set end_date
       end
@@ -40,7 +38,7 @@ module LeihsAdmin
         @date1 = 1.month.ago.to_formatted_s(:db)
         @date2 = Date.today.to_formatted_s(:db)
         sql = <<-SQL
-          SELECT inventory_pools.id,
+                  SELECT inventory_pools.id,
                  SUM(reservations.quantity) AS quantity,
                  inventory_pools.name AS label
           FROM "inventory_pools"
@@ -56,24 +54,20 @@ module LeihsAdmin
         SQL
         @inventory_pools = ActiveRecord::Base.connection.exec_query(sql).to_hash
         within '.list-of-lines' do
-          @inventory_pools.each do |ip|
-            expect(page).to have_content ip['label']
-          end
+          @inventory_pools.each { |ip| expect(page).to have_content ip['label'] }
         end
       end
 
       step 'I expand an inventory pool' do
         @inventory_pool = @inventory_pools.first
-        within('.list-of-lines .row',
-               text: @inventory_pool['name'],
-               match: :first) do
+        within('.list-of-lines .row', text: @inventory_pool['name'], match: :first) do
           find('.toggle').click
         end
       end
 
       step 'I see all models which this inventory pool is responsible for' do
         sql = <<-SQL
-          SELECT models.id,
+                  SELECT models.id,
                  SUM(reservations.quantity) AS quantity,
                  CONCAT_WS(' ',
                            models.manufacturer,
@@ -84,7 +78,9 @@ module LeihsAdmin
           WHERE ("reservations"."type" = 'ItemLine'
                  AND "reservations"."item_id" IS NOT NULL
                  AND "reservations"."returned_date" IS NOT NULL)
-            AND "reservations"."inventory_pool_id" = '#{@inventory_pool['id']}'
+            AND "reservations"."inventory_pool_id" = '#{@inventory_pool[
+          'id'
+        ]}'
             AND ("reservations"."start_date" >= '#{@date1}')
             AND ("reservations"."returned_date" <= '#{@date2}')
           GROUP BY models.id,
@@ -95,9 +91,7 @@ module LeihsAdmin
         @models = ActiveRecord::Base.connection.exec_query(sql).to_hash
 
         within '.list-of-lines .children' do
-          @models.each do |model|
-            find('.row', text: model['name'], match: :first)
-          end
+          @models.each { |model| find('.row', text: model['name'], match: :first) }
         end
       end
 
@@ -116,7 +110,7 @@ module LeihsAdmin
         @date2 = Date.today.to_formatted_s(:db)
 
         sql = <<-SQL
-          SELECT users.id,
+                  SELECT users.id,
                  SUM(reservations.quantity) AS quantity,
                  CONCAT_WS(' ', users.firstname, users.lastname) AS label
           FROM "users"
@@ -133,24 +127,18 @@ module LeihsAdmin
 
         @users = ActiveRecord::Base.connection.exec_query(sql).to_hash
         within '.list-of-lines' do
-          @users.each do |user|
-            expect(page).to have_content user['label']
-          end
+          @users.each { |user| expect(page).to have_content user['label'] }
         end
       end
 
       step 'I expand the first user' do
         @user = @users.first
-        within('.list-of-lines .row',
-               text: @user['name'],
-               match: :first) do
-          find('.toggle').click
-        end
+        within('.list-of-lines .row', text: @user['name'], match: :first) { find('.toggle').click }
       end
 
       step 'I see all models which the users has borrowed' do
         sql = <<-SQL
-          SELECT models.id,
+                  SELECT models.id,
                  SUM(reservations.quantity) AS quantity,
                  CONCAT_WS(' ',
                            models.manufacturer,
@@ -161,7 +149,9 @@ module LeihsAdmin
           WHERE ("reservations"."type" = 'ItemLine'
                  AND "reservations"."item_id" IS NOT NULL
                  AND "reservations"."returned_date" IS NOT NULL)
-            AND "reservations"."user_id" = '#{@user['id']}'
+            AND "reservations"."user_id" = '#{@user[
+          'id'
+        ]}'
             AND ("reservations"."start_date" >= '#{@date1}')
             AND ("reservations"."returned_date" <= '#{@date2}')
           GROUP BY models.id,
@@ -172,22 +162,22 @@ module LeihsAdmin
         @models = ActiveRecord::Base.connection.exec_query(sql).to_hash
 
         within '.list-of-lines .children' do
-          @models.each do |model|
-            find('.row', text: model['name'], match: :first)
-          end
+          @models.each { |model| find('.row', text: model['name'], match: :first) }
         end
       end
 
       step 'I see all models for which this inventory pool owns items' do
         sql = <<-SQL
-          SELECT models.id,
+                  SELECT models.id,
                  COUNT(items.id) AS quantity,
                  SUM(items.price) AS price,
                  models.product AS label
           FROM "models"
           INNER JOIN "items" ON "items"."model_id" = "models"."id"
           WHERE ("items"."price" > 0)
-            AND "items"."owner_id" = '#{@inventory_pool['id']}'
+            AND "items"."owner_id" = '#{@inventory_pool[
+          'id'
+        ]}'
             AND ("items"."created_at" >= '#{@date1}')
             AND ("items"."created_at" <= '#{@date2}')
           GROUP BY items.model_id,
@@ -198,14 +188,12 @@ module LeihsAdmin
         @models = ActiveRecord::Base.connection.exec_query(sql).to_hash
 
         within '.list-of-lines .children' do
-          @models.each do |model|
-            find('.row', text: model['name'], match: :first)
-          end
+          @models.each { |model| find('.row', text: model['name'], match: :first) }
         end
       end
 
       step 'for each model a sum of the purchase price of all matching items ' \
-           'in this inventory pool' do
+             'in this inventory pool' do
         within '.list-of-lines .children' do
           @models.each do |model|
             within('.row', text: model['label'], match: :first) do
@@ -221,7 +209,7 @@ module LeihsAdmin
         @date1 = 1.month.ago.to_formatted_s(:db)
         @date2 = Date.today.to_formatted_s(:db)
         sql = <<-SQL
-          SELECT inventory_pools.id,
+                  SELECT inventory_pools.id,
                  COUNT(items.id) AS quantity,
                  SUM(items.price) AS price,
                  inventory_pools.name AS label
@@ -236,14 +224,12 @@ module LeihsAdmin
         SQL
         @inventory_pools = ActiveRecord::Base.connection.exec_query(sql).to_hash
         within '.list-of-lines' do
-          @inventory_pools.each do |ip|
-            expect(page).to have_content ip['label']
-          end
+          @inventory_pools.each { |ip| expect(page).to have_content ip['label'] }
         end
       end
 
       step 'for each model the number of items ' \
-           'of this model in that inventory pool' do
+             'of this model in that inventory pool' do
         within '.list-of-lines .children' do
           @models.each do |model|
             within('.row', text: model['label'], match: :first) do

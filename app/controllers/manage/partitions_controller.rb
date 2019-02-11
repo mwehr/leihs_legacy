@@ -1,11 +1,10 @@
 class Manage::PartitionsController < Manage::ApplicationController
-
   def index
-    @partitions = \
+    @partitions =
       Entitlement.with_generals(
-        model_ids: params[:model_ids],
-        inventory_pool_id: current_inventory_pool.id
-      ).map do |e|
+        model_ids: params[:model_ids], inventory_pool_id: current_inventory_pool.id
+      )
+        .map do |e|
         e.attributes.transform_keys do |k|
           case k
           when 'entitlement_group_id'

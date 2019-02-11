@@ -7,7 +7,7 @@ end
 
 Given "item '$item' is part of package item $package_item" do |item, package_item|
   package = Item.find_by_inventory_code package_item
-  item    = Item.find_by_inventory_code item
+  item = Item.find_by_inventory_code item
   item.parent = package
   item.save
 end
@@ -27,9 +27,7 @@ Then "even though 'Khil Remix' is not part of a package in inventory pool 2!" do
   # dummy - has comment only!
 end
 
-Given(/^this model is a package$/) do
-  @model.update_attributes(is_package: true)
-end
+Given(/^this model is a package$/) { @model.update_attributes(is_package: true) }
 
 Given(/^this package item is part of this package model$/) do
   @item.model = @model
@@ -47,13 +45,10 @@ Given(/^this item is part of this package item$/) do
 end
 
 When(/^I choose "(.*?)" from building select box$/) do |name|
-  fill_in_via_autocomplete \
-    css: "[data-id='building_id'] input[data-type='autocomplete']",
-    value: name
+  fill_in_via_autocomplete css: "[data-id='building_id'] input[data-type='autocomplete']",
+                           value: name
 end
 
 When(/^I choose "(.*?)" from room select box$/) do |name|
-  fill_in_via_autocomplete \
-    css: "[data-id='room_id'] input[data-type='autocomplete']",
-    value: name
+  fill_in_via_autocomplete css: "[data-id='room_id'] input[data-type='autocomplete']", value: name
 end

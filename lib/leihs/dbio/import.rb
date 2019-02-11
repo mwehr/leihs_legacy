@@ -2,31 +2,26 @@ module Leihs
   module DBIO
     module Import
       class << self
-
-        uuid_ns = ENV['LEIS_UUID_NS'].presence || raise("Set a globally unique LEIS_UUID_NS value")
+        uuid_ns = ENV['LEIS_UUID_NS'].presence || raise('Set a globally unique LEIS_UUID_NS value')
 
         LEIHS_UUID_NS = UUIDTools::UUID.sha1_create UUIDTools::UUID.parse_int(0), uuid_ns
 
-        IGNORED_TABLES = %w(schema_migrations ar_internal_metadata)
+        IGNORED_TABLES = %w[schema_migrations ar_internal_metadata]
 
-        TABLES = %w(
+        TABLES = %w[
           languages
           authentication_systems
-
           users
           delegations_users
           database_authentications
-
           fields
           hidden_fields
-
           addresses
           inventory_pools
           workdays
           options
           holidays
           access_rights
-
           models
           models_compatibles
           accessories
@@ -43,17 +38,14 @@ module Leihs
           model_links
           model_group_links
           partitions
-
           purposes
           contracts
           reservations
-
           images
           mail_templates
           numerators
           settings
           attachments
-
           procurement_organizations
           procurement_main_categories
           procurement_accesses
@@ -65,12 +57,11 @@ module Leihs
           procurement_requests
           procurement_attachments
           procurement_settings
-
           notifications
           audits
-        )
+        ]
 
-        NEW_TABLES = %w( procurement_images )
+        NEW_TABLES = %w[procurement_images]
 
         (TABLES + NEW_TABLES).each do |tbl_name|
           class_name = "LeihsDBIOImport#{tbl_name.to_s.camelize}"
@@ -79,8 +70,9 @@ module Leihs
           klass.inheritance_column = nil
         end
 
-        FOREIGN_TABLE_RESOLVERS = (YAML.load <<-YML.strip_heredoc
-          delegations_users:
+        FOREIGN_TABLE_RESOLVERS =
+          (YAML.load <<-YML
+                    delegations_users:
             delegation_id: users
           items:
             owner_id: inventory_pools
@@ -118,7 +110,8 @@ module Leihs
           procurement_images:
             parent_id: procurement_images
         YML
-                                  ).with_indifferent_access
+            .strip_heredoc)
+            .with_indifferent_access
 
         def escape(file_path)
           Shellwords.escape file_path
@@ -134,10 +127,13 @@ module Leihs
           else
             table_uuid_ns = UUIDTools::UUID.sha1_create LEIHS_UUID_NS, 'model_group_links'
             ref_table_uuid_ns = UUIDTools::UUID.sha1_create LEIHS_UUID_NS, 'model_groups'
-            { id: UUIDTools::UUID.sha1_create(table_uuid_ns, row[:id].to_s),
+
+            {
+              id: UUIDTools::UUID.sha1_create(table_uuid_ns, row[:id].to_s),
               parent_id: UUIDTools::UUID.sha1_create(ref_table_uuid_ns, row[:ancestor_id].to_s),
               child_id: UUIDTools::UUID.sha1_create(ref_table_uuid_ns, row[:descendant_id].to_s),
-              label: row[:label] }
+              label: row[:label]
+            }
           end
         end
 
@@ -164,13 +160,14 @@ module Leihs
             file_path = "#{@v3_attachments_dir}/#{path_to_file(row[:id], row[:filename])}"
             row[:content] = read_and_encode_file(file_path)
             if row[:content] and ref_klass.find_by_id(ref_uuid)
-              row[:content_type] = `file -b --mime-type #{escape file_path}`.sub("\n", '')
+              row[:content_type] = `file -b --mime-type #{escape file_path}`.sub('undefined', '')
               row[:size] = File.open(file_path).size
               row.merge Hash["#{ref_table.singularize}_id", ref_uuid]
-            elsif row[:content].blank? and ref_klass.find_by_id(ref_uuid) and ENV['REPLACE_MISSING_IMAGES'].present?
+            elsif row[:content].blank? and ref_klass.find_by_id(ref_uuid) and
+              ENV['REPLACE_MISSING_IMAGES'].present?
               row[:content] = DUMMY_IMAGE_PNG
               row[:content_type] = 'image/png'
-              row[:size]= 736
+              row[:size] = 736
               row.merge Hash["#{ref_table.singularize}_id", ref_uuid]
             else
               Rails.logger.warn("Ignoring missing attachment #{row.to_s}")
@@ -183,7 +180,10 @@ module Leihs
         end
 
         def map_procurement_attachments_row(row)
-          file_path = "#{@v3_procurement_attachments_dir}/#{path_to_procurement_file(row[:id], row[:file_file_name])}"
+          file_path =
+            "#{@v3_procurement_attachments_dir}/#{path_to_procurement_file(
+              row[:id], row[:file_file_name]
+            )}"
           row[:content] = read_and_encode_file(file_path)
 
           ref_table_uuid_ns = UUIDTools::UUID.sha1_create LEIHS_UUID_NS, 'procurement_requests'
@@ -195,23 +195,36 @@ module Leihs
         end
 
         def map_procurement_main_categories_row(row)
-          file_path = "#{@v3_procurement_images_dir}/#{path_to_procurement_image(row[:id], row[:image_file_name])}"
+          file_path =
+            "#{@v3_procurement_images_dir}/#{path_to_procurement_image(
+              row[:id], row[:image_file_name]
+            )}"
           content = read_and_encode_file(file_path)
-          thumbnail_file_path = "#{@v3_procurement_images_dir}/#{path_to_procurement_image(row[:id], row[:image_file_name], 'normal')}"
+          thumbnail_file_path =
+            "#{@v3_procurement_images_dir}/#{path_to_procurement_image(
+              row[:id], row[:image_file_name], 'normal'
+            )}"
           thumbnail_content = read_and_encode_file(thumbnail_file_path)
+
           begin
             if content and thumbnail_content
               thumbnail_file = File.open(thumbnail_file_path)
-              row.merge \
-                after_create: { table_name: 'procurement_main_categories',
-                                data: [{ content_type: row[:image_content_type],
-                                         content: content,
-                                         filename: row[:image_file_name],
-                                         size: row[:image_file_size] },
-                                       { content_type: row[:image_content_type],
-                                         content: thumbnail_content,
-                                         filename: row[:image_file_name],
-                                         size: thumbnail_file.size }] }
+              row.merge after_create: {
+                table_name: 'procurement_main_categories',
+                data: [
+                  {
+                    content_type: row[:image_content_type],
+                    content: content,
+                    filename: row[:image_file_name],
+                    size: row[:image_file_size]
+                  }, {
+                    content_type: row[:image_content_type],
+                    content: thumbnail_content,
+                    filename: row[:image_file_name],
+                    size: thumbnail_file.size
+                  }
+                ]
+              }
             else
               row
             end
@@ -226,11 +239,11 @@ module Leihs
           filename = row[:filename]
           file_path = "#{@v3_images_dir}/#{path_to_file(folder_id, filename)}"
           if row[:content] = read_and_encode_file(file_path)
-            row[:content_type] = `file -b --mime-type #{escape file_path}`.sub("\n", '')
+            row[:content_type] = `file -b --mime-type #{escape file_path}`.sub('undefined', '')
           elsif row[:content].blank? and ENV['REPLACE_MISSING_IMAGES'].present?
             row[:content] = DUMMY_IMAGE_PNG
             row[:content_type] = 'image/png'
-            row[:size]= 2161
+            row[:size] = 2161
           else
             Rails.logger.warn("Ignoring missing Іmage for #{row.to_s}")
           end
@@ -240,13 +253,7 @@ module Leihs
           target_id = UUIDTools::UUID.sha1_create(ref_table_uuid_ns, row[:target_id].to_s)
           row.merge!(target_id: target_id)
 
-          if row[:content]
-            if row[:thumbnail]
-              row
-            else
-              [row, build_thumbnail_row(row.dup)]
-            end
-          end
+          row[:thumbnail] ? row : [row, build_thumbnail_row(row.dup)] if row[:content]
         end
 
         def build_thumbnail_row(row)
@@ -258,13 +265,12 @@ module Leihs
 
           begin
             file = File.open(thumbnail_file_path)
-            row.merge \
-              id: nil,
-              content: read_and_encode_file(thumbnail_file_path),
-              filename: thumbnail_filename,
-              size: file.size,
-              parent_id: row[:id],
-              thumbnail: :thumb
+            row.merge id: nil,
+            content: read_and_encode_file(thumbnail_file_path),
+            filename: thumbnail_filename,
+            size: file.size,
+            parent_id: row[:id],
+            thumbnail: :thumb
           rescue => e
             Rails.logger.warn(e.message)
             nil
@@ -305,15 +311,15 @@ module Leihs
           end
         end
 
-        def add_position_to_partition row
+        def add_position_to_partition(row)
           row.merge(position: row[:id])
         end
 
-        def map_contract_row row
+        def map_contract_row(row)
           row.merge(compact_id: row[:id].to_s)
         end
 
-        def map_items_row row
+        def map_items_row(row)
           row.except('updater_id')
         end
 
@@ -350,35 +356,37 @@ module Leihs
             if k.to_s == 'id' and v.is_a? Integer
               [k, UUIDTools::UUID.sha1_create(table_uuid_ns, v.to_s)]
             elsif k.to_s =~ /_id$/ and v.is_a? Integer
-              ref_table_name = FOREIGN_TABLE_RESOLVERS[table_name].try(:[], k) \
-                || k.gsub(/_id$/, '').pluralize
+              ref_table_name =
+                FOREIGN_TABLE_RESOLVERS[table_name].try(:[], k) || k.gsub(/_id$/, '').pluralize
               ref_table_uuid_ns = UUIDTools::UUID.sha1_create LEIHS_UUID_NS, ref_table_name
               [k, UUIDTools::UUID.sha1_create(ref_table_uuid_ns, v.to_s)]
             else
               [k, v]
             end
-          end.to_h
+          end
+            .to_h
         end
 
         def convert(table_name, rows)
-          rows.map { |row| custom_pre_migrator(table_name, row) } \
-            .flatten.compact.map { |row| general_migrator(table_name, row) }
+          rows.map { |row| custom_pre_migrator(table_name, row) }.flatten.compact.map do |row|
+            general_migrator(table_name, row)
+          end
         end
 
         def import_table_data(table_name, rows)
           Rails.logger.info "Importing #{table_name} with #{rows.count} rows..."
           class_name = singleton_class.const_get("LeihsDBIOImport#{table_name.to_s.camelize}")
-          rows = convert(table_name, rows).map do |row|
-            begin
-            class_name.create! row.reject { |k, v| k == 'after_create' }
-            if row.has_key?('after_create')
-              custom_after_create! row
+          rows =
+            convert(table_name, rows).map do |row|
+              begin
+                class_name.create! row.reject { |k, v| k == 'after_create' }
+                custom_after_create! row if row.has_key?('after_create')
+
+                #binding.pry
+              rescue => e
+                raise e
+              end
             end
-            rescue => e
-              #binding.pry
-              raise e
-            end
-          end
           Rails.logger.info "Imported #{table_name} with #{rows.count} rows."
         end
 
@@ -390,10 +398,12 @@ module Leihs
           when 'procurement_main_categories'
             random_uuid = UUIDTools::UUID.sha1_create row['id'], 'procurement_images'
             original_row, thumbnail_row = after_create['data']
-            LeihsDBIOImportProcurementImages.create! original_row.merge(id: random_uuid,
-                                                                        main_category_id: row['id'])
-            LeihsDBIOImportProcurementImages.create! thumbnail_row.merge(main_category_id: row['id'],
-                                                                         parent_id: random_uuid)
+            LeihsDBIOImportProcurementImages.create! original_row.merge(
+              id: random_uuid, main_category_id: row['id']
+            )
+            LeihsDBIOImportProcurementImages.create! thumbnail_row.merge(
+              main_category_id: row['id'], parent_id: random_uuid
+            )
           else
             raise "custom after create hook for #{table_name} not defined!"
           end
@@ -403,16 +413,14 @@ module Leihs
           ApplicationRecord.connection.execute 'SET session_replication_role = replica;'
           ApplicationRecord.record_timestamps = false
           data.reject { |tn, _| IGNORED_TABLES.include? tn }.each do |table_name, rows|
-            if rows.presence && (not rows.empty?)
-              import_table_data table_name, rows
-            end
+            import_table_data table_name, rows if rows.presence && (not rows.empty?)
           end
           ApplicationRecord.connection.execute 'SET session_replication_role = DEFAULT;'
         end
 
         def validated_import(data)
-          ApplicationRecord.connection.execute <<-SQL.strip_heredoc
-            ALTER TABLE ONLY users
+          ApplicationRecord.connection.execute <<-SQL
+                      ALTER TABLE ONLY users
               DROP CONSTRAINT fkey_users_delegators;
             ALTER TABLE ONLY items
               DROP CONSTRAINT fk_rails_ed5bf219ac;
@@ -421,17 +429,17 @@ module Leihs
             ALTER TABLE ONLY images
               DROP CONSTRAINT fkey_images_images_parent_id;
           SQL
-          TABLES.each do |table_name|
-            import_table_data table_name, data[table_name]
-          end
+            .strip_heredoc
+          TABLES.each { |table_name| import_table_data table_name, data[table_name] }
 
-          ApplicationRecord.connection.execute <<-SQL.strip_heredoc
-            UPDATE images SET parent_id = NULL
+          ApplicationRecord.connection.execute <<-SQL
+                      UPDATE images SET parent_id = NULL
               WHERE (NOT EXISTS (SELECT 1 FROM images parents WHERE parents.id = images.parent_id))
           SQL
+            .strip_heredoc
 
-          ApplicationRecord.connection.execute <<-SQL.strip_heredoc
-            ALTER TABLE ONLY users
+          ApplicationRecord.connection.execute <<-SQL
+                      ALTER TABLE ONLY users
                 ADD CONSTRAINT fkey_users_delegators FOREIGN KEY (delegator_user_id) REFERENCES users(id);
             ALTER TABLE ONLY items
                 ADD CONSTRAINT fk_rails_ed5bf219ac FOREIGN KEY (parent_id) REFERENCES items(id) ON DELETE SET NULL;
@@ -440,11 +448,11 @@ module Leihs
             ALTER TABLE ONLY images
               ADD CONSTRAINT fkey_images_images_parent_id FOREIGN KEY (parent_id) REFERENCES images(id);
           SQL
+            .strip_heredoc
 
-          unmigrated_tables = \
-            ApplicationRecord.connection.tables.reject { |tn| tn =~ /schema_migrations/ } \
-            - TABLES \
-            - NEW_TABLES
+          unmigrated_tables =
+            ApplicationRecord.connection.tables.reject { |tn| tn =~ /schema_migrations/ } - TABLES -
+              NEW_TABLES
           Rails.logger.info "Yet unmigrated tables: #{unmigrated_tables.sort}."
         end
 
@@ -468,28 +476,23 @@ module Leihs
           data
         end
 
-        def import(filename = nil,
-                   attachments_path: nil,
-                   images_path: nil,
-                   procurement_attachments_path: nil,
-                   procurement_images_path: nil)
+        def import(filename = nil, attachments_path: nil, images_path: nil, procurement_attachments_path: nil, procurement_images_path: nil)
           filename ||= Rails.root.join('tmp', 'db_data.yml')
-          @v3_attachments_dir = \
-            attachments_path || "#{Rails.root}/public/attachments/"
-          @v3_images_dir = \
-            images_path || "#{Rails.root}/public/images/attachments/"
-          @v3_procurement_attachments_dir = \
-            procurement_attachments_path || "#{Rails.root}/public/system/procurement/attachments/files/"
-          @v3_procurement_images_dir = \
-            procurement_images_path || "#{Rails.root}/public/system/procurement/main_categories/images/"
+          @v3_attachments_dir = attachments_path || "#{Rails.root}/public/attachments/"
+          @v3_images_dir = images_path || "#{Rails.root}/public/images/attachments/"
+          @v3_procurement_attachments_dir =
+            procurement_attachments_path ||
+              "#{Rails.root}/public/system/procurement/attachments/files/"
+          @v3_procurement_images_dir =
+            procurement_images_path ||
+              "#{Rails.root}/public/system/procurement/main_categories/images/"
           import_data load_data(filename)
           # PgTasks.structure_and_data_dump 'tmp/import_dump.pgbin'
           # `export RAILS_ENV=test && export FILE=tmp/import_dump.pgbin && bundle exec rake db:pg:truncate_tables db:pg:data:restore`
         end
 
-
-        DUMMY_IMAGE_PNG = <<-PNG.strip_heredoc
-          iVBORw0KGgoAAAANSUhEUgAAAPAAAAAoBAMAAAAyFmrjAAAAG1BMVEX/AAAA
+        DUMMY_IMAGE_PNG = <<-PNG
+                  iVBORw0KGgoAAAANSUhEUgAAAPAAAAAoBAMAAAAyFmrjAAAAG1BMVEX/AAAA
           AAB/AAA/AABfAAC/AADfAAAfAACfAACoVuFXAAAACXBIWXMAAA7EAAAOxAGV
           Kw4bAAACa0lEQVRYhe2Wz3OaQBTHn6ILx/oj0SOpmdpjHdJ4NSWpPeLBpMel
           qTFHkRg44iFj/uy+tyAYC4TtOON0hu+4w8J+3Q+7+/axAKVKlSpVqtR/oKpx
@@ -507,6 +510,7 @@ module Leihs
           Yu8H7HajH1a7J5QM0Rfs4NLc3Ob5J4Dfxc+LxaV0gtx2bdxx2rk5+g/gjI2n
           lZi5BgAAAABJRU5ErkJggg==
         PNG
+          .strip_heredoc
       end
     end
   end

@@ -9,10 +9,7 @@ class EntitlementGroup < ApplicationRecord
 
   has_many :entitlements, dependent: :restrict_with_exception
   accepts_nested_attributes_for :entitlements, allow_destroy: true
-  has_many(:models,
-           -> { distinct },
-           through: :entitlements,
-           dependent: :restrict_with_exception)
+  has_many(:models, -> { distinct }, through: :entitlements, dependent: :restrict_with_exception)
 
   validates_presence_of :inventory_pool_id # tmp#2
   validates_presence_of :name

@@ -19,7 +19,7 @@ class Address < ApplicationRecord
   end
 
   def to_multiline_s
-    [street, zip_code, city, country].compact.join('\r\n')
+    [street, zip_code, city, country].compact.join('undefinedundefined')
   end
 
   def country
@@ -28,11 +28,6 @@ class Address < ApplicationRecord
   end
 
   def coordinates
-    if latitude.nil? or longitude.nil?
-      geocode
-    else
-      [latitude, longitude]
-    end
+    latitude.nil? or longitude.nil? ? geocode : [latitude, longitude]
   end
-
 end

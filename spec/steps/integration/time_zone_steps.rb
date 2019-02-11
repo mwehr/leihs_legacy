@@ -10,7 +10,7 @@ module Spec
 
     step 'the time zone is set to :time_zone' do |time_zone|
       ApplicationRecord.connection.execute <<-SQL
-        UPDATE settings SET time_zone = '#{time_zone}'
+              UPDATE settings SET time_zone = '#{time_zone}'
       SQL
     end
 
@@ -38,6 +38,4 @@ module Spec
   end
 end
 
-RSpec.configure do |config|
-  config.include Spec::TimeZoneSteps, time_zone: true
-end
+RSpec.configure { |config| config.include Spec::TimeZoneSteps, time_zone: true }

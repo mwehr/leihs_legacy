@@ -1,5 +1,4 @@
 class Manage::MailTemplatesController < Manage::ApplicationController
-
   private
 
   # NOTE overriding super controller
@@ -10,10 +9,10 @@ class Manage::MailTemplatesController < Manage::ApplicationController
   public
 
   def index
-    @template_types = \
-      MailTemplate::TEMPLATE_TYPES
-      .to_a
-      .sort { |x, y| "#{x.second}#{x.first}" <=> "#{y.second}#{y.first}" }
+    @template_types =
+      MailTemplate::TEMPLATE_TYPES.to_a.sort do |x, y|
+        "#{x.second}#{x.first}" <=> "#{y.second}#{y.first}"
+      end
   end
 
   def edit
@@ -21,10 +20,13 @@ class Manage::MailTemplatesController < Manage::ApplicationController
 
     Language.unscoped.each do |language|
       ['text'].each do |format|
-        mt = MailTemplate.find_by!(inventory_pool_id: current_inventory_pool.id,
-                                   name: params[:name],
-                                   language_id: language.id,
-                                   format: format)
+        mt =
+          MailTemplate.find_by!(
+            inventory_pool_id: current_inventory_pool.id,
+            name: params[:name],
+            language_id: language.id,
+            format: format
+          )
         @mail_templates << mt
       end
     end
@@ -35,15 +37,15 @@ class Manage::MailTemplatesController < Manage::ApplicationController
     errors = []
 
     params[:mail_templates].each do |p|
-      mt = MailTemplate.find_by!(
-        inventory_pool_id: current_inventory_pool.id,
-        name: p[:name],
-        language: Language.find_by(locale_name: p[:language]),
-        format: p[:format])
+      mt =
+        MailTemplate.find_by!(
+          inventory_pool_id: current_inventory_pool.id,
+          name: p[:name],
+          language: Language.find_by(locale_name: p[:language]),
+          format: p[:format]
+        )
       @mail_templates << mt
-      unless mt.update_attributes(body: p[:body])
-        errors << mt.errors.full_messages
-      end
+      errors << mt.errors.full_messages unless mt.update_attributes(body: p[:body])
     end
 
     if errors.empty?
@@ -53,5 +55,4 @@ class Manage::MailTemplatesController < Manage::ApplicationController
       render :edit
     end
   end
-
 end

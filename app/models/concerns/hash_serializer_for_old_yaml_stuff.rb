@@ -1,6 +1,5 @@
 module Concerns
   class HashSerializerForOldYamlStuff
-
     def self.dump(hash)
       YAML.dump(hash || {})
     end

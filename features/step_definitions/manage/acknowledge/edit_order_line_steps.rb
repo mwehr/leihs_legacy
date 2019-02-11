@@ -1,8 +1,20 @@
 # -*- encoding : utf-8 -*-
 
-When(/^I open a contract for acknowledgement( with more then one line)?(, whose start date is not in the past)?$/) do |arg1, arg2|
-  contracts = @current_inventory_pool.orders.submitted.select { |o| not o.user.suspended?(@current_inventory_pool) }
-  contracts = contracts.select { |c| c.reservations.size > 1 and c.reservations.map(&:model_id).uniq.size > 1 } if arg1
+When(
+  /
+    ^I open a contract for acknowledgement( with more then one line)?(, whose start date is not in the past)?$
+  /
+) do |arg1, arg2|
+  contracts =
+    @current_inventory_pool.orders.submitted.select do |o|
+      not o.user.suspended?(@current_inventory_pool)
+    end
+  if arg1
+    contracts =
+      contracts.select do |c|
+        c.reservations.size > 1 and c.reservations.map(&:model_id).uniq.size > 1
+      end
+  end
   contracts = contracts.select { |c| c.min_date >= Time.zone.today } if arg2
 
   @contract = contracts.first
@@ -21,17 +33,20 @@ When(/^I open the booking calendar for this line$/) do
 end
 
 When(/^I edit the timerange of the selection$/) do
-  if page.has_selector?('.button.green[data-hand-over-selection]') or page.has_selector?('.button.green[data-take-back-selection]')
+  if page.has_selector?('.button.green[data-hand-over-selection]') or
+    page.has_selector?('.button.green[data-take-back-selection]')
     step 'I edit all reservations'
   else
-    find(".multibutton [data-selection-enabled][data-edit-lines='selected-lines']", text: _('Edit Selection')).click
+    find(
+      ".multibutton [data-selection-enabled][data-edit-lines='selected-lines']",
+      text: _('Edit Selection')
+    )
+      .click
   end
   step 'I see the booking calendar'
 end
 
-When(/^I save the booking calendar$/) do
-  find('#submit-booking-calendar:not(:disabled)').click
-end
+When(/^I save the booking calendar$/) { find('#submit-booking-calendar:not(:disabled)').click }
 
 Then(/^the booking calendar is( not)? closed$/) do |arg1|
   b = !arg1
@@ -44,20 +59,19 @@ When(/^I change a contract reservations time range$/) do
     if @contract
       @contract.reservations.first
     else
-      @customer.visits.hand_over.where(inventory_pool_id: @current_inventory_pool).first.reservations.first
+      @customer.visits.hand_over.where(inventory_pool_id: @current_inventory_pool).first
+        .reservations
+        .first
     end
-  @line_element = begin
-                    find(".line[data-ids*='#{@line.id}']", match: :first)
-                  rescue
-                    find(".line[data-id='#{@line.id}']", match: :first)
-                  end
+  @line_element =
+    begin
+      find(".line[data-ids*='#{@line.id}']", match: :first)
+    rescue StandardError
+      find(".line[data-id='#{@line.id}']", match: :first)
+    end
   step 'I open the booking calendar for this line'
   @new_start_date =
-    if @line.start_date + 1.day < Time.zone.today
-      Time.zone.today
-    else
-      @line.start_date + 1.day
-    end
+    @line.start_date + 1.day < Time.zone.today ? Time.zone.today : @line.start_date + 1.day
   expect(has_selector?('.fc-widget-content .fc-day-number')).to be true
   get_fullcalendar_day_element(@new_start_date).click
   sleep 1
@@ -84,7 +98,10 @@ When(/^I increase a submitted contract reservations quantity$/) do
 end
 
 When(/^I decrease a submitted contract reservations quantity$/) do
-  @line_element = all('.line[data-ids]').detect { |l| l.find('div:nth-child(3) > span:nth-child(1)').text.to_i > 1 }
+  @line_element =
+    all('.line[data-ids]').detect do |l|
+      l.find('div:nth-child(3) > span:nth-child(1)').text.to_i > 1
+    end
   within @line_element do
     @line_model_name = find('.col6of10 strong').text
     @new_quantity = find('div:nth-child(3) > span:nth-child(1)').text.to_i - 1
@@ -100,10 +117,14 @@ When(/^I change a contract reservations quantity$/) do
       elsif @order
         @order.reservations.first
       else
-        @hand_over = @customer.visits.hand_over.where(inventory_pool_id: @current_inventory_pool).first
+        @hand_over =
+          @customer.visits.hand_over.where(inventory_pool_id: @current_inventory_pool).first
         @hand_over.reservations.first
       end
-    @total_quantity = (@contract || @order || @hand_over).reservations.where(model_id: @line.model_id).to_a.sum(&:quantity)
+    @total_quantity =
+      (@contract || @order || @hand_over).reservations.where(model_id: @line.model_id).to_a.sum(
+        &:quantity
+      )
     @new_quantity = @line.quantity + 1
     @line_element = find(".line[data-id='#{@line.id}']")
   end
@@ -119,8 +140,11 @@ end
 
 Then(/^the contract line was duplicated$/) do
   expect(
-   (@line.contract || @contract || @order || @hand_over.reload)
-    .reservations.where(model_id: @line.model_id).to_a.sum(&:quantity)
+    (@line.contract || @contract || @order || @hand_over.reload).reservations.where(
+      model_id: @line.model_id
+    )
+      .to_a
+      .sum(&:quantity)
   ).to eq @total_quantity + 1
 end
 
@@ -136,9 +160,13 @@ end
 
 When(/^I select two reservations$/) do
   @line1 = @contract.reservations.first
-  find('.line', match: :prefer_exact, text: @line1.model.name).find('input[type=checkbox]').set(true)
+  find('.line', match: :prefer_exact, text: @line1.model.name).find('input[type=checkbox]').set(
+    true
+  )
   @line2 = @contract.reservations.detect { |l| l.model != @line1.model }
-  find('.line', match: :prefer_exact, text: @line2.model.name).find('input[type=checkbox]').set(true)
+  find('.line', match: :prefer_exact, text: @line2.model.name).find('input[type=checkbox]').set(
+    true
+  )
 end
 
 When(/^I change the time range for multiple reservations$/) do
@@ -164,11 +192,7 @@ When(/^I close the booking calendar$/) do
 end
 
 When(/^I edit one of the selected reservations$/) do
-  all('.line').each do |line|
-    if line.find('input', match: :first).checked?
-      @line_element = line
-    end
-  end
+  all('.line').each { |line| @line_element = line if line.find('input', match: :first).checked? }
   step 'I open the booking calendar for this line'
 end
 
@@ -176,17 +200,20 @@ Then(/^I see the booking calendar$/) do
   expect(has_selector?('#booking-calendar .fc-day-content')).to be true
 end
 
-When(/^I change the time range for multiple reservations that have quantity bigger then (\d+)$/) do |arg1|
+When(
+  /^I change the time range for multiple reservations that have quantity bigger then (\d+)$/
+) do |arg1|
   expect(has_selector?('.line[data-ids]')).to be true
   sleep 2
   all_ids = all('.line[data-ids]').to_a.map { |x| x['data-ids'] }
-  @models_quantities = all_ids.map do |ids|
-    @line_element = find(".line[data-ids='#{ids}']")
-    step 'I increase a submitted contract reservations quantity'
-    step 'the quantity of that submitted contract line is changed'
-    expect(@new_quantity).to be > arg1.to_i
-    { name: @line_model_name, quantity: @new_quantity }
-  end
+  @models_quantities =
+    all_ids.map do |ids|
+      @line_element = find(".line[data-ids='#{ids}']")
+      step 'I increase a submitted contract reservations quantity'
+      step 'the quantity of that submitted contract line is changed'
+      expect(@new_quantity).to be > arg1.to_i
+      { name: @line_model_name, quantity: @new_quantity }
+    end
   expect(@models_quantities.size).to be > 0
   step 'I change the time range for multiple reservations'
 end

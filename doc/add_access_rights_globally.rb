@@ -1,5 +1,4 @@
 def add_access_right(user, inventory_pool, role = :customer)
-
   existing = user.access_rights.where(inventory_pool_id: inventory_pool, role: role).first
   if existing
     return true
@@ -12,5 +11,4 @@ def add_access_right(user, inventory_pool, role = :customer)
       return false
     end
   end
-
 end

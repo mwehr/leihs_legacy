@@ -1,9 +1,3 @@
-Given(/^(?:the )database is empty$/) do
-  PgTasks.truncate_tables
-end
+Given(/^(?:the )database is empty$/) { PgTasks.truncate_tables }
 
-Given(/^settings exist$/) do
-  unless Setting.first
-    FactoryGirl.create(:setting)
-  end
-end
+Given(/^settings exist$/) { FactoryGirl.create(:setting) unless Setting.first }

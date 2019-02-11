@@ -1,7 +1,6 @@
 # NOTE: currently only works for category_ids
 
 class BreadCrumbs
-
   def initialize(bread_crumbs_as_params)
     @crumbs = bread_crumbs_as_params
     @crumbs ||= []
@@ -12,14 +11,8 @@ class BreadCrumbs
     @crumbs.each_with_index do |category_id, i|
       category = Category.find category_id
       category_ids = @crumbs[0..i]
-      url_helper = \
-        Rails \
-          .application
-          .routes
-          .url_helpers
-          .borrow_models_path(category_id: category_id)
-      crumbs.push [path_for(url_helper, category_ids, false),
-                   category.name]
+      url_helper = Rails.application.routes.url_helpers.borrow_models_path(category_id: category_id)
+      crumbs.push [path_for(url_helper, category_ids, false), category.name]
     end
     crumbs
   end
@@ -39,10 +32,7 @@ class BreadCrumbs
 
   def as_params(category_ids = [])
     crumbs = []
-    category_ids.each do |category_id|
-      crumbs.push(category_id) unless crumbs.include? category_id
-    end
+    category_ids.each { |category_id| crumbs.push(category_id) unless crumbs.include? category_id }
     { '_bc' => crumbs }
   end
-
 end

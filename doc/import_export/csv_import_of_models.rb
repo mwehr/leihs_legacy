@@ -1,10 +1,6 @@
-
-
-
 import_file = '/tmp/theater.csv'
 
 def create_model(name, category1, category2)
-
   m = Model.find_by_product(name)
   if m.nil?
     c1 = Category.find_or_create_by_name(category1) unless category1.blank?
@@ -16,13 +12,10 @@ def create_model(name, category1, category2)
     m.save
   end
 
-
   return m
 end
 
 require 'csv'
 items_to_import = CSV.open(import_file, headers: false)
 
-items_to_import.each do |item|
-  create_model(item[0], item[1], item[2])
-end
+items_to_import.each { |item| create_model(item[0], item[1], item[2]) }

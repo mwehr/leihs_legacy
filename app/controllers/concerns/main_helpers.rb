@@ -6,9 +6,7 @@ module MainHelpers
     include AuthenticatedSystem
     include AppSettings
 
-    helper_method(:current_inventory_pool,
-                  :current_managed_inventory_pools,
-                  :admin?)
+    helper_method(:current_inventory_pool, :current_managed_inventory_pools, :admin?)
 
     # TODO: **20 optimize lib/role_requirement and refactor to backend
     def current_inventory_pool
@@ -28,19 +26,21 @@ module MainHelpers
 
     def set_gettext_locale
       language =
-        # user requested a change of locale
         if params[:locale]
           Language.where(locale_name: params[:locale]).first
-        # user is logged in
+          # user is logged in
+
+          # user is not logged in
+
+          # default case
         elsif current_user
           current_user.language
-        # user is not logged in
         elsif session[:locale]
           Language.where(locale_name: session[:locale]).first
-        # default case
         else
           Language.default_language
         end
+      # user requested a change of locale
 
       unless language.nil?
         # If user is logged in and he requested a locale change or he does not have
@@ -53,16 +53,16 @@ module MainHelpers
       end
     end
 
-    def set_pagination_header(paginated_active_record,
-                              disable_total_count: false,
-                              custom_count: nil)
+    def set_pagination_header(paginated_active_record, disable_total_count: false, custom_count: nil)
       headers['X-Pagination'] = {
-        total_count: total_count(paginated_active_record,
-                                 disable: disable_total_count,
-                                 custom_count: custom_count),
+        total_count:
+          total_count(
+            paginated_active_record, disable: disable_total_count, custom_count: custom_count
+          ),
         per_page: paginated_active_record.per_page,
         offset: paginated_active_record.offset
-      }.to_json
+      }
+        .to_json
     end
 
     ##################################################
@@ -100,7 +100,6 @@ module MainHelpers
         paginated_active_record.total_entries
       end
     end
-
   end
 
   if Rails.env.production?
@@ -112,5 +111,4 @@ module MainHelpers
       '/sign-out'
     end
   end
-
 end

@@ -12,11 +12,7 @@ module Dataset
       mode = ENV['TIMECOP_MODE'] || :travel
       Timecop.send(mode, datetime)
     else
-      if ENV['TEST_DATETIME']
-        back_to_date(Time.parse(ENV['TEST_DATETIME']))
-      else
-        Timecop.return
-      end
+      ENV['TEST_DATETIME'] ? back_to_date(Time.parse(ENV['TEST_DATETIME'])) : Timecop.return
     end
   end
 
@@ -35,6 +31,6 @@ module Dataset
     srand(test_datetime)
 
     back_to_date(Time.parse(TEST_DATETIME))
-    puts "\n        ------------------------- TEST_DATETIME=#{TEST_DATETIME} -------------------------"
+    puts "undefined        ------------------------- TEST_DATETIME=#{TEST_DATETIME} -------------------------"
   end
 end

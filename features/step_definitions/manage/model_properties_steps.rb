@@ -4,12 +4,12 @@ Given /^I create a model and fill in all required fields$/ do
   #step 'ich ein neues Modell hinzufüge'
   step 'I add a new Model'
   #step 'ich erfasse die folgenden Details', table(%{
-  step 'I enter the following details', table(%{
+  step 'I enter the following details',
+       table('
     | Field   | Value      |
     | Product | Test Model |
-  })
+  ')
 end
-
 
 When /^I add some properties and fill in their keys and values$/ do
   step 'I add the property "Dimensions" "(20x40cm)"'
@@ -18,30 +18,30 @@ When /^I add some properties and fill in their keys and values$/ do
   step 'I add the property "Color" "Blue"'
 end
 
-When /^I add the property "(.*?)" "(.*?)"$/ do |k,v|
+When /^I add the property "(.*?)" "(.*?)"$/ do |k, v|
   find('.button.green', text: _('Save %s') % _('Model'))
   find('#add-property').click
   find("[name='model[properties_attributes][][key]']", match: :first).set k
   find("[name='model[properties_attributes][][value]']", match: :first).set v
 end
 
-
 When /^I sort the properties$/ do
   within '#properties' do
     find('.list-of-lines.ui-sortable') # real sorting is not possible with capybara/selenium
-    @properties = all('.list-of-lines .line').map{|line| {key: line.find("input[name='model[properties_attributes][][key]']").value, value: line.find("input[name='model[properties_attributes][][value]']").value}}
+    @properties =
+      all('.list-of-lines .line').map do |line|
+        {
+          key: line.find("input[name='model[properties_attributes][][key]']").value,
+          value: line.find("input[name='model[properties_attributes][][value]']").value
+        }
+      end
   end
 end
-
 
 Then /^this model's properties are saved in the order they were given$/ do
   find('.line', match: :first)
   # can't seem to find the proper model otherwise
-  if @model
-    model = @model
-  else
-    model = Model.order('created_at DESC').first
-  end
+  @model ? model = @model : model = Model.order('created_at DESC').first
   expect(model.properties.empty?).to be false
   model.properties.each_with_index do |property, i|
     expect(property.key).to eq @properties[i][:key]
@@ -78,6 +78,12 @@ end
 When /^I delete one or more existing properties$/ do
   within '#properties' do
     find('.list-of-lines .line:not(.striked) .button[data-remove]', match: :first).click
-    @properties = all('.list-of-lines .line:not(.striked)').map{|line| {key: line.find("input[name='model[properties_attributes][][key]']").value, value: line.find("input[name='model[properties_attributes][][value]']").value}}
+    @properties =
+      all('.list-of-lines .line:not(.striked)').map do |line|
+        {
+          key: line.find("input[name='model[properties_attributes][][key]']").value,
+          value: line.find("input[name='model[properties_attributes][][value]']").value
+        }
+      end
   end
 end

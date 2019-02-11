@@ -3,13 +3,13 @@ When /^I open a take back, hand over or I edit a contract$/ do
   type = possible_types.sample
   case type
   when 'take_back'
-    @customer = @current_inventory_pool.users.detect {|x| x.contracts.open.exists? }
+    @customer = @current_inventory_pool.users.detect { |x| x.contracts.open.exists? }
     visit manage_take_back_path(@current_inventory_pool, @customer)
   when 'hand_over'
-    @customer = @current_inventory_pool.users.detect {|x| x.orders.approved.exists? }
+    @customer = @current_inventory_pool.users.detect { |x| x.orders.approved.exists? }
     step 'I open a hand over for this customer'
   when 'contract'
-    @customer = @current_inventory_pool.users.detect {|x| x.orders.submitted.exists? }
+    @customer = @current_inventory_pool.users.detect { |x| x.orders.submitted.exists? }
     @entity = @customer.orders.submitted.first
     visit manage_edit_order_path(@current_inventory_pool, @entity)
   end
@@ -20,9 +20,7 @@ When /^I select all reservations of an linegroup$/ do
     @linegroup = find('[data-selected-lines-container]', match: :first)
     within @linegroup do
       find('.line input[type=checkbox][data-select-line]', match: :first)
-      all('.line input[type=checkbox][data-select-line]', match: :first).map do |c|
-        c.click
-      end
+      all('.line input[type=checkbox][data-select-line]', match: :first).map(&:click)
     end
   end
 end
@@ -32,7 +30,11 @@ Then /^the linegroup is selected$/ do
 end
 
 Then /^the count matches the amount of selected reservations$/ do
-  expect(all('input[type=checkbox][data-select-line]').select{|x| x.checked? }.size).to eq find('#line-selection-counter').text.to_i
+  expect(all('input[type=checkbox][data-select-line]').select(&:checked?).size).to eq find(
+       '#line-selection-counter'
+     )
+       .text
+       .to_i
 end
 
 When /^I select the linegroup$/ do

@@ -5,26 +5,23 @@ module Spec
     end
 
     step 'there exists an active inventory pool' do
-      @active_inventory_pool = FactoryGirl.create(:inventory_pool,
-                                                  is_active: true)
+      @active_inventory_pool = FactoryGirl.create(:inventory_pool, is_active: true)
     end
 
     step 'there exists an inactive inventory pool' do
-      @inactive_inventory_pool = FactoryGirl.create(:inventory_pool,
-                                                    is_active: false)
+      @inactive_inventory_pool = FactoryGirl.create(:inventory_pool, is_active: false)
     end
 
     step 'there is a customer for the current pool' do
-      @user = FactoryGirl.create(:customer,
-                                 inventory_pool: @current_inventory_pool)
+      @user = FactoryGirl.create(:customer, inventory_pool: @current_inventory_pool)
     end
 
     step 'there is a customer delegation for the current pool' do
-      delegator = FactoryGirl.create(:customer,
-                                     inventory_pool: @current_inventory_pool)
-      @delegation = FactoryGirl.create(:customer,
-                                       delegator_user_id: delegator.id,
-                                       inventory_pool: @current_inventory_pool)
+      delegator = FactoryGirl.create(:customer, inventory_pool: @current_inventory_pool)
+      @delegation =
+        FactoryGirl.create(
+          :customer, delegator_user_id: delegator.id, inventory_pool: @current_inventory_pool
+        )
     end
 
     step 'there exists a software' do
@@ -37,9 +34,7 @@ module Spec
 
     step 'there exists a model with items' do
       @model = FactoryGirl.create(:model)
-      3.times do
-        FactoryGirl.create(:item, model: @model)
-      end
+      3.times { FactoryGirl.create(:item, model: @model) }
     end
 
     step 'there exists a category' do

@@ -1,5 +1,4 @@
 class Manage::OptionsController < Manage::ApplicationController
-
   def index
     @options = Option.filter params, current_inventory_pool
     set_pagination_header(@options) unless params[:paginate] == 'false'
@@ -34,5 +33,4 @@ class Manage::OptionsController < Manage::ApplicationController
   def edit
     @option ||= current_inventory_pool.options.find params[:id]
   end
-
 end

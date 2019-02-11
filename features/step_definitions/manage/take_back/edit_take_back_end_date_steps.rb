@@ -1,10 +1,11 @@
 When /^I change (a contract|an option) line end date$/ do |arg1|
-  line_el = case arg1
-              when 'an option'
-                find(".line[data-line-type='option_line']", match: :first)
-              else
-                find('.line', match: :first)
-            end
+  line_el =
+    case arg1
+    when 'an option'
+      find(".line[data-line-type='option_line']", match: :first)
+    else
+      find('.line', match: :first)
+    end
   @line = @reservations_to_take_back.find(line_el['data-id'])
   line_el.has_content?(@line.model.name)
   line_el.find('.multibutton .button', text: _('Change entry')).click
@@ -27,13 +28,25 @@ Then /^the start date of that line is not changed$/ do
 end
 
 When /^I open a take back which has multiple reservations$/ do
-  @customer = @current_inventory_pool.users.find {|x| x.contracts.open.exists? and !x.contracts.open.detect{|c| c.reservations.size > 1 and c.inventory_pool == @current_inventory_pool}.nil? }
-  @contract = @customer.contracts.open.detect{|c| c.reservations.size > 1 and c.inventory_pool == @current_inventory_pool}
+  @customer =
+    @current_inventory_pool.users.find do |x|
+      x.contracts.open.exists? and
+        !x.contracts.open.detect do |c|
+          c.reservations.size > 1 and c.inventory_pool == @current_inventory_pool
+        end
+          .nil?
+    end
+  @contract =
+    @customer.contracts.open.detect do |c|
+      c.reservations.size > 1 and c.inventory_pool == @current_inventory_pool
+    end
   visit manage_take_back_path(@current_inventory_pool, @customer)
   expect(has_selector?('#take-back-view')).to be true
 end
 
-When /^I change the end date for all contract reservations, envolving option and item reservations$/ do
+When /
+       ^I change the end date for all contract reservations, envolving option and item reservations$
+     / do
   step 'I select all reservations'
   step 'I edit the timerange of the selection'
   @old_end_date = @contract.reservations.map(&:end_date).max

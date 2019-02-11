@@ -11,9 +11,7 @@ module LeihsAdmin
           @end_date = end_date_param
           @search_term = search_term_param
         end
-        format.js do
-          render partial: 'leihs_admin/audits/audits', collection: @audits
-        end
+        format.js { render partial: 'leihs_admin/audits/audits', collection: @audits }
       end
     end
 
@@ -21,24 +19,29 @@ module LeihsAdmin
 
     # rubocop:disable Metrics/MethodLength
     def audits
-      Audit
-        .filter(start_date: Date.parse(start_date_param),
-                end_date: Date.parse(end_date_param),
-                auditable_id: id_param,
-                auditable_type: type_param,
-                user_id: user_id_param,
-                search_term: search_term_param)
-        .select(<<-SQL)
-          audits.request_uuid,
+      Audit.filter(
+        start_date: Date.parse(start_date_param),
+        end_date: Date.parse(end_date_param),
+        auditable_id: id_param,
+        auditable_type: type_param,
+        user_id: user_id_param,
+        search_term: search_term_param
+      )
+        .select(
+        <<-SQL
+                  audits.request_uuid,
           audits.user_id,
           array_agg(row_to_json(audits.*)) AS rows,
           MAX(audits.created_at) AS created_at
         SQL
-        .group(<<-SQL)
-          audits.request_uuid,
+      )
+        .group(
+        <<-SQL
+                  audits.request_uuid,
           audits.user_id,
           audits.created_at::date
         SQL
+      )
         .reorder('created_at DESC')
         .offset(PER_PAGE * page_param)
         .limit(PER_PAGE)
