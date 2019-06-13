@@ -84,12 +84,20 @@ module Concerns
         _('Building') => room.building.name,
         _('Room') => room.name,
         _('Shelf') => shelf,
+
         "#{_('Borrower')} #{_('First name')}" => current_borrower.try(:firstname),
         "#{_('Borrower')} #{_('Last name')}" => current_borrower.try(:lastname),
         "#{_('Borrower')} #{_('Personal ID')}" => \
           current_borrower.try(:extended_info).try(:fetch, 'id', nil) \
             || current_borrower.try(:org_id),
-        "#{_('Borrowed until')}" => "#{current_reservation.try(:end_date)}"
+        "#{_('Borrowed until')}" => "#{current_reservation.try(:end_date)}",
+
+        # add same data like Borrower, but for Delegations, about the User who picked it up on handover
+        "#{_('Delegation')} #{_('Borrower')} #{_('First name')}" => current_delegated_borrower.try(:firstname),
+        "#{_('Delegation')} #{_('Borrower')} #{_('Last name')}" => current_delegated_borrower.try(:lastname),
+        "#{_('Delegation')} #{_('Borrower')} #{_('Personal ID')}" => \
+        current_delegated_borrower.try(:extended_info).try(:fetch, 'id', nil) \
+        || current_delegated_borrower.try(:org_id),
       )
       h1
     end
