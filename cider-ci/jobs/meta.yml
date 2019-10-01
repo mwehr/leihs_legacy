@@ -39,7 +39,7 @@ jobs:
                 set -exu
                 export PATH=~/.rubies/$RUBY/bin:$PATH
                 export DISABLE_DATABASE_ENVIRONMENT_CHECK=1
-                bundle exec rake db:drop db:create db:pg:structure_and_data:restore FILE=./features/personas/personas.pgbin
+                bundle exec rake db:pg:data:restore FILE=./features/personas/personas.pgbin
                 if bundle exec rake db:migrate:status | grep -q -E "\s*down\s*\d*\s*"; then
                   echo "run ./bin/migrate-and-dump-personas"
                   exit 1
@@ -51,9 +51,10 @@ jobs:
           include:
             - cider-ci/task-components/database.yml
 
+
           environment_variables:
             LEIHS_SECRET: secret
-            RAILS_ENV: production
+            RAILS_ENV: test
 
           name: "Check if demo dump needs to be and has been migrated"
 
@@ -64,7 +65,7 @@ jobs:
                 set -exu
                 export PATH=~/.rubies/$RUBY/bin:$PATH
                 export DISABLE_DATABASE_ENVIRONMENT_CHECK=1
-                bundle exec rake db:drop db:create db:pg:structure_and_data:restore FILE=./features/personas/demo.pgbin
+                bundle exec rake db:pg:data:restore FILE=./features/personas/demo.pgbin
                 if bundle exec rake db:migrate:status | grep -q -E "\s*down\s*\d*\s*"; then
                   echo "run ./bin/migrate-and-dump-demo"
                   exit 1
@@ -127,13 +128,6 @@ jobs:
                 set -eu
                 export PATH=./node_modules/.bin:~/.rubies/$RUBY/bin:$PATH
                 yarn check --integrity --verify-tree --offline
-
-        "rails bug 25198 is open":
-          name: "Check if Rails bug 25198 is still open. If it isn't we have to fix our code."
-          scripts:
-            test:
-              body:
-                read_and_replace_with: cider-ci/bin/check-rails-bug-25198.rb
 
         backend and frontend locales are synchronised:
           name: "Backend and frontend locales are synchronised"

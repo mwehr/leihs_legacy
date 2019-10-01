@@ -118,10 +118,6 @@ window.i18n.locale_data = {
          null,
          "Gegenstände zurückzubringen am "
       ],
-      "\"Couldn't connect to LDAP: #{LDAP_CONFIG[:host]}:#{LDAP_CONFIG[:port]}\"": [
-         null,
-         ""
-      ],
       "%d day in the future": [
          "%d days in the future",
          "%d Tag in der Zukunft",
@@ -2410,10 +2406,6 @@ window.i18n.locale_data = {
          null,
          "wartet auf Genehmigung"
       ],
-      "but a few changes were made to it": [
-         null,
-         ""
-      ],
       "could not be assigned for take back": [
          null,
          "konnte nicht für Rücknahme zugewiesen werden"
@@ -3938,9 +3930,9 @@ window.i18n.locale_data = {
          null,
          "Produkt"
       ],
-      "Min. number of days between order and hand over": [
+      "Min. number of days between current date and hand over": [
          null,
-         "Min. Tage zwischen Bestellung und Aushändigung"
+         "Min. Tage zwischen dem aktuellen Datum und der Aushändigung"
       ],
       "Status note": [
          null,
@@ -4590,9 +4582,9 @@ window.i18n.locale_data = {
          null,
          "Bestellungen sind für dieses Rückgabetag nicht möglich"
       ],
-      "The readonly attributes are managed through settings.yml file. More information is ": [
+      "A change of the highlighted attributes requires a restart of the legacy service.": [
          null,
-         "Die schreibgeschützten Attribute werden durch die settings.yml Datei verwaltet. Mehr Informationen findet man "
+         "Eine Änderung der hervor gehobenen Attribute erfordert einen Neustart vom Legacy-Service."
       ],
       "You are suspended for this inventory pool": [
          null,
@@ -4693,6 +4685,14 @@ window.i18n.locale_data = {
       "Maximum reservation time is restricted to": [
          null,
          "Maximale Reservationsdauer ist beschränkt auf"
+      ],
+      "There are open reservations for delegated users: ": [
+         null,
+         "Es gibt offene Reservationen für Delegationsmitglieder: "
+      ],
+      "This order is not approvable because some reservations violate the minimal reservation advance period of the inventory pool. Please adjust the start date accordingly.": [
+         null,
+         "Diese Bestellung kann nicht genehmigt werden, weil einige Reservationen die minimale Zeitdauer zwischen heute und der Aushändigung verletzen. Bitte passen Sie ensprechend das Startdatum an."
       ]
    }
 }

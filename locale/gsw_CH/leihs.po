@@ -43,9 +43,6 @@ msgstr " Sach(e)"
 msgid " item(s) due on "
 msgstr " Sachä fällig am "
 
-msgid "\"Couldn't connect to LDAP: #{LDAP_CONFIG[:host]}:#{LDAP_CONFIG[:port]}\""
-msgstr ""
-
 msgid "%d day in the future"
 msgid_plural "%d days in the future"
 msgstr[0] "%d Tag i de Zuekunft"
@@ -1746,9 +1743,6 @@ msgstr "verfüegbar"
 msgid "awaiting approval"
 msgstr "wartet uf Beschtätigung"
 
-msgid "but a few changes were made to it"
-msgstr ""
-
 msgid "could not be assigned for take back"
 msgstr "hät nöd chöne für d Rücknahm zuegwise werde"
 
@@ -2878,7 +2872,7 @@ msgstr "Diä Sach muss zumene Paket ghöre"
 msgid "Product"
 msgstr "Produkt"
 
-msgid "Min. number of days between order and hand over"
+msgid "Min. number of days between current date and hand over"
 msgstr ""
 
 msgid "Currency"

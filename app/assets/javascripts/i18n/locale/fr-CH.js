@@ -88,10 +88,6 @@ window.i18n.locale_data = {
          "X-Generator": " Poedit 2.0.6",
          "X-Loco-Parser": " loco_parse_po"
       },
-      "\"Couldn't connect to LDAP: #{LDAP_CONFIG[:host]}:#{LDAP_CONFIG[:port]}\"": [
-         null,
-         ""
-      ],
       "Suspended until": [
          null,
          "Suspendu jusqu'au"
@@ -2432,10 +2428,6 @@ window.i18n.locale_data = {
          null,
          "en attente d'approbation"
       ],
-      "but a few changes were made to it": [
-         null,
-         "mais quelques changements ont été effectué"
-      ],
       "could not be assigned for take back": [
          null,
          "n'a pas pu être attribué pour la restitution"
@@ -3912,9 +3904,9 @@ window.i18n.locale_data = {
          null,
          "Produit"
       ],
-      "Min. number of days between order and hand over": [
+      "Min. number of days between current date and hand over": [
          null,
-         "Min. de jours entre une commande et une transmission"
+         "Min. de jours entre date actuelle et une transmission"
       ],
       "Status note": [
          null,
