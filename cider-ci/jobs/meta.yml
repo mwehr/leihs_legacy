@@ -138,6 +138,7 @@ jobs:
 
         extract missing and fuzzy translations:
           name: "Extract missing and fuzzy translations"
+          max_trials: 3
           tree_attachments:
             translation-todos:
               include_match: tmp\/translation-todos\/.*\.po$
