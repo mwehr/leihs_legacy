@@ -1,7 +1,3 @@
-class CustomerOrder < ApplicationRecord
-  belongs_to :user
-end
-
 FactoryGirl.define do
 
   factory :order do
